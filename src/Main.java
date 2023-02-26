@@ -69,47 +69,35 @@ public class Main {
             printMenu();
             command = scanner.nextLine().trim();
 
-            if ("1".equals(command)) {         // Начать тест заново
-                test.restartTest();
-                test.printLine();
-                System.out.print("ТЕСТ перезапущен.");
-            } else if ("2".equals(command)) {  // Вывести списки задач
-                test.printTask();
-            } else if ("3".equals(command)) {  // Создать задачу
-                test.createTask();
-            } else if ("4".equals(command)) {  // Создать эпик с 2 подзадачами
-                test.createEpic(2);
-            } else if ("5".equals(command)) {  // Создать эпик с 1 подзадачей
-                test.createEpic(1);
-            } else if ("6".equals(command)) {  // Обновить последнюю задачу
-                test.lastTaskUpdateStatus(IssueStatus.DONE);
-            } else if ("7".equals(command)) {  // Обновить последний эпик
-                test.lastEpicUpdateStatus(IssueStatus.DONE);
-            } else if ("8".equals(command)) {  // Обновить последнюю подзадачу
-                test.lastSubTaskUpdateStatus(IssueStatus.DONE);
-            } else if ("9".equals(command)) {  // Удалить последнюю задачу
-                test.lastTaskToDelete(IssueType.TASK);
-            } else if ("10".equals(command)) { // Удалить последний эпик
-                test.lastTaskToDelete(IssueType.EPIC);
-            } else if ("11".equals(command)) { // Удалить последнюю подзадачу
-                test.lastTaskToDelete(IssueType.SUBTASK);
-            } else if ("12".equals(command)) { // Очистить список задач
-                test.deleteAllTask(IssueType.TASK);
-            } else if ("13".equals(command)) { // Очистить список подзадач
-                test.deleteAllTask(IssueType.SUBTASK);
-            } else if ("14".equals(command)) { // Очистить список эпиков
-                test.deleteAllTask(IssueType.EPIC);
-                test.printTask();
-            } else if ("15".equals(command)) { // показать результат тестов
-                System.out.print("Общий результат всех тестов ");
-                test.viewResult(test.isCommonGoodResultAllTest());
-            } else if ("0".equals(command)) {  // Закончить тест
-                System.out.print("Ваш тест завершен ");
-                test.viewResult(test.isCommonGoodResultAllTest());
-                scanner.close();
-                return;
-            } else {
-                System.out.println("Извините, но такого теста пока нет.");
+            switch (command) {
+                case "0":// Закончить тест
+                    System.out.print("Ваш тест завершен ");
+                    test.viewResult(test.isCommonGoodResultAllTest());
+                    scanner.close();
+                    return;
+                case "1":// Начать тест заново
+                    test.restartTest();
+                    test.printLine();
+                    System.out.print("ТЕСТ перезапущен.");
+                    break;
+                case "2": test.printTask(); break;                              // Вывести списки задач
+                case "3": test.createTask(); break;                             // Создать задачу
+                case "4": test.createEpic(2); break;               // Создать эпик с 2 подзадачами
+                case "5": test.createEpic(1); break;               // Создать эпик с 1 подзадачей
+                case "6": test.lastTaskUpdateStatus(IssueStatus.DONE); break;   // Обновить последнюю задачу
+                case "7": test.lastEpicUpdateStatus(IssueStatus.DONE); break;   // Обновить последний эпик
+                case "8": test.lastSubTaskUpdateStatus(IssueStatus.DONE); break;// Обновить последнюю подзадачу
+                case "9": test.lastTaskToDelete(IssueType.TASK); break;         // Удалить последнюю задачу
+                case "10":test.lastTaskToDelete(IssueType.EPIC); break;         // Удалить последний эпик
+                case "11":test.lastTaskToDelete(IssueType.SUBTASK); break;      // Удалить последнюю подзадачу
+                case "12":test.deleteAllTask(IssueType.TASK); break;            // Очистить список задач
+                case "13":test.deleteAllTask(IssueType.SUBTASK); break;         // Очистить список подзадач
+                case "14":test.deleteAllTask(IssueType.EPIC); break;            // Очистить список эпиков
+                case "15": // показать результат тестов
+                    System.out.print("Общий результат всех тестов ");
+                    test.viewResult(test.isCommonGoodResultAllTest());
+                    break;
+                default: System.out.println("Извините, но такого теста пока нет.");
             }
         }
 
