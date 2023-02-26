@@ -35,7 +35,7 @@ public class TaskManager {
 
     /**
      * Метод для перезапуска менеджера:
-     * - очищает все мапы: задачи/подзадачи/эпики
+     * - очищает данные: задачи/подзадачи/эпики
      * - id = 1
      */
     public void restartTaskManager() {
@@ -100,7 +100,7 @@ public class TaskManager {
                     SubTask subTask = (SubTask) getTaskForId(issueType, idIssue);
                     //Удаляем ребенка у эпика
                     subTask.getParent().deleteChild(subTask);
-                    //Удаляем из мапы подзадачу
+                    //Удаляем из менеджера подзадачу
                     subTasks.remove(idIssue);
                 } else {
                     System.out.println(msgErrorIdNotFound);

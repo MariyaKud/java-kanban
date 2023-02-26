@@ -58,23 +58,28 @@ public class TestTaskManager {
         tracker.deleteAllTask(type);
 
         //Простая достижения цели теста
-        boolean goalAchieved = true;
-        if (tracker.getAllTask(type).size() > 0) {
+        boolean goalAchieved    = true;
+        ArrayList<Issue> tasksForCheck = tracker.getAllTask(type);
+
+        if (!tasksForCheck.isEmpty()) {
             //Что-то осталось
             goalAchieved = false;
         }
-        //Дополнительная проверка для эпиков
-        if (!goalAchieved && type == IssueType.EPIC && tracker.getAllTask(IssueType.SUBTASK).size() > 0){
-            //Если все эпики удалены, то и подзадач быть не должно
+
+        ArrayList<Issue> issues = tracker.getAllTask(IssueType.SUBTASK);
+        //Дополнительная проверка для эпиков. Если все эпики удалены, то и подзадач быть не должно
+        if (goalAchieved && type == IssueType.EPIC && issues.size() > 0) {
             goalAchieved = false;
         }
+
         //Дополнительная проверка для подзадач
-        if (!goalAchieved && type == IssueType.SUBTASK) {
+        if (goalAchieved && type == IssueType.SUBTASK) {
             //Если удалены все подзадачи, то эпики должны остаться без детей
             ArrayList<Issue> epics = tracker.getAllTask(IssueType.EPIC);
             for (Issue epic : epics) {
                 if (((Epic) epic).getChildren().size()>0) {
                     goalAchieved = false;
+                    break;
                 }
             }
         }
@@ -117,9 +122,11 @@ public class TestTaskManager {
         tracker.createTask(IssueType.TASK, newTask);
         System.out.println(printTask + newTask.getId());
 
-        //Проверка достижения цели - задача найдена в мапе менеджера
+        //Проверка достижения цели - задача найдена в HashMap менеджера
         boolean goalAchieved = true;
-        if (tracker.getTaskForId(IssueType.TASK, newTask.getId()) == null) {
+        Issue issue = tracker.getTaskForId(IssueType.TASK, newTask.getId());
+
+        if (issue == null) {
             goalAchieved = false;
         }
 
@@ -155,9 +162,11 @@ public class TestTaskManager {
         tracker.createTask(IssueType.EPIC, newTask);
         System.out.println(printTask + newTask.getId());
 
-        //Проверка достижения цели - задача найдена в мапе менеджера
+        //Проверка достижения цели - задача найдена в HashMap менеджера
         boolean goalAchieved = true;
-        if (tracker.getTaskForId(IssueType.EPIC, newTask.getId()) == null) {
+        Issue issue = tracker.getTaskForId(IssueType.EPIC, newTask.getId());
+
+        if (issue == null) {
             goalAchieved = false;
         }
 
@@ -202,7 +211,7 @@ public class TestTaskManager {
             tracker.createTask(IssueType.SUBTASK, newTask);
             System.out.println(printTask + newTask.getId() + " для эпика с id = " + parent.getId());
 
-            //Проверка достижения цели - задача найдена в мапе менеджера
+            //Проверка достижения цели - задача найдена в HashMap менеджера
             if (tracker.getTaskForId(IssueType.SUBTASK, newTask.getId()) == null) {
                 goalAchieved = false;
             }
@@ -391,7 +400,7 @@ public class TestTaskManager {
             System.out.println("Попытка удаления задачи с Id = " + id + " тип задачи = " + type);
             tracker.deleteTask(type, id);
 
-            //Проверка достижения цели - задачи в мапе менеджера нет
+            //Проверка достижения цели - задачи в HashMap менеджера нет
             if (tracker.getTaskForId(type, id) != null) {
                 goalAchieved = false;
             }
@@ -450,7 +459,7 @@ public class TestTaskManager {
 
     /**
      * Метод СЛУЖЕБНЫЙ - для перезапуска теста:
-     *   - очищает все мапы менеджера: задачи/подзадачи/эпики
+     *   - очищает все HashMap менеджера: задачи/подзадачи/эпики
      *   - id = 1
      *   - commonGoodResultAllTest = true
      */
