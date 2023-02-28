@@ -8,11 +8,8 @@ public class Main {
 
     public static void main(String[] args) {
 
-        //Запускаем менеджера, нумерация задач начинается с 1
-        TaskManager tracker = new TaskManager();
         //Запускаем тест
-        TestTaskManager test = new TestTaskManager(tracker);
-        //экземпляр Scanner
+        TestTaskManager test = new TestTaskManager(new TaskManager());
         Scanner scanner = new Scanner(System.in);
         String command;
 
@@ -21,13 +18,13 @@ public class Main {
         System.out.println("Запуск авто ТЕСТА для менеджера задач...");
 
         //Создать задачи
-        test.createTask();
-        test.createTask();
-        test.createEpic(1);
-        test.createEpic(2);
+        test.testCreateForTask();
+        test.testCreateForTask();
+        test.testCreateForEpic(1);
+        test.testCreateForEpic(2);
 
         //Распечатать списки
-        test.printTask();
+        test.testGetAllTaskAndViewResult();
 
         //Изменить статусы
         test.lastTaskUpdateStatus(IssueStatus.IN_PROGRESS);
@@ -36,26 +33,26 @@ public class Main {
         test.lastSubTaskUpdateStatus(IssueStatus.IN_PROGRESS);
         test.lastSubTaskUpdateStatus(IssueStatus.DONE);
         // для наглядности сохранения статуса эпика удалим существующие эпики и создадим новый
-        test.deleteAllTask(IssueType.EPIC);
-        test.createEpic(1);
+        test.testDeleteAllTaskForType(IssueType.EPIC);
+        test.testCreateForEpic(1);
         test.lastEpicUpdateStatus(IssueStatus.DONE);
-        test.printTask();
+        test.testGetAllTaskAndViewResult();
 
         //Удалить задачи
         test.lastTaskToDelete(IssueType.TASK);
         test.lastTaskToDelete(IssueType.EPIC);
         test.lastTaskToDelete(IssueType.SUBTASK);
-        test.printTask();
+        test.testGetAllTaskAndViewResult();
 
         //Очистить списки
-        test.deleteAllTask(IssueType.TASK);
-        test.printTask();
-        test.deleteAllTask(IssueType.SUBTASK);
-        test.printTask();
-        test.createEpic(1);
-        test.printTask();
-        test.deleteAllTask(IssueType.EPIC);
-        test.printTask();
+        test.testDeleteAllTaskForType(IssueType.TASK);
+        test.testGetAllTaskAndViewResult();
+        test.testDeleteAllTaskForType(IssueType.SUBTASK);
+        test.testGetAllTaskAndViewResult();
+        test.testCreateForEpic(1);
+        test.testGetAllTaskAndViewResult();
+        test.testDeleteAllTaskForType(IssueType.EPIC);
+        test.testGetAllTaskAndViewResult();
 
         //Выводим итоги авто теста
         test.printLine();
@@ -80,24 +77,51 @@ public class Main {
                     test.printLine();
                     System.out.print("ТЕСТ перезапущен.");
                     break;
-                case "2": test.printTask(); break;                              // Вывести списки задач
-                case "3": test.createTask(); break;                             // Создать задачу
-                case "4": test.createEpic(2); break;               // Создать эпик с 2 подзадачами
-                case "5": test.createEpic(1); break;               // Создать эпик с 1 подзадачей
-                case "6": test.lastTaskUpdateStatus(IssueStatus.DONE); break;   // Обновить последнюю задачу
-                case "7": test.lastEpicUpdateStatus(IssueStatus.DONE); break;   // Обновить последний эпик
-                case "8": test.lastSubTaskUpdateStatus(IssueStatus.DONE); break;// Обновить последнюю подзадачу
-                case "9": test.lastTaskToDelete(IssueType.TASK); break;         // Удалить последнюю задачу
-                case "10":test.lastTaskToDelete(IssueType.EPIC); break;         // Удалить последний эпик
-                case "11":test.lastTaskToDelete(IssueType.SUBTASK); break;      // Удалить последнюю подзадачу
-                case "12":test.deleteAllTask(IssueType.TASK); break;            // Очистить список задач
-                case "13":test.deleteAllTask(IssueType.SUBTASK); break;         // Очистить список подзадач
-                case "14":test.deleteAllTask(IssueType.EPIC); break;            // Очистить список эпиков
+                case "2":// Вывести списки задач
+                    test.testGetAllTaskAndViewResult();
+                    break;
+                case "3":// Создать задачу
+                    test.testCreateForTask();
+                    break;
+                case "4":// Создать эпик с 2 подзадачами
+                    test.testCreateForEpic(2);
+                    break;
+                case "5":// Создать эпик с 1 подзадачей
+                    test.testCreateForEpic(1);
+                    break;
+                case "6":// Обновить последнюю задачу
+                    test.lastTaskUpdateStatus(IssueStatus.DONE);
+                    break;
+                case "7":// Обновить последний эпик
+                    test.lastEpicUpdateStatus(IssueStatus.DONE);
+                    break;
+                case "8":// Обновить последнюю подзадачу
+                    test.lastSubTaskUpdateStatus(IssueStatus.DONE);
+                    break;
+                case "9":// Удалить последнюю задачу
+                    test.lastTaskToDelete(IssueType.TASK);
+                    break;
+                case "10":// Удалить последний эпик
+                    test.lastTaskToDelete(IssueType.EPIC);
+                    break;
+                case "11":// Удалить последнюю подзадачу
+                    test.lastTaskToDelete(IssueType.SUBTASK);
+                    break;
+                case "12":// Очистить список задач
+                    test.testDeleteAllTaskForType(IssueType.TASK);
+                    break;
+                case "13":// Очистить список подзадач
+                    test.testDeleteAllTaskForType(IssueType.SUBTASK);
+                    break;
+                case "14":// Очистить список эпиков
+                    test.testDeleteAllTaskForType(IssueType.EPIC);
+                    break;
                 case "15": // показать результат тестов
                     System.out.print("Общий результат всех тестов ");
                     test.viewResult(test.isCommonGoodResultAllTest());
                     break;
-                default: System.out.println("Извините, но такого теста пока нет.");
+                default:
+                    System.out.println("Извините, но такого теста пока нет.");
             }
         }
 
