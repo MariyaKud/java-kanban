@@ -1,6 +1,7 @@
 package model;
 
 public abstract class Issue {
+
     protected int id;             // Идентификатор
     protected String title;      // Название
     protected String description; // Описание
@@ -29,4 +30,14 @@ public abstract class Issue {
         return status;
     }
 
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", hash='"  + hashCode() + '\'' +
+                '}';
+    }
 }

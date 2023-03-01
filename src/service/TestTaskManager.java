@@ -1,25 +1,40 @@
 package service;
 
-import model.*;
+import model.Epic;
+import model.Issue;
+import model.IssueStatus;
+import model.IssueType;
+import model.SubTask;
+import model.Task;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class TestTaskManager {
-    private final TaskManager tracker;       // тестируемый менеджер
-    private int idTest;                      // номер выполняемого теста
-    private boolean commonGoodResultAllTest; // результат всех тестов, если ВСЕ тесты прошли успешно, то true
-
-    private final static String msgErrorParentNull = "Родитель подзадачи не может быть null.";
-    private final static String msgErrorTypeNull = "Для метода не указан тип задачи.";
-    private final static String msgErrorTaskEmpty = "Список задач пуст.";
-    private final static String msgErrorTypeUnKnow = "Для выбранного типа задач не создан обработчик в методе.";
-    private final static String msgErrorIdNull = "Не найдена задача с указанным id.";
 
     /**
-     * Любой метод данного класса должен запускаться из метода - printTitleTest()
-     * - для ведения хронологии тестов
-     * Если при выполнении теста случилась ошибка
-     * - необходимо установить commonGoodResultAllTest = false
+     tracker тестируемый менеджер {@link TaskManager}
+     */
+    private final TaskManager tracker;       // тестируемый менеджер
+
+    /**
+     * idTest идентификатор проводимого теста
+     */
+    private int idTest;                      // номер выполняемого теста
+
+    /**
+     *  Если при выполнении очередного теста случилась ошибка, то
+     *  необходимо установить commonGoodResultAllTest = false
+     */
+    private boolean commonGoodResultAllTest; // результат всех тестов, если ВСЕ тесты прошли успешно, то true
+
+    private final static String MSG_ERROR_PARENT_NULL = "Родитель подзадачи не может быть null.";
+    private final static String MSG_ERROR_TYPE_NULL = "Для метода не указан тип задачи.";
+    private final static String MSG_ERROR_TASK_EMPTY = "Список задач пуст.";
+    private final static String MSG_ERROR_TYPE_UNKNOW = "Для выбранного типа задач не создан обработчик в методе.";
+    private final static String MSG_ERROR_ID_NULL = "Не найдена задача с указанным id.";
+
+    /**
+     * Метод для тестирования сервиса {@link TaskManager}
      */
     public TestTaskManager(TaskManager taskManager) {
         this.tracker = taskManager;
@@ -60,7 +75,7 @@ public class TestTaskManager {
         System.out.println("Выполняется удаление задач с типом = " + type + " ..");
         tracker.deleteAllTask(type);
 
-        ArrayList<Issue> tasksForCheck = tracker.getAllTask(type);
+        List<Issue> tasksForCheck = tracker.getAllTask(type);
 
         //Проверка результата
         if (!tasksForCheck.isEmpty()) {
@@ -68,13 +83,13 @@ public class TestTaskManager {
             goalAchieved = false;
         } else if (type == IssueType.EPIC) {
             //Дополнительная проверка для эпиков. Если все эпики удалены, то и подзадач быть не должно
-            ArrayList<Issue> issues = tracker.getAllTask(IssueType.SUBTASK);
+            List<Issue> issues = tracker.getAllTask(IssueType.SUBTASK);
             if (issues.size() > 0) {
                 goalAchieved = false;
             }
         } else if (type == IssueType.SUBTASK) {
             //Дополнительная проверка для подзадач. Если удалены все подзадачи, то эпики должны остаться без детей
-            ArrayList<Issue> epics = tracker.getAllTask(IssueType.EPIC);
+            List<Issue> epics = tracker.getAllTask(IssueType.EPIC);
             for (Issue epic : epics) {
                 if (((Epic) epic).getChildren().size() > 0) {
                     goalAchieved = false;
@@ -213,7 +228,7 @@ public class TestTaskManager {
                 goalAchieved = false;
             }
         } else {
-            System.out.println(msgErrorParentNull);
+            System.out.println(MSG_ERROR_PARENT_NULL);
             goalAchieved = false;
         }
 
@@ -322,7 +337,7 @@ public class TestTaskManager {
 
                         break;
                     default:
-                        System.out.println(msgErrorTypeUnKnow);
+                        System.out.println(MSG_ERROR_TYPE_UNKNOW);
                         goalAchieved = false;
                         newTaskToUpdate = null;
                         break;
@@ -357,11 +372,11 @@ public class TestTaskManager {
                     }
                 }
             } else {
-                System.out.println(msgErrorIdNull);
+                System.out.println(MSG_ERROR_ID_NULL);
                 goalAchieved = false;
             }
         } else {
-            System.out.println(msgErrorIdNull);
+            System.out.println(MSG_ERROR_ID_NULL);
             goalAchieved = false;
         }
 
@@ -440,7 +455,7 @@ public class TestTaskManager {
             }
 
         } else {
-            System.out.println(msgErrorIdNull);
+            System.out.println(MSG_ERROR_ID_NULL);
             goalAchieved = false;
         }
 
@@ -511,16 +526,15 @@ public class TestTaskManager {
     private Integer getLastIdTask(IssueType issueType) {
 
         if (issueType != null) {
-            ArrayList<Issue> issues = tracker.getAllTask(issueType);
+            List<Issue> issues = tracker.getAllTask(issueType);
             if (!issues.isEmpty()) {
                 return issues.get(issues.size() - 1).getId();
             } else {
-                System.out.println(msgErrorTaskEmpty);
+                System.out.println(MSG_ERROR_TASK_EMPTY);
             }
         } else {
-            System.out.println(msgErrorTypeNull);
+            System.out.println(MSG_ERROR_TYPE_NULL);
         }
         return null;
     }
-
 }

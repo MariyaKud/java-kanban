@@ -2,23 +2,29 @@ package service;
 
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import model.*;
 
+/**
+ * Основной класс работы с сущностями: {@code Task}, {@code SubTask}, {@code Epic}
+ *
+ */
 public class TaskManager {
 
     // Переменные класса
     private int id = 1; //доступный идентификатор менеджера
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private final HashMap<Integer, SubTask> subTasks = new HashMap<>();
+    private final Map<Integer, Task> tasks = new HashMap<>();
+    private final Map<Integer, Epic> epics = new HashMap<>();
+    private final Map<Integer, SubTask> subTasks = new HashMap<>();
 
     //Текст сообщений об ошибках
-    private final static String msgErrorTypeNull = "Для метода не указан тип задачи.";
-    private final static String msgErrorTypeUnKnow = "Для выбранного типа задач не создан обработчик в методе.";
-    private final static String msgErrorIdNotFound = "Не найдена задача с указанным id.";
-    private final static String msgErrorTaskNUll = "Данные по обновлению задачи пустые.";
-    private final static String msgErrorNotFoundEpic = "Менеджер не нашел родителя добавляемой подзадачи.";
+    private final static String MSG_ERROR_TYPE_NULL = "Для метода не указан тип задачи.";
+    private final static String MSG_ERROR_TYPE_UNKNOW = "Для выбранного типа задач не создан обработчик в методе.";
+    private final static String MSG_ERROR_ID_NOT_FOUND = "Не найдена задача с указанным id.";
+    private final static String MSG_ERROR_TASK_NULL = "Данные по обновлению задачи пустые.";
+    private final static String MSG_ERROR_NOT_FOUND_EPIC = "Менеджер не нашел родителя добавляемой подзадачи.";
 
     /**
      * Метод выдает очередной идентификатор для новой задачи + готовит идентификатор для следующей задачи
@@ -79,15 +85,15 @@ public class TaskManager {
                         //добавляем родителю ребенка
                         parent.getChildren().add(newSubTask);
                     } else {
-                        System.out.println(msgErrorNotFoundEpic);
+                        System.out.println(MSG_ERROR_NOT_FOUND_EPIC);
                     }
                     break;
 
                 default:
-                    System.out.println(msgErrorTypeUnKnow);
+                    System.out.println(MSG_ERROR_TYPE_UNKNOW);
             }
         } else {
-            System.out.println(msgErrorTypeNull);
+            System.out.println(MSG_ERROR_TYPE_NULL);
         }
     }
 
@@ -104,7 +110,7 @@ public class TaskManager {
                 if (tasks.containsKey(idIssue)) {
                     tasks.remove(idIssue);
                 } else {
-                    System.out.println(msgErrorIdNotFound);
+                    System.out.println(MSG_ERROR_ID_NOT_FOUND);
                 }
                 break;
 
@@ -118,7 +124,7 @@ public class TaskManager {
                         subTasks.remove(idIssue);
                     }
                 } else {
-                    System.out.println(msgErrorIdNotFound);
+                    System.out.println(MSG_ERROR_ID_NOT_FOUND);
                 }
                 break;
 
@@ -132,12 +138,12 @@ public class TaskManager {
                     }
                     epics.remove(idIssue);
                 } else {
-                    System.out.println(msgErrorIdNotFound);
+                    System.out.println(MSG_ERROR_ID_NOT_FOUND);
                 }
                 break;
 
             default:
-                System.out.println(msgErrorTypeUnKnow);
+                System.out.println(MSG_ERROR_TYPE_UNKNOW);
         }
     }
 
@@ -147,7 +153,7 @@ public class TaskManager {
      * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
      * @return возвращает список задач менеджера по заданному типу
      */
-    public ArrayList<Issue> getAllTask(IssueType issueType) {
+    public List<Issue> getAllTask(IssueType issueType) {
         ArrayList<Issue> issues = new ArrayList<>();
 
         switch (issueType) {
@@ -164,7 +170,7 @@ public class TaskManager {
                 break;
 
             default:
-                System.out.println(msgErrorTypeUnKnow);
+                System.out.println(MSG_ERROR_TYPE_UNKNOW);
         }
         return issues;
     }
@@ -193,7 +199,7 @@ public class TaskManager {
                 break;
 
             default:
-                System.out.println(msgErrorTypeUnKnow);
+                System.out.println(MSG_ERROR_TYPE_UNKNOW);
         }
     }
 
@@ -213,7 +219,7 @@ public class TaskManager {
             case SUBTASK:
                 return subTasks.get(idIssue);
             default:
-                System.out.println(msgErrorTypeUnKnow);
+                System.out.println(MSG_ERROR_TYPE_UNKNOW);
                 return null;
         }
     }
@@ -224,7 +230,7 @@ public class TaskManager {
      * @param epic эпик, по которому нужно получить список подзадач
      * @return список подзадач эпика
      */
-    public ArrayList<SubTask> getSubTaskForEpic(Epic epic) {
+    public List<SubTask> getSubTaskForEpic(Epic epic) {
         return epic.getChildren();
     }
 
@@ -246,7 +252,7 @@ public class TaskManager {
                     if (oldTask != null) {
                         tasks.put(issue.getId(), newTask);
                     } else {
-                        System.out.println(msgErrorIdNotFound);
+                        System.out.println(MSG_ERROR_ID_NOT_FOUND);
                     }
                     break;
 
@@ -272,7 +278,7 @@ public class TaskManager {
                             }
                         }
                     } else {
-                        System.out.println(msgErrorIdNotFound);
+                        System.out.println(MSG_ERROR_ID_NOT_FOUND);
                     }
                     break;
 
@@ -290,15 +296,15 @@ public class TaskManager {
                         //Добавляем обновленную подзадачу в эпик
                         parent.getChildren().add(newSubTask);
                     } else {
-                        System.out.println(msgErrorIdNotFound);
+                        System.out.println(MSG_ERROR_ID_NOT_FOUND);
                     }
                     break;
 
                 default:
-                    System.out.println(msgErrorTypeUnKnow);
+                    System.out.println(MSG_ERROR_TYPE_UNKNOW);
             }
         } else {
-            System.out.println(msgErrorTaskNUll);
+            System.out.println(MSG_ERROR_TASK_NULL);
         }
     }
 }

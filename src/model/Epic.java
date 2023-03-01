@@ -1,20 +1,26 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Epic extends Issue {
-    private final ArrayList<SubTask> children = new ArrayList<>(); // Список подзадач эпика
+
+    /**
+     * Содержит список элементов класса {@link SubTask}, содержащихся в экземпляре {@link Epic}
+     */
+    private final List<SubTask> children = new ArrayList<>();
 
     public Epic(int id, String title, String description) {
         super(id, title, description);
     }
 
-    public ArrayList<SubTask> getChildren() {
+    public List<SubTask> getChildren() {
         return children;
     }
 
     /**
-     * Метод для расчета статуса эпика. Правила для установки статуса эпика.
+     * <b>Метод расчета статуса эпика</b>
+     * <p>Правило установки статуса эпика:
      * Если у эпика нет подзадач или все они имеют статус NEW, то статус должен быть NEW.
      * Если все подзадачи имеют статус DONE, то и эпик считается завершённым со статусом DONE.
      * Во всех остальных случаях статус должен быть IN_PROGRESS.

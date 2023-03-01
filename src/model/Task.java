@@ -9,11 +9,6 @@ public class Task extends Issue {
 
     @Override
     public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", status=" + status +
-                ", title='" + title + '\'' +
-                ", hash='"  + hashCode() + '\'' +
-                '}';
+        return super.toString();
     }
 }

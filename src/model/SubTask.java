@@ -1,7 +1,11 @@
 package model;
 
 public class SubTask extends Issue {
-    private final Epic parent; // родитель эпик
+
+    /**
+     * Владелец текущего экземпляра класса {@link SubTask}
+     */
+    private final Epic parent;
 
     public SubTask(int id, String title, String description, Epic parent, IssueStatus status) {
         super(id,title,description);

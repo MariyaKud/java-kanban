@@ -1,7 +1,7 @@
-import model.*;
+import model.IssueStatus;
+import model.IssueType;
 import service.TaskManager;
 import service.TestTaskManager;
-
 import java.util.Scanner;
 
 public class Main {
