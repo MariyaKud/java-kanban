@@ -10,7 +10,7 @@ public class SubTask extends Issue {
     public SubTask(int id, String title, String description, Epic parent, IssueStatus status) {
         super(id,title,description);
         this.parent = parent;
-        this.status = status;
+        this.setStatus(status);
     }
 
     public Epic getParent() {
@@ -20,7 +20,7 @@ public class SubTask extends Issue {
     @Override
     public String toString() {
         return "SubTask{"  +
-                "id=" + id +
+                "id=" + getId() +
                 ", parentId=" + parent.getId() +
                 ", status="   + getStatus() +
                 ", title='"   + getTitle() + '\'' +

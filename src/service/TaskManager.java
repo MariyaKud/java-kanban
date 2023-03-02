@@ -13,13 +13,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Основной класс работы с сущностями: {@code Task}, {@code SubTask}, {@code Epic}
+ * Основной класс управления сущностями: {@code Task}, {@code SubTask}, {@code Epic}
  *
  */
 public class TaskManager {
 
     // Переменные класса
-    private int id = 1; //доступный идентификатор менеджера
+    private int id = 1; // идентификатор менеджера
     private final Map<Integer, Task> tasks = new HashMap<>();
     private final Map<Integer, Epic> epics = new HashMap<>();
     private final Map<Integer, SubTask> subTasks = new HashMap<>();
@@ -36,40 +36,40 @@ public class TaskManager {
      *
      * @return возвращает очередной свободный идентификатор
      */
-    private int newId() {
+    private int getId() {
         return id++;
     }
 
     /**
-     * Метод для перезапуска менеджера:
-     * очищает данные: задачи/подзадачи/эпики
+     * Перезапустить менеджер задач:
+     * очищает хранилища: задачи/подзадачи/эпики
      * id = 1
      */
     public void restartTaskManager() {
-        deleteAllTask(IssueType.TASK);
-        deleteAllTask(IssueType.EPIC);
+        delAllIssueForType(IssueType.TASK);
+        delAllIssueForType(IssueType.EPIC);
         id = 1;
     }
 
     public Task initTask(String title, String description, IssueStatus status) {
-        return new Task(newId(), title, description, status);
+        return new Task(getId(), title, description, status);
     }
 
     public SubTask initSubTask(String title,String description, Epic parent, IssueStatus status) {
-        return new SubTask(newId(), title, description, parent, status);
+        return new SubTask(getId(), title, description, parent, status);
     }
 
     public Epic initEpic(String title,String description) {
-        return new Epic(newId(), title, description);
+        return new Epic(getId(), title, description);
     }
 
     /**
-     * Метод создает задачу. Сам объект передается в качестве параметра.
+     * Создать задачу. Сам объект передается в качестве параметра.
      *
      * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
      * @param issue     экземпляр класса Issue
      */
-    public void createTask(IssueType issueType, Issue issue) {
+    public void createIssueForType(IssueType issueType, Issue issue) {
 
         if (issue != null) {
             switch (issueType) {
@@ -88,7 +88,7 @@ public class TaskManager {
                     if (epics.containsValue(parent)) {
                         subTasks.put(issue.getId(), (SubTask) issue);
                         //добавляем родителю ребенка
-                        parent.getChildren().add(newSubTask);
+                        parent.getListChildren().add(newSubTask);
                     } else {
                         System.out.println(MSG_ERROR_NOT_FOUND_EPIC);
                     }
@@ -108,7 +108,7 @@ public class TaskManager {
      * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
      * @param idIssue   идентификатор задачи на удаление
      */
-    public void deleteTask(IssueType issueType, int idIssue) {
+    public void delIssueByIdForType(IssueType issueType, int idIssue) {
 
         switch (issueType) {
             case TASK:
@@ -121,10 +121,10 @@ public class TaskManager {
 
             case SUBTASK:
                 if (subTasks.containsKey(idIssue)) {
-                    SubTask subTask = (SubTask) getTaskForId(issueType, idIssue);
+                    SubTask subTask = (SubTask) getIssueByIdForType(issueType, idIssue);
                     if (subTask != null) {
                         //Удаляем эту подзадачу в эпике
-                        subTask.getParent().getChildren().remove(subTask);
+                        subTask.getParent().getListChildren().remove(subTask);
                         //Удаляем из менеджера подзадачу
                         subTasks.remove(idIssue);
                     }
@@ -136,7 +136,7 @@ public class TaskManager {
             case EPIC:
                 if (epics.containsKey(idIssue)) {
                     //удаляем подзадачи эпика в менеджере
-                    for (SubTask child : epics.get(idIssue).getChildren()) {
+                    for (SubTask child : epics.get(idIssue).getListChildren()) {
                         if (subTasks.containsValue(child)) {
                             subTasks.remove(child.getId());
                         }
@@ -158,7 +158,7 @@ public class TaskManager {
      * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
      * @return возвращает список задач менеджера по заданному типу
      */
-    public List<Issue> getAllTask(IssueType issueType) {
+    public List<Issue> getListOfAllIssueForType(IssueType issueType) {
         ArrayList<Issue> issues = new ArrayList<>();
 
         switch (issueType) {
@@ -185,7 +185,7 @@ public class TaskManager {
      *
      * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
      */
-    public void deleteAllTask(IssueType issueType) {
+    public void delAllIssueForType(IssueType issueType) {
         switch (issueType) {
             case TASK:
                 tasks.clear();
@@ -198,7 +198,7 @@ public class TaskManager {
 
             case SUBTASK:
                 for (Epic epic : epics.values()) {
-                    epic.getChildren().clear();
+                    epic.getListChildren().clear();
                 }
                 subTasks.clear();
                 break;
@@ -215,7 +215,7 @@ public class TaskManager {
      * @param idIssue   идентификатор задачи для поиска
      * @return - задачу по идентификатору, может вернуть NULL
      */
-    public Issue getTaskForId(IssueType issueType, int idIssue) {
+    public Issue getIssueByIdForType(IssueType issueType, int idIssue) {
         switch (issueType) {
             case TASK:
                 return tasks.get(idIssue);
@@ -235,8 +235,8 @@ public class TaskManager {
      * @param epic эпик, по которому нужно получить список подзадач
      * @return список подзадач эпика
      */
-    public List<SubTask> getSubTaskForEpic(Epic epic) {
-        return epic.getChildren();
+    public List<SubTask> getListSubTaskForEpic(Epic epic) {
+        return epic.getListChildren();
     }
 
     /**
@@ -245,13 +245,13 @@ public class TaskManager {
      * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
      * @param issue     новая версия объекта с верным идентификатором, включая обновленный статус
      */
-    public void updateTask(IssueType issueType, Issue issue) {
+    public void updIssueForType(IssueType issueType, Issue issue) {
 
         if (issue != null) {
             switch (issueType) {
                 case TASK:
                     Task newTask = (Task) issue;
-                    Task oldTask = (Task) getTaskForId(IssueType.TASK, issue.getId());
+                    Task oldTask = (Task) getIssueByIdForType(IssueType.TASK, issue.getId());
 
                     //Мы можем обновить только существующий объект
                     if (oldTask != null) {
@@ -263,11 +263,11 @@ public class TaskManager {
 
                 case EPIC:
                     Epic newEpic = (Epic) issue;
-                    Epic oldEpic = (Epic) getTaskForId(IssueType.EPIC, issue.getId());
+                    Epic oldEpic = (Epic) getIssueByIdForType(IssueType.EPIC, issue.getId());
 
                     if (oldEpic != null) {
                         //Удаляем все подзадачи старого эпика
-                        for (SubTask child : oldEpic.getChildren()) {
+                        for (SubTask child : oldEpic.getListChildren()) {
                             subTasks.remove(child.getId());
                         }
                         //Обновляем эпик
@@ -275,9 +275,9 @@ public class TaskManager {
                         //Устанавливаем статус нового эпика
                         newEpic.updateStatus();
                         //Добавляем подзадачи нового эпика
-                        for (SubTask child : newEpic.getChildren()) {
+                        for (SubTask child : newEpic.getListChildren()) {
                             if (subTasks.containsKey(child.getId())) {
-                                updateTask(IssueType.SUBTASK, child);
+                                updIssueForType(IssueType.SUBTASK, child);
                             } else {
                                 subTasks.put(child.getId(),child);
                             }
@@ -289,17 +289,17 @@ public class TaskManager {
 
                 case SUBTASK:
                     SubTask newSubTask = (SubTask) issue;
-                    SubTask oldSubTask  = (SubTask) getTaskForId(IssueType.SUBTASK, issue.getId());
+                    SubTask oldSubTask  = (SubTask) getIssueByIdForType(IssueType.SUBTASK, issue.getId());
 
                     if (oldSubTask != null) {
                         //Родитель подзадачи - эпик
                         Epic parent = oldSubTask.getParent();
                         //Удаляем старую подзадачу у эпика родителя
-                        parent.getChildren().remove(oldSubTask);
+                        parent.getListChildren().remove(oldSubTask);
                         //Обновляем подзадачу в списке подзадач
                         subTasks.put(issue.getId(), newSubTask);
                         //Добавляем обновленную подзадачу в эпик
-                        parent.getChildren().add(newSubTask);
+                        parent.getListChildren().add(newSubTask);
                     } else {
                         System.out.println(MSG_ERROR_ID_NOT_FOUND);
                     }

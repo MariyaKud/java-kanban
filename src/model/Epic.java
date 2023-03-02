@@ -14,7 +14,7 @@ public class Epic extends Issue {
         super(id, title, description);
     }
 
-    public List<SubTask> getChildren() {
+    public List<SubTask> getListChildren() {
         return children;
     }
 
@@ -28,7 +28,7 @@ public class Epic extends Issue {
     public void updateStatus() {
 
         if (children.size() == 0) {
-            this.status = IssueStatus.NEW;
+            setStatus(IssueStatus.NEW);
         } else {
 
             boolean allNew = true;
@@ -48,11 +48,11 @@ public class Epic extends Issue {
             }
 
             if (allNew) {
-                this.status = IssueStatus.NEW;
+                setStatus(IssueStatus.NEW);
             } else if (allDone) {
-                this.status = IssueStatus.DONE;
+                setStatus(IssueStatus.DONE);
             } else {
-                this.status = IssueStatus.IN_PROGRESS;
+                setStatus(IssueStatus.IN_PROGRESS);
             }
 
         }
@@ -61,26 +61,26 @@ public class Epic extends Issue {
     @Override
     public String toString() {
         //Идентификаторы детей эпика через ","
-        String idChildren = "";
-        String hashChildren = "";
+        StringBuilder idChildren = new StringBuilder();
+        StringBuilder hashChildren = new StringBuilder();
 
         for (SubTask child : this.children) {
-            if (idChildren.equals("")) {
-                idChildren = idChildren + child.getId();
-                hashChildren = hashChildren + child.hashCode();
+            if (idChildren.length() == 0) {
+                idChildren.append(child.getId());
+                hashChildren.append(child.hashCode());
             } else {
-                idChildren = idChildren + "," + child.getId();
-                hashChildren = hashChildren + "," + child.hashCode();
+                idChildren.append(",").append(child.getId());
+                hashChildren.append(",").append(child.hashCode());
             }
         }
 
         return "Epic{" +
-                "id=" + this.id +
-                ", status=" + this.status +
-                ", children.size='" + this.children.size() + '\'' +
+                "id=" + getId() +
+                ", status=" + getStatus() +
+                ", children.size='" + children.size() + '\'' +
                 ", children.id='" + idChildren + '\'' +
-                ", title='" + this.getTitle() + '\'' +
-                ", hash='" + this.hashCode() + '\'' +
+                ", title='" + getTitle() + '\'' +
+                ", hash='" + hashCode() + '\'' +
                 ", children.hash='" + hashChildren + '\'' +
                 '}';
     }

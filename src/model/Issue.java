@@ -2,10 +2,10 @@ package model;
 
 public abstract class Issue {
 
-    protected int id;             // Идентификатор
-    protected String title;      // Название
-    protected String description; // Описание
-    protected IssueStatus status;  // Статус
+    private final int id;             // Идентификатор
+    private final String title;       // Название
+    private final String description; // Описание
+    private IssueStatus status;       // Статус
 
     public Issue(int id, String title, String description) {
         this.id = id;
@@ -30,6 +30,10 @@ public abstract class Issue {
         return status;
     }
 
+    protected void setStatus(IssueStatus status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -40,4 +44,5 @@ public abstract class Issue {
                 ", hash='"  + hashCode() + '\'' +
                 '}';
     }
+
 }
