@@ -1,11 +1,16 @@
 package service;
 
+import model.Epic;
+import model.Issue;
+import model.IssueStatus;
+import model.IssueType;
+import model.SubTask;
+import model.Task;
+
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import model.*;
 
 /**
  * Основной класс работы с сущностями: {@code Task}, {@code SubTask}, {@code Epic}
@@ -21,7 +26,7 @@ public class TaskManager {
 
     //Текст сообщений об ошибках
     private final static String MSG_ERROR_TYPE_NULL = "Для метода не указан тип задачи.";
-    private final static String MSG_ERROR_TYPE_UNKNOW = "Для выбранного типа задач не создан обработчик в методе.";
+    private final static String MSG_ERROR_TYPE_UN_KNOW = "Для выбранного типа задач не создан обработчик в методе.";
     private final static String MSG_ERROR_ID_NOT_FOUND = "Не найдена задача с указанным id.";
     private final static String MSG_ERROR_TASK_NULL = "Данные по обновлению задачи пустые.";
     private final static String MSG_ERROR_NOT_FOUND_EPIC = "Менеджер не нашел родителя добавляемой подзадачи.";
@@ -90,7 +95,7 @@ public class TaskManager {
                     break;
 
                 default:
-                    System.out.println(MSG_ERROR_TYPE_UNKNOW);
+                    System.out.println(MSG_ERROR_TYPE_UN_KNOW);
             }
         } else {
             System.out.println(MSG_ERROR_TYPE_NULL);
@@ -143,7 +148,7 @@ public class TaskManager {
                 break;
 
             default:
-                System.out.println(MSG_ERROR_TYPE_UNKNOW);
+                System.out.println(MSG_ERROR_TYPE_UN_KNOW);
         }
     }
 
@@ -170,7 +175,7 @@ public class TaskManager {
                 break;
 
             default:
-                System.out.println(MSG_ERROR_TYPE_UNKNOW);
+                System.out.println(MSG_ERROR_TYPE_UN_KNOW);
         }
         return issues;
     }
@@ -199,7 +204,7 @@ public class TaskManager {
                 break;
 
             default:
-                System.out.println(MSG_ERROR_TYPE_UNKNOW);
+                System.out.println(MSG_ERROR_TYPE_UN_KNOW);
         }
     }
 
@@ -219,7 +224,7 @@ public class TaskManager {
             case SUBTASK:
                 return subTasks.get(idIssue);
             default:
-                System.out.println(MSG_ERROR_TYPE_UNKNOW);
+                System.out.println(MSG_ERROR_TYPE_UN_KNOW);
                 return null;
         }
     }
@@ -301,7 +306,7 @@ public class TaskManager {
                     break;
 
                 default:
-                    System.out.println(MSG_ERROR_TYPE_UNKNOW);
+                    System.out.println(MSG_ERROR_TYPE_UN_KNOW);
             }
         } else {
             System.out.println(MSG_ERROR_TASK_NULL);
