@@ -1,7 +1,9 @@
+
 import model.IssueStatus;
 import model.IssueType;
-import service.InMemoryTaskManager;
-import service.InMemoryTestManager;
+import service.Managers;
+import service.TestTaskManager;
+
 import java.util.Scanner;
 
 public class Main {
@@ -9,7 +11,8 @@ public class Main {
     public static void main(String[] args) {
 
         //Запускаем тест
-        InMemoryTestManager test = new InMemoryTestManager(new InMemoryTaskManager());
+        //InMemoryTestManager test = new InMemoryTestManager(new InMemoryTaskManager());
+        TestTaskManager test = new TestTaskManager(new Managers().getDefault());
 
         Scanner scanner = new Scanner(System.in);
         String command;
@@ -54,6 +57,9 @@ public class Main {
         test.testGetListOfAllIssueForType();
         test.testDelListOfAllIssueForType(IssueType.EPIC);
         test.testGetListOfAllIssueForType();
+
+        test.printLine();
+        test.testGetHistory();
 
         //Выводим итоги авто теста
         test.printLine();
@@ -121,11 +127,13 @@ public class Main {
                     System.out.print("Общий результат всех тестов ");
                     test.viewResult(test.isCommonGoodResultAllTest());
                     break;
+                case "16": // показать историю просмотров
+                    test.testGetHistory();
+                    break;
                 default:
                     System.out.println("Извините, но такого теста пока нет.");
             }
         }
-
     }
 
     static void printMenu() {
@@ -135,7 +143,7 @@ public class Main {
         System.out.println("6 - Обновить задачу. 7  - Обновить эпик.               8  - Обновить подзадачу.");
         System.out.println("9 - Удалить задачу.  10 - Удалить эпик.                11 - Удалить подзадачу.");
         System.out.println("12- Очистить задачи. 13 - Очистить эпики.              14 - Очистить подзадачи.");
-        System.out.println("15- Получить результат теста.");
+        System.out.println("15- Получить результат теста. 16 - Получить историю просмотров задач.");
         System.out.println("-------------------------------------------");
     }
 

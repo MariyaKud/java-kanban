@@ -8,7 +8,7 @@ public class Epic extends Issue {
     /**
      * Содержит список элементов класса {@link SubTask}, содержащихся в экземпляре {@code Epic}
      */
-    private final List<SubTask> children = new ArrayList<>();
+    private final List<SubTask> childrenList = new ArrayList<>();
 
     public Epic(int id, String title, String description) {
         super(id, title, description);
@@ -18,8 +18,8 @@ public class Epic extends Issue {
      * Получить всех детей экземпляра класса {@code Epic}
      * @return - список элементов класса {@link SubTask}, содержащихся в экземпляре {@code Epic}
      */
-    public List<SubTask> getChildren() {
-        return children;
+    public List<SubTask> getChildrenList() {
+        return childrenList;
     }
 
     /**
@@ -31,14 +31,13 @@ public class Epic extends Issue {
      */
     public void updStatus() {
 
-        if (children.size() == 0) {
+        if (childrenList.size() == 0) {
             setStatus(IssueStatus.NEW);
         } else {
-
             boolean allNew = true;
             boolean allDone = true;
 
-            for (SubTask child : children) {
+            for (SubTask child : childrenList) {
                 if (child.getStatus() != IssueStatus.NEW) {
                     allNew = false;
                 }
@@ -58,7 +57,6 @@ public class Epic extends Issue {
             } else {
                 setStatus(IssueStatus.IN_PROGRESS);
             }
-
         }
     }
 
@@ -68,7 +66,7 @@ public class Epic extends Issue {
         StringBuilder idChildren = new StringBuilder();
         StringBuilder hashChildren = new StringBuilder();
 
-        for (SubTask child : this.children) {
+        for (SubTask child : this.childrenList) {
             if (idChildren.length() == 0) {
                 idChildren.append(child.getId());
                 hashChildren.append(child.hashCode());
@@ -81,7 +79,7 @@ public class Epic extends Issue {
         return "Epic{" +
                 "id=" + getId() +
                 ", status=" + getStatus() +
-                ", children.size='" + children.size() + '\'' +
+                ", children.size='" + childrenList.size() + '\'' +
                 ", children.id='" + idChildren + '\'' +
                 ", title='" + getTitle() + '\'' +
                 ", hash='" + hashCode() + '\'' +

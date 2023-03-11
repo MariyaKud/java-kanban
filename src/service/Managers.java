@@ -5,15 +5,16 @@ package service;
  *
  * <p>Должен подобрать нужную реализацию {@code TaskManager}
  */
-public class Managers<T extends TaskManager> {
+public class Managers {
 
-    private T tracker;
+    private final InMemoryTaskManager tracker = new InMemoryTaskManager();
+
 
     /**
      * Получить реализацию интерфейса {@link TaskManager}
      * @return  объект-менеджер {@code TaskManager}
      */
-    public T getDefault() {
+    public InMemoryTaskManager getDefault() {
         return tracker;
     }
 }

@@ -9,23 +9,23 @@ import model.Task;
 
 import java.util.List;
 
-public class InMemoryTestManager {
+public class TestTaskManager {
 
     /**
-     tracker тестируемый менеджер {@link InMemoryTaskManager}
+     tracker тестируемый менеджер {@link TaskManager}
      */
-    private final InMemoryTaskManager tracker;       // тестируемый менеджер
+    private final InMemoryTaskManager tracker;
 
     /**
      * idTest идентификатор проводимого теста
      */
-    private int idTest;                      // номер выполняемого теста
+    private int idTest;
 
     /**
      *  Если при выполнении очередного теста случилась ошибка, то
      *  необходимо установить commonGoodResultAllTest = false
      */
-    private boolean commonGoodResultAllTest; // результат всех тестов, если ВСЕ тесты прошли успешно, то true
+    private boolean commonGoodResultAllTest;
 
     private final static String MSG_ERROR_PARENT_NULL = "Родитель подзадачи не может быть null.";
     private final static String MSG_ERROR_TYPE_NULL = "Для метода не указан тип задачи.";
@@ -34,12 +34,18 @@ public class InMemoryTestManager {
     private final static String MSG_ERROR_ID_NULL = "Не найдена задача с указанным id.";
 
     /**
-     * Метод для тестирования сервиса {@link InMemoryTaskManager}
+     * Метод для тестирования сервиса экземпляра класса для реализации интерфейса {@link TaskManager}
      */
-    public InMemoryTestManager(InMemoryTaskManager taskManager) {
-        this.tracker = taskManager;
+    public TestTaskManager(InMemoryTaskManager tracker) {
         this.idTest = 1;
         this.commonGoodResultAllTest = true;
+        this.tracker = tracker;
+    }
+
+    public void testGetHistory(){
+        for (Issue issue : tracker.getHistory()) {
+            System.out.println(issue);
+        }
     }
 
     /**
@@ -52,11 +58,11 @@ public class InMemoryTestManager {
         System.out.println("Проверяемый метод: getListOfAllIssueForType, используемый метод System.out.print\n");
 
         //Визуализируем результаты теста
-        System.out.print("ЗАДАЧИ:" + tracker.getAllIssues(IssueType.TASK));
+        System.out.print("ЗАДАЧИ:" + tracker.getListAllIssues(IssueType.TASK));
         viewResult(true);
-        System.out.print("ЗПИКИ:" + tracker.getAllIssues(IssueType.EPIC));
+        System.out.print("ЗПИКИ:" + tracker.getListAllIssues(IssueType.EPIC));
         viewResult(true);
-        System.out.print("ПОДЗАДАЧИ:" + tracker.getAllIssues(IssueType.SUBTASK));
+        System.out.print("ПОДЗАДАЧИ:" + tracker.getListAllIssues(IssueType.SUBTASK));
         viewResult(true);
     }
 
@@ -76,7 +82,7 @@ public class InMemoryTestManager {
         System.out.println("Выполняется удаление задач с типом = " + type + " ..");
         tracker.delAllIssues(type);
 
-        List<Issue> issueListForCheck = tracker.getAllIssues(type);
+        List<Issue> issueListForCheck = tracker.getListAllIssues(type);
 
         //Проверка результата
         if (!issueListForCheck.isEmpty()) {
@@ -84,15 +90,15 @@ public class InMemoryTestManager {
             goalAchieved = false;
         } else if (type == IssueType.EPIC) {
             //Дополнительная проверка для эпиков. Если все эпики удалены, то и подзадач быть не должно
-            List<Issue> subTaskListForCheck = tracker.getAllIssues(IssueType.SUBTASK);
+            List<Issue> subTaskListForCheck = tracker.getListAllIssues(IssueType.SUBTASK);
             if (subTaskListForCheck.size() > 0) {
                 goalAchieved = false;
             }
         } else if (type == IssueType.SUBTASK) {
             //Дополнительная проверка для подзадач. Если удалены все подзадачи, то эпики должны остаться без детей
-            List<Issue> epicListForCheck = tracker.getAllIssues(IssueType.EPIC);
+            List<Issue> epicListForCheck = tracker.getListAllIssues(IssueType.EPIC);
             for (Issue epic : epicListForCheck) {
-                if (((Epic) epic).getChildren().size() > 0) {
+                if (((Epic) epic).getChildrenList().size() > 0) {
                     goalAchieved = false;
                     break;
                 }
@@ -102,13 +108,13 @@ public class InMemoryTestManager {
         //Вывод результата теста
         System.out.print("Результат теста ");
         viewResult(goalAchieved);
-        System.out.println("ВСЕ задачи типа " + type + " : " + tracker.getAllIssues(type));
+        System.out.println("ВСЕ задачи типа " + type + " : " + tracker.getListAllIssues(type));
         if (type == IssueType.EPIC) {
             System.out.println("ВСЕ задачи типа " + IssueType.SUBTASK + " : "
-                                + tracker.getAllIssues(IssueType.SUBTASK));
+                    + tracker.getListAllIssues(IssueType.SUBTASK));
         } else if (type == IssueType.SUBTASK) {
             System.out.println("ВСЕ задачи типа " + IssueType.EPIC + " : "
-                                + tracker.getAllIssues(IssueType.EPIC));
+                    + tracker.getListAllIssues(IssueType.EPIC));
         }
 
         //Если текущий тест дал ошибку, то считаем весь тест испорченным
@@ -122,7 +128,7 @@ public class InMemoryTestManager {
      */
     public void testCreateForTask() {
 
-        int numberTask = tracker.getAllIssues(IssueType.TASK).size() + 1;
+        int numberTask = tracker.getListAllIssues(IssueType.TASK).size() + 1;
         boolean goalAchieved = true;
         String titleTask = "Задача " + numberTask;
         String descriptionTask = "Описание задачи " + numberTask;
@@ -148,7 +154,7 @@ public class InMemoryTestManager {
         //Вывод результата теста
         System.out.print("Результат теста ");
         viewResult(goalAchieved);
-        System.out.println("ЗАДАЧИ: " + tracker.getAllIssues(IssueType.TASK));
+        System.out.println("ЗАДАЧИ: " + tracker.getListAllIssues(IssueType.TASK));
 
         //Если текущий тест дал ошибку, то считаем весь тест испорченным
         if (!goalAchieved) {
@@ -156,14 +162,16 @@ public class InMemoryTestManager {
         }
     }
 
+
     /**
      * ТЕСТ - создать эпик с заданным количеством подзадач
      *
      * @param quantitySubTask количество подзадач эпика
      */
+
     public void testCreateForEpic(int quantitySubTask) {
 
-        int number = tracker.getAllIssues(IssueType.EPIC).size() + 1;
+        int number = tracker.getListAllIssues(IssueType.EPIC).size() + 1;
         String title = "Эпик " + number;
         String description = "Описание эпика " + number;
         Epic newEpic = tracker.addEpic(title, description);
@@ -173,7 +181,7 @@ public class InMemoryTestManager {
         printTitleTest();
         System.out.println("Цель ТЕСТА: создать эпик");
         System.out.println("Проверяемый метод: createIssueForType для эпика, "
-                            + "используемый метод для проверки - getIssueByIdForType\n");
+                + "используемый метод для проверки - getIssueByIdForType\n");
 
         //Тестируем метод
         tracker.addIssue(IssueType.EPIC, newEpic);
@@ -189,7 +197,7 @@ public class InMemoryTestManager {
         //Вывод результата теста
         System.out.print("Результат теста ");
         viewResult(goalAchieved);
-        System.out.println("ЭПИКИ: " + tracker.getAllIssues(IssueType.EPIC));
+        System.out.println("ЭПИКИ: " + tracker.getListAllIssues(IssueType.EPIC));
 
         //Если текущий тест дал ошибку, то считаем весь тест испорченным
         if (!goalAchieved) {
@@ -201,11 +209,13 @@ public class InMemoryTestManager {
         }
     }
 
+
     /**
      * ТЕСТ - создать подзадачу
      *
      * @param parent эпик (родитель подзадачи)
      */
+
     private void testCreateForSubTask(Epic parent) {
 
         boolean goalAchieved = true;
@@ -219,14 +229,14 @@ public class InMemoryTestManager {
 
         //Тестируем метод
         if (parent != null) {
-            int number = tracker.getAllIssues(IssueType.SUBTASK).size() + 1;
+            int number = tracker.getListAllIssues(IssueType.SUBTASK).size() + 1;
             String title = "Подзадача " + number;
             String description = "Описание подзадачи " + number;
 
             SubTask newSubTask = tracker.addSubTask(title, description, parent, IssueStatus.NEW);
             tracker.addIssue(IssueType.SUBTASK, newSubTask);
             System.out.println("Создана подзадача с id = " + newSubTask.getId() + " для эпика с id = "
-                                + parent.getId());
+                    + parent.getId());
 
             //Проверка достижения цели - задача найдена в HashMap менеджера
             if (tracker.getIssueById(IssueType.SUBTASK, newSubTask.getId()) == null) {
@@ -240,14 +250,15 @@ public class InMemoryTestManager {
         //Вывод результата теста
         System.out.print("Результат теста ");
         viewResult(goalAchieved);
-        System.out.println("ПОДЗАДАЧИ: " + tracker.getAllIssues(IssueType.SUBTASK));
-        System.out.println("ЭПИКИ: " + tracker.getAllIssues(IssueType.EPIC));
+        System.out.println("ПОДЗАДАЧИ: " + tracker.getListAllIssues(IssueType.SUBTASK));
+        System.out.println("ЭПИКИ: " + tracker.getListAllIssues(IssueType.EPIC));
 
         //Если текущий тест дал ошибку, то считаем весь тест испорченным
         if (!goalAchieved) {
             commonGoodResultAllTest = false;
         }
     }
+
 
     /**
      * Метод СЛУЖЕБНЫЙ - обновить задачу (смена статуса включена)
@@ -302,7 +313,7 @@ public class InMemoryTestManager {
         printTitleTest();
         System.out.println("Цель ТЕСТА: обновить задачу тип = " + type + ". Устанавливаем статус = " + status);
         System.out.println("Проверяемый метод: updIssueForType, " +
-                            "используемый метод для проверки - getIssueByIdForType\n");
+                "используемый метод для проверки - getIssueByIdForType\n");
 
         //Тестируем метод
         if (id != null) {
@@ -315,10 +326,10 @@ public class InMemoryTestManager {
                 if (type == IssueType.SUBTASK) {
                     Epic parent = ((SubTask) issueToUpdate).getParent();
                     System.out.println("Родитель подзадачи эпик с id = " + parent.getId() + " : " + parent);
-                    System.out.println("Все подзадачи эпика с id = " + parent.getId() + " : " + parent.getChildren());
+                    System.out.println("Все подзадачи эпика с id = " + parent.getId() + " : " + parent.getChildrenList());
                 } else if (type == IssueType.EPIC) {
                     System.out.println("Все подзадачи эпика с id = " + issueToUpdate.getId() + " : "
-                            + ((Epic) issueToUpdate).getChildren());
+                            + ((Epic) issueToUpdate).getChildrenList());
                 }
 
                 //Дополнительным конструктором создаем ее копию, но с другим статусом, также обновим заголовок
@@ -332,8 +343,8 @@ public class InMemoryTestManager {
                         newIssueToUpdate = new Epic(issueToUpdate.getId(), issueToUpdate.getTitle() + "(обновлена)",
                                 issueToUpdate.getDescription());
                         // Состав подзадач совпадает, поэтому статус обновленного эпика должен сохраниться
-                        for (SubTask child : ((Epic) issueToUpdate).getChildren()) {
-                            ((Epic) newIssueToUpdate).getChildren().add(child);
+                        for (SubTask child : ((Epic) issueToUpdate).getChildrenList()) {
+                            ((Epic) newIssueToUpdate).getChildrenList().add(child);
                         }
                         break;
                     case SUBTASK:
@@ -361,11 +372,11 @@ public class InMemoryTestManager {
                     if (type == IssueType.SUBTASK) {
                         Epic parent = ((SubTask) newIssue).getParent();
                         System.out.println("Родитель подзадачи эпик с id = " + parent.getId() + " : " + parent);
-                        System.out.println("Все подзадачи эпика с id = " + parent.getId() + " : " + parent.getChildren());
+                        System.out.println("Все подзадачи эпика с id = " + parent.getId() + " : " + parent.getChildrenList());
                     } else if (type == IssueType.EPIC) {
                         // Дополнительная информация по эпику
                         System.out.println("Все подзадачи эпика с id = " + issueToUpdate.getId() + " : "
-                                + ((Epic) newIssue).getChildren());
+                                + ((Epic) newIssue).getChildrenList());
                     }
 
                     if (type != IssueType.EPIC && newIssueToUpdate.getStatus() == issueToUpdate.getStatus()) {
@@ -388,11 +399,11 @@ public class InMemoryTestManager {
         //Вывод результата теста
         System.out.print("Результат теста ");
         viewResult(goalAchieved);
-        System.out.println("Все задачи типа " + type + ": " + tracker.getAllIssues(type));
+        System.out.println("Все задачи типа " + type + ": " + tracker.getListAllIssues(type));
         if (type == IssueType.SUBTASK) {
-            System.out.println("ЭПИКИ: " + tracker.getAllIssues(IssueType.EPIC));
+            System.out.println("ЭПИКИ: " + tracker.getListAllIssues(IssueType.EPIC));
         } else if (type == IssueType.EPIC) {
-            System.out.println("ПОДЗАДАЧИ: " + tracker.getAllIssues(IssueType.SUBTASK));
+            System.out.println("ПОДЗАДАЧИ: " + tracker.getListAllIssues(IssueType.SUBTASK));
         }
 
         //Если текущий тест дал ошибку, то считаем весь тест испорченным
@@ -404,8 +415,9 @@ public class InMemoryTestManager {
     /**
      * Метод СЛУЖЕБНЫЙ - удалить последнюю созданную задачу, заданного типа
      *
-     * @param type - тип задачи IssueType = {Task, SubTask, Epic}
+     * @param  - тип задачи IssueType = {Task, SubTask, Epic}
      */
+
     public void testDelAllIssueForType(IssueType type) {
 
         Integer id = getIdForLastTask(type);
@@ -414,12 +426,16 @@ public class InMemoryTestManager {
         }
     }
 
+
+
     /**
      * ТЕСТ - удалить задачу по идентификатору, заданного типа
      *
      * @param type - тип задачи IssueType = {Task, SubTask, Epic}
      * @param id   - идентификатор задачи
+     *
      */
+
     private void testDelIssueForTypeById(IssueType type, Integer id) {
 
         boolean goalAchieved = true;
@@ -429,8 +445,8 @@ public class InMemoryTestManager {
         printTitleTest();
         System.out.println("Цель ТЕСТА: удалить задачу тип = " + type);
         System.out.println("Проверяемый метод: delIssueByIdForType, " +
-                           "используемые методы для проверки - getIssueByIdForType, " +
-                           "getListOfAllIssueForType, getListSubTaskForEpic\n");
+                "используемые методы для проверки - getIssueByIdForType, " +
+                "getListOfAllIssueForType, getListSubTaskForEpic\n");
 
         //Тестируем метод
         if (id != null) {
@@ -442,7 +458,7 @@ public class InMemoryTestManager {
                 goalAchieved = false;
             } else if (type == IssueType.SUBTASK) {
                 //Дополнительно для подзадачи - необходимо проверить, что подзадачи нет в детях эпика
-                for (Issue issue : tracker.getAllIssues(IssueType.EPIC)) {
+                for (Issue issue : tracker.getListAllIssues(IssueType.EPIC)) {
                     for (SubTask subTask : tracker.getListSubTaskOfEpic((Epic) issue)) {
                         if (subTask.getId() == id) {
                             goalAchieved = false;
@@ -452,7 +468,7 @@ public class InMemoryTestManager {
                 }
             } else if (type == IssueType.EPIC) {
                 //Для эпика необходимо проверить, что нет подзадач с таким родителем
-                for (Issue issue : tracker.getAllIssues(IssueType.SUBTASK)) {
+                for (Issue issue : tracker.getListAllIssues(IssueType.SUBTASK)) {
                     if (((SubTask) issue).getParent().getId() == id) {
                         goalAchieved = false;
                         break;
@@ -468,11 +484,11 @@ public class InMemoryTestManager {
         //Вывод результата теста
         System.out.print("Результат теста ");
         viewResult(goalAchieved);
-        System.out.println("ЗАДАЧИ " + type + ": " + tracker.getAllIssues(type));
+        System.out.println("ЗАДАЧИ " + type + ": " + tracker.getListAllIssues(type));
         if (type == IssueType.SUBTASK) {
-            System.out.println("ЭПИКИ: " + tracker.getAllIssues(IssueType.EPIC));
+            System.out.println("ЭПИКИ: " + tracker.getListAllIssues(IssueType.EPIC));
         } else if (type == IssueType.EPIC) {
-            System.out.println("ПОДЗАДАЧИ: " + tracker.getAllIssues(IssueType.SUBTASK));
+            System.out.println("ПОДЗАДАЧИ: " + tracker.getListAllIssues(IssueType.SUBTASK));
         }
 
         //Если текущий тест дал ошибку, то считаем весь тест испорченным
@@ -481,9 +497,11 @@ public class InMemoryTestManager {
         }
     }
 
+
     public void printLine() {
         System.out.println("-------------------------------------------");
     }
+
 
     public boolean isCommonGoodResultAllTest() {
         return commonGoodResultAllTest;
@@ -495,11 +513,13 @@ public class InMemoryTestManager {
      * - id = 1
      * - commonGoodResultAllTest = true
      */
+
     public void restartTest() {
         tracker.restartTaskManager();
         idTest = 1;
         commonGoodResultAllTest = true;
     }
+
 
     /**
      * Метод СЛУЖЕБНЫЙ - для вывода номера выполняемого теста:
@@ -532,7 +552,7 @@ public class InMemoryTestManager {
     private Integer getIdForLastTask(IssueType issueType) {
 
         if (issueType != null) {
-            List<Issue> issues = tracker.getAllIssues(issueType);
+            List<Issue> issues = tracker.getListAllIssues(issueType);
             if (!issues.isEmpty()) {
                 return issues.get(issues.size() - 1).getId();
             } else {
@@ -543,4 +563,5 @@ public class InMemoryTestManager {
         }
         return null;
     }
+
 }

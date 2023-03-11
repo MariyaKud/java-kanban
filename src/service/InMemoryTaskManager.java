@@ -15,22 +15,36 @@ import java.util.Map;
 /**
  * Основной класс управления сущностями: {@code Task}, {@code SubTask}, {@code Epic} наследники класса {@code Issue}
  *
- * <p>Описание сущности {@link Issue}:
+ * <p><b>Описание сущности {@link Issue}:</b>
  * <p>Название, кратко описывающее суть {@code Issue}.
  * <p>Описание, в котором раскрываются детали.
  * <p>Уникальный идентификационный номер сущности, по которому её можно будет найти.
  * <p>Статус, отображающий её прогресс.
  * <p>Мы будем выделять следующие этапы жизни сущности: {@code NEW},{@code IN_PROGRESS},{@code DONE}.
+ *
+ * <p><b>Функции объекта-менеджера:</b>
+ * <p> Возможность хранить задачи всех типов.
+ * <p> Методы для каждого из типа Issue ({@code Task},{@code SubTask},{@code Epic}):
+ * <p> Получение списка всех задач.
+ * <p> Получение списка всех задач.
+ * <p> Удаление всех задач.
+ * <p> Получение по идентификатору.
+ * <p> Создание. Сам объект должен передаваться в качестве параметра.
+ * <p> Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра.
+ * <p> Удаление по идентификатору.
+ *
+ * <p><b>Дополнительные методы:</b>
+ * <p> Получение списка всех подзадач определённого эпика.
  */
 public class InMemoryTaskManager implements TaskManager {
 
     // Переменные класса
     private int id = 1; // идентификатор менеджера
-    private final Map<Integer, Task> tasks = new HashMap<>();
-    private final Map<Integer, Epic> epics = new HashMap<>();
-    private final Map<Integer, SubTask> subTasks = new HashMap<>();
-    private final List<Issue> historyListOfViewIssue = new ArrayList<>();
-    private final static byte SIZE_HISTORY_LIST_OF_VIEW_ISSUE = 10;
+    private final Map<Integer, Task> tasksMap = new HashMap<>();
+    private final Map<Integer, Epic> epicsMap = new HashMap<>();
+    private final Map<Integer, SubTask> subTasksMap = new HashMap<>();
+    private final List<Issue> historyOfViewIssueList = new ArrayList<>();
+    private final static byte SIZE_HISTORY_OF_VIEW_ISSUE_LIST = 10;
 
     //Текст сообщений об ошибках
     private final static String MSG_ERROR_TYPE_NULL = "Для метода не указан тип задачи.";
@@ -69,6 +83,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void restartTaskManager() {
         delAllIssues(IssueType.TASK);
         delAllIssues(IssueType.EPIC);
+        historyOfViewIssueList.clear();
         id = 1;
     }
 
@@ -84,21 +99,21 @@ public class InMemoryTaskManager implements TaskManager {
         if (issue != null) {
             switch (issueType) {
                 case TASK:
-                    tasks.put(issue.getId(), (Task) issue);
+                    tasksMap.put(issue.getId(), (Task) issue);
                     break;
 
                 case EPIC:
-                    epics.put(issue.getId(), (Epic) issue);
+                    epicsMap.put(issue.getId(), (Epic) issue);
                     break;
 
                 case SUBTASK:
                     SubTask newSubTask = (SubTask) issue;
                     Epic parent = newSubTask.getParent();
                     //Если родитель известен, то берем и его ребенка
-                    if (epics.containsValue(parent)) {
-                        subTasks.put(issue.getId(), (SubTask) issue);
+                    if (epicsMap.containsValue(parent)) {
+                        subTasksMap.put(issue.getId(), (SubTask) issue);
                         //добавляем родителю ребенка
-                        parent.getChildren().add(newSubTask);
+                        parent.getChildrenList().add(newSubTask);
                     } else {
                         System.out.println(MSG_ERROR_NOT_FOUND_EPIC);
                     }
@@ -129,7 +144,7 @@ public class InMemoryTaskManager implements TaskManager {
 
                     //Мы можем обновить только существующий объект
                     if (oldTask != null) {
-                        tasks.put(issue.getId(), newTask);
+                        tasksMap.put(issue.getId(), newTask);
                     } else {
                         System.out.println(MSG_ERROR_ID_NOT_FOUND);
                     }
@@ -141,19 +156,19 @@ public class InMemoryTaskManager implements TaskManager {
 
                     if (oldEpic != null) {
                         //Удаляем все подзадачи старого эпика
-                        for (SubTask child : oldEpic.getChildren()) {
-                            subTasks.remove(child.getId());
+                        for (SubTask child : oldEpic.getChildrenList()) {
+                            subTasksMap.remove(child.getId());
                         }
                         //Обновляем эпик
-                        epics.put(issue.getId(), (Epic) issue);
+                        epicsMap.put(issue.getId(), (Epic) issue);
                         //Устанавливаем статус нового эпика
                         newEpic.updStatus();
                         //Добавляем подзадачи нового эпика
-                        for (SubTask child : newEpic.getChildren()) {
-                            if (subTasks.containsKey(child.getId())) {
+                        for (SubTask child : newEpic.getChildrenList()) {
+                            if (subTasksMap.containsKey(child.getId())) {
                                 updIssue(IssueType.SUBTASK, child);
                             } else {
-                                subTasks.put(child.getId(),child);
+                                subTasksMap.put(child.getId(),child);
                             }
                         }
                     } else {
@@ -169,11 +184,11 @@ public class InMemoryTaskManager implements TaskManager {
                         //Родитель подзадачи - эпик
                         Epic parent = oldSubTask.getParent();
                         //Удаляем старую подзадачу у эпика родителя
-                        parent.getChildren().remove(oldSubTask);
+                        parent.getChildrenList().remove(oldSubTask);
                         //Обновляем подзадачу в списке подзадач
-                        subTasks.put(issue.getId(), newSubTask);
+                        subTasksMap.put(issue.getId(), newSubTask);
                         //Добавляем обновленную подзадачу в эпик
-                        parent.getChildren().add(newSubTask);
+                        parent.getChildrenList().add(newSubTask);
                     } else {
                         System.out.println(MSG_ERROR_ID_NOT_FOUND);
                     }
@@ -198,21 +213,21 @@ public class InMemoryTaskManager implements TaskManager {
 
         switch (issueType) {
             case TASK:
-                if (tasks.containsKey(idIssue)) {
-                    tasks.remove(idIssue);
+                if (tasksMap.containsKey(idIssue)) {
+                    tasksMap.remove(idIssue);
                 } else {
                     System.out.println(MSG_ERROR_ID_NOT_FOUND);
                 }
                 break;
 
             case SUBTASK:
-                if (subTasks.containsKey(idIssue)) {
+                if (subTasksMap.containsKey(idIssue)) {
                     SubTask subTask = (SubTask) getIssueById(issueType, idIssue);
                     if (subTask != null) {
                         //Удаляем эту подзадачу в эпике
-                        subTask.getParent().getChildren().remove(subTask);
+                        subTask.getParent().getChildrenList().remove(subTask);
                         //Удаляем из менеджера подзадачу
-                        subTasks.remove(idIssue);
+                        subTasksMap.remove(idIssue);
                     }
                 } else {
                     System.out.println(MSG_ERROR_ID_NOT_FOUND);
@@ -220,14 +235,14 @@ public class InMemoryTaskManager implements TaskManager {
                 break;
 
             case EPIC:
-                if (epics.containsKey(idIssue)) {
+                if (epicsMap.containsKey(idIssue)) {
                     //удаляем подзадачи эпика в менеджере
-                    for (SubTask child : epics.get(idIssue).getChildren()) {
-                        if (subTasks.containsValue(child)) {
-                            subTasks.remove(child.getId());
+                    for (SubTask child : epicsMap.get(idIssue).getChildrenList()) {
+                        if (subTasksMap.containsValue(child)) {
+                            subTasksMap.remove(child.getId());
                         }
                     }
-                    epics.remove(idIssue);
+                    epicsMap.remove(idIssue);
                 } else {
                     System.out.println(MSG_ERROR_ID_NOT_FOUND);
                 }
@@ -251,24 +266,26 @@ public class InMemoryTaskManager implements TaskManager {
 
         switch (issueType) {
             case TASK:
-                issue = tasks.get(idIssue);
+                issue = tasksMap.get(idIssue);
                 break;
             case EPIC:
-                issue = epics.get(idIssue);
+                issue = epicsMap.get(idIssue);
                 break;
             case SUBTASK:
-                issue = subTasks.get(idIssue);
+                issue = subTasksMap.get(idIssue);
                 break;
             default:
                 System.out.println(MSG_ERROR_TYPE_UN_KNOW);
                 return null;
         }
 
-        //обновляем стек с историей просмотров
-        if (historyListOfViewIssue.size() == SIZE_HISTORY_LIST_OF_VIEW_ISSUE) {
-            historyListOfViewIssue.remove(1);
+        if (issue != null) {
+            //обновляем стек с историей просмотров
+            if (historyOfViewIssueList.size() == SIZE_HISTORY_OF_VIEW_ISSUE_LIST) {
+                historyOfViewIssueList.remove(1);
+            }
+            historyOfViewIssueList.add(issue);
         }
-        historyListOfViewIssue.add(issue);
 
         return issue;
     }
@@ -280,20 +297,20 @@ public class InMemoryTaskManager implements TaskManager {
      * @return возвращает список задач менеджера по заданному типу
      */
     @Override
-    public List<Issue> getAllIssues(IssueType issueType) {
+    public List<Issue> getListAllIssues(IssueType issueType) {
         ArrayList<Issue> issues = new ArrayList<>();
 
         switch (issueType) {
             case TASK:
-                issues.addAll(tasks.values());
+                issues.addAll(tasksMap.values());
                 break;
 
             case EPIC:
-                issues.addAll(epics.values());
+                issues.addAll(epicsMap.values());
                 break;
 
             case SUBTASK:
-                issues.addAll(subTasks.values());
+                issues.addAll(subTasksMap.values());
                 break;
 
             default:
@@ -311,19 +328,19 @@ public class InMemoryTaskManager implements TaskManager {
     public void delAllIssues(IssueType issueType) {
         switch (issueType) {
             case TASK:
-                tasks.clear();
+                tasksMap.clear();
                 break;
 
             case EPIC:
-                subTasks.clear(); // нет смысла оставлять подзадачи, если родители удалены
-                epics.clear();
+                subTasksMap.clear(); // нет смысла оставлять подзадачи, если родители удалены
+                epicsMap.clear();
                 break;
 
             case SUBTASK:
-                for (Epic epic : epics.values()) {
-                    epic.getChildren().clear();
+                for (Epic epic : epicsMap.values()) {
+                    epic.getChildrenList().clear();
                 }
-                subTasks.clear();
+                subTasksMap.clear();
                 break;
 
             default:
@@ -338,7 +355,7 @@ public class InMemoryTaskManager implements TaskManager {
      * @return список подзадач эпика
      */
     public List<SubTask> getListSubTaskOfEpic(Epic epic) {
-        return epic.getChildren();
+        return epic.getChildrenList();
     }
 
     /**
@@ -347,6 +364,7 @@ public class InMemoryTaskManager implements TaskManager {
      * @return список просмотренных задач = {Task, SubTask, Epic}
      */
     public List<Issue> getHistory() {
-        return historyListOfViewIssue;
+        return historyOfViewIssueList;
     }
+
 }

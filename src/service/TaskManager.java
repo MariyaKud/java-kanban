@@ -17,5 +17,5 @@ public interface TaskManager {
 
     void delAllIssues(IssueType issueType);
 
-    List<Issue> getAllIssues(IssueType issueType);
+    List<Issue> getListAllIssues(IssueType issueType);
 }

@@ -11,5 +11,4 @@ public class Task extends Issue {
     public String toString() {
         return super.toString();
     }
-
 }
