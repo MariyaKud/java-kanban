@@ -1,7 +1,6 @@
 
 import model.IssueStatus;
 import model.IssueType;
-import service.Managers;
 import service.TestTaskManager;
 
 import java.util.Scanner;
@@ -40,23 +39,23 @@ public class Main {
         test.testDelListOfAllIssueForType(IssueType.EPIC);
         test.testCreateForEpic(1);
         test.testUpdStatusForLastEpic(IssueStatus.DONE);
-        test.testGetListOfAllIssueForType();
+        test.printManager();
 
         //Удалить задачи
         test.testDelAllIssueForType(IssueType.TASK);
         test.testDelAllIssueForType(IssueType.EPIC);
         test.testDelAllIssueForType(IssueType.SUBTASK);
-        test.testGetListOfAllIssueForType();
+        test.printManager();
 
         //Очистить списки
         test.testDelListOfAllIssueForType(IssueType.TASK);
-        test.testGetListOfAllIssueForType();
+        test.printManager();
         test.testDelListOfAllIssueForType(IssueType.SUBTASK);
-        test.testGetListOfAllIssueForType();
+        test.printManager();
         test.testCreateForEpic(1);
-        test.testGetListOfAllIssueForType();
+        test.printManager();
         test.testDelListOfAllIssueForType(IssueType.EPIC);
-        test.testGetListOfAllIssueForType();
+        test.printManager();
 
         test.printLine();
         test.testGetHistory();
@@ -85,7 +84,7 @@ public class Main {
                     System.out.print("ТЕСТ перезапущен.");
                     break;
                 case "2":// Вывести списки задач
-                    test.testGetListOfAllIssueForType();
+                    test.printManager();
                     break;
                 case "3":// Создать задачу
                     test.testCreateForTask();

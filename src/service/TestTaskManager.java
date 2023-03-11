@@ -48,6 +48,12 @@ public class TestTaskManager {
         }
     }
 
+    public void printManager() {
+        printLine();
+        System.out.println("В памяти менеджера:");
+        System.out.println(tracker);
+    }
+
     /**
      * ТЕСТ - получить списки задач по типам
      */
@@ -142,7 +148,7 @@ public class TestTaskManager {
 
         //Тестируем метод
         Task newTask = tracker.addTask(titleTask, descriptionTask, IssueStatus.NEW);
-        tracker.addIssue(IssueType.TASK, newTask);
+        tracker.addIssue(newTask);
         System.out.println("Создана задача с id = " + newTask.getId());
 
         //Проверка достижения цели - задача найдена в HashMap менеджера
@@ -184,7 +190,7 @@ public class TestTaskManager {
                 + "используемый метод для проверки - getIssueByIdForType\n");
 
         //Тестируем метод
-        tracker.addIssue(IssueType.EPIC, newEpic);
+        tracker.addIssue(newEpic);
         System.out.println("Создан эпик с id = " + newEpic.getId());
 
         //Проверка достижения цели - задача найдена в HashMap менеджера
@@ -234,7 +240,7 @@ public class TestTaskManager {
             String description = "Описание подзадачи " + number;
 
             SubTask newSubTask = tracker.addSubTask(title, description, parent, IssueStatus.NEW);
-            tracker.addIssue(IssueType.SUBTASK, newSubTask);
+            tracker.addIssue(newSubTask);
             System.out.println("Создана подзадача с id = " + newSubTask.getId() + " для эпика с id = "
                     + parent.getId());
 
@@ -363,7 +369,7 @@ public class TestTaskManager {
                 //Если получилось создать копию задачи, то можно переходить к самому тесту updateTask
                 if (newIssueToUpdate != null) {
                     //Обновляем задачу, выводим информацию по обновленной задаче по правильному id
-                    tracker.updIssue(type, newIssueToUpdate);
+                    tracker.updIssue(newIssueToUpdate);
                     Issue newIssue = tracker.getIssueById(type, issueToUpdate.getId());
                     System.out.println("Обновлена задача с id = " + issueToUpdate.getId() + " : "
                             + newIssue);
@@ -415,7 +421,7 @@ public class TestTaskManager {
     /**
      * Метод СЛУЖЕБНЫЙ - удалить последнюю созданную задачу, заданного типа
      *
-     * @param  - тип задачи IssueType = {Task, SubTask, Epic}
+     * @param type - тип задачи IssueType = {Task, SubTask, Epic}
      */
 
     public void testDelAllIssueForType(IssueType type) {
