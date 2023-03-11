@@ -29,6 +29,8 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Task> tasks = new HashMap<>();
     private final Map<Integer, Epic> epics = new HashMap<>();
     private final Map<Integer, SubTask> subTasks = new HashMap<>();
+    private final List<Issue> historyListOfViewIssue = new ArrayList<>();
+    private final static byte SIZE_HISTORY_LIST_OF_VIEW_ISSUE = 10;
 
     //Текст сообщений об ошибках
     private final static String MSG_ERROR_TYPE_NULL = "Для метода не указан тип задачи.";
@@ -245,17 +247,30 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public Issue getIssueById(IssueType issueType, int idIssue) {
+        Issue issue;
+
         switch (issueType) {
             case TASK:
-                return tasks.get(idIssue);
+                issue = tasks.get(idIssue);
+                break;
             case EPIC:
-                return epics.get(idIssue);
+                issue = epics.get(idIssue);
+                break;
             case SUBTASK:
-                return subTasks.get(idIssue);
+                issue = subTasks.get(idIssue);
+                break;
             default:
                 System.out.println(MSG_ERROR_TYPE_UN_KNOW);
                 return null;
         }
+
+        //обновляем стек с историей просмотров
+        if (historyListOfViewIssue.size() == SIZE_HISTORY_LIST_OF_VIEW_ISSUE) {
+            historyListOfViewIssue.remove(1);
+        }
+        historyListOfViewIssue.add(issue);
+
+        return issue;
     }
 
     /**
@@ -324,5 +339,14 @@ public class InMemoryTaskManager implements TaskManager {
      */
     public List<SubTask> getListSubTaskOfEpic(Epic epic) {
         return epic.getChildren();
+    }
+
+    /**
+     * Получить историю просмотров задач.
+     *
+     * @return список просмотренных задач = {Task, SubTask, Epic}
+     */
+    public List<Issue> getHistory() {
+        return historyListOfViewIssue;
     }
 }
