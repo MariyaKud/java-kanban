@@ -5,6 +5,9 @@ import model.Issue;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Объекта-история просмотров задач {Task, SubTask, Epic}
+ */
 public class InMemoryHistoryManager implements HistoryManager{
 
     private final List<Issue> historyOfViewIssueList = new ArrayList<>();
@@ -12,9 +15,10 @@ public class InMemoryHistoryManager implements HistoryManager{
 
     @Override
     public void add(Issue issue) {
+
         if (issue != null) {
             if (historyOfViewIssueList.size() == SIZE_HISTORY_OF_VIEW_ISSUE_LIST) {
-                historyOfViewIssueList.remove(1);
+                historyOfViewIssueList.remove(0);
             }
             historyOfViewIssueList.add(issue);
         }
