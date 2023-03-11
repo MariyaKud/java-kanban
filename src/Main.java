@@ -12,7 +12,7 @@ public class Main {
 
         //Запускаем тест
         //InMemoryTestManager test = new InMemoryTestManager(new InMemoryTaskManager());
-        TestTaskManager test = new TestTaskManager(new Managers().getDefault());
+        TestTaskManager test = new TestTaskManager();
 
         Scanner scanner = new Scanner(System.in);
         String command;

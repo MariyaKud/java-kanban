@@ -36,10 +36,10 @@ public class TestTaskManager {
     /**
      * Метод для тестирования сервиса экземпляра класса для реализации интерфейса {@link TaskManager}
      */
-    public TestTaskManager(InMemoryTaskManager tracker) {
+    public TestTaskManager() {
         this.idTest = 1;
         this.commonGoodResultAllTest = true;
-        this.tracker = tracker;
+        this.tracker = Managers.getDefault();
     }
 
     public void testGetHistory(){

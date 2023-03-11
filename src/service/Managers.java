@@ -1,20 +1,27 @@
 package service;
 
 /**
- * Утилитарный класс {@code Managers} ответственный за создание менеджера задач
+ * Утилитарный класс <b>{@code Managers}</b> ответственный за получение дефолтных значений
  *
- * <p>Должен подобрать нужную реализацию {@code TaskManager}
+ * <p>Должен подобрать нужную реализацию:
+ * <p> - объекта-менеджера {@code TaskManager}
+ * <p> - объекта-история просмотров {@code HistoryManager}
  */
 public class Managers {
 
-    private final InMemoryTaskManager tracker = new InMemoryTaskManager();
-
+    /**
+     * Получить дефолтный объект-менеджера
+     * @return  объект-менеджер
+     */
+    public static InMemoryTaskManager getDefault() {
+        return new InMemoryTaskManager();
+    }
 
     /**
-     * Получить реализацию интерфейса {@link TaskManager}
-     * @return  объект-менеджер {@code TaskManager}
+     * Получить дефолтный объект-история просмотров
+     * @return  объект-история просмотров
      */
-    public InMemoryTaskManager getDefault() {
-        return tracker;
+    public static InMemoryHistoryManager getDefaultHistory() {
+        return new InMemoryHistoryManager();
     }
 }

@@ -43,8 +43,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Task> tasksMap = new HashMap<>();
     private final Map<Integer, Epic> epicsMap = new HashMap<>();
     private final Map<Integer, SubTask> subTasksMap = new HashMap<>();
-    private final List<Issue> historyOfViewIssueList = new ArrayList<>();
-    private final static byte SIZE_HISTORY_OF_VIEW_ISSUE_LIST = 10;
+    private final HistoryManager historyManager = Managers.getDefaultHistory();
 
     //Текст сообщений об ошибках
     private final static String MSG_ERROR_TYPE_NULL = "Для метода не указан тип задачи.";
@@ -83,7 +82,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void restartTaskManager() {
         delAllIssues(IssueType.TASK);
         delAllIssues(IssueType.EPIC);
-        historyOfViewIssueList.clear();
+        historyManager.clearHistory();
         id = 1;
     }
 
@@ -279,14 +278,7 @@ public class InMemoryTaskManager implements TaskManager {
                 return null;
         }
 
-        if (issue != null) {
-            //обновляем стек с историей просмотров
-            if (historyOfViewIssueList.size() == SIZE_HISTORY_OF_VIEW_ISSUE_LIST) {
-                historyOfViewIssueList.remove(1);
-            }
-            historyOfViewIssueList.add(issue);
-        }
-
+        historyManager.add(issue);
         return issue;
     }
 
@@ -364,7 +356,6 @@ public class InMemoryTaskManager implements TaskManager {
      * @return список просмотренных задач = {Task, SubTask, Epic}
      */
     public List<Issue> getHistory() {
-        return historyOfViewIssueList;
+        return historyManager.getHistory();
     }
-
 }

@@ -1,0 +1,12 @@
+package service;
+
+import model.Issue;
+
+import java.util.List;
+
+public interface HistoryManager {
+
+    void add(Issue issue);
+    List<Issue> getHistory();
+    void clearHistory();
+}
