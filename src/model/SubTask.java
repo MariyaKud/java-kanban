@@ -5,7 +5,7 @@ public class SubTask extends Issue {
     /**
      * Владелец текущего экземпляра класса {@code SubTask}
      */
-    private final Epic parent;
+    private Epic parent;
 
     public SubTask(int id, String title, String description, Epic parent, IssueStatus status) {
         super(id,title,description);
@@ -19,6 +19,10 @@ public class SubTask extends Issue {
      */
     public Epic getParent() {
         return parent;
+    }
+
+    public void setParent(Epic parent) {
+        this.parent = parent;
     }
 
     @Override
