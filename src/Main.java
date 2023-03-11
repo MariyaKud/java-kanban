@@ -1,7 +1,7 @@
 import model.IssueStatus;
 import model.IssueType;
-import service.TaskManager;
-import service.TestTaskManager;
+import service.InMemoryTaskManager;
+import service.InMemoryTestManager;
 import java.util.Scanner;
 
 public class Main {
@@ -9,7 +9,8 @@ public class Main {
     public static void main(String[] args) {
 
         //Запускаем тест
-        TestTaskManager test = new TestTaskManager(new TaskManager());
+        InMemoryTestManager test = new InMemoryTestManager(new InMemoryTaskManager());
+
         Scanner scanner = new Scanner(System.in);
         String command;
 
