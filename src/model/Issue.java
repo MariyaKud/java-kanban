@@ -1,5 +1,8 @@
 package model;
 
+/**
+ * Универсальный класс задач, родитель любой сущности, управляемой менеджером
+ */
 public abstract class Issue {
 
     private final int id;             // Идентификатор
