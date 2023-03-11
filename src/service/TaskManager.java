@@ -1,15 +1,34 @@
 package service;
 
+import model.Epic;
 import model.Issue;
+import model.IssueStatus;
 import model.IssueType;
+import model.SubTask;
+import model.Task;
 
 import java.util.List;
 
+/**
+ * Контракт для объекта-менеджера
+ */
 public interface TaskManager {
 
-    void addIssue(IssueType issueType, Issue issue);
+    //Текст сообщений об ошибках
+    String MSG_ERROR_TYPE_UN_KNOW = "Для выбранного типа задач не создан обработчик в методе.";
+    String MSG_ERROR_ID_NOT_FOUND = "Не найдена задача с указанным id.";
+    String MSG_ERROR_WRONG_EPIC = "При обновлении эпика дети остаются неизменными.";
+    String MSG_ERROR_NOT_FOUND_EPIC = "Не найден эпик для подзадачи.";
 
-    void updIssue(IssueType issueType, Issue issue);
+    Task addTask(String title, String description, IssueStatus status);
+
+    SubTask addSubTask(String title, String description, Epic parent, IssueStatus status);
+
+    Epic addEpic(String title, String description);
+
+    void addIssue(Issue issue);
+
+    void updIssue(Issue issue);
 
     void delIssueById(IssueType issueType, int idIssue);
 
@@ -18,4 +37,8 @@ public interface TaskManager {
     void delAllIssues(IssueType issueType);
 
     List<Issue> getListAllIssues(IssueType issueType);
+
+    List<SubTask> getListSubTaskOfEpic(Epic epic);
+
+    List<Issue> getHistory();
 }
