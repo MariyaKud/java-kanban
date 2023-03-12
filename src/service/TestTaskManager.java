@@ -343,6 +343,127 @@ public class TestTaskManager implements TaskManager{
     @Override
     public void delAllIssues(IssueType issueType) {
 
+        boolean goalAchieved = true;
+
+        printHeadOfTest("void delAllIssues(IssueType issueType)",
+                "удалить все сущности типа " + issueType,
+                "проверить данные в хранилище на наличие удаляемых сущностей",
+                "List<Issue> getListAllIssues(IssueType issueType)",
+                "тест ошибочный, если список сущностей типом " + issueType + " не пуст.");
+
+        System.out.println("Выполняется удаление сущностей с типом = " + issueType + " ..");
+        tracker.delAllIssues(issueType);
+
+        List<Issue> issueListForCheck = tracker.getListAllIssues(issueType);
+
+        //Проверка результата
+        if (!issueListForCheck.isEmpty()) {
+            //Что-то осталось
+            goalAchieved = false;
+        } else if (issueType == IssueType.EPIC) {
+            //Дополнительная проверка для эпиков. Если все эпики удалены, то и подзадач быть не должно
+            List<Issue> subTaskListForCheck = tracker.getListAllIssues(IssueType.SUBTASK);
+            if (subTaskListForCheck.size() > 0) {
+                goalAchieved = false;
+            }
+        } else if (issueType == IssueType.SUBTASK) {
+            //Дополнительная проверка для подзадач. Если удалены все подзадачи, то эпики должны остаться без детей
+            List<Issue> epicListForCheck = tracker.getListAllIssues(IssueType.EPIC);
+            for (Issue epic : epicListForCheck) {
+                if (((Epic) epic).getChildrenList().size() > 0) {
+                    goalAchieved = false;
+                    break;
+                }
+            }
+        }
+
+        viewResult(goalAchieved);
+        printListAllIssues(issueType);
+        if (issueType == IssueType.EPIC) {
+            printListAllIssues(IssueType.SUBTASK);
+        } else if (issueType == IssueType.SUBTASK) {
+            printListAllIssues(IssueType.EPIC);
+        }
+    }
+
+    @Override
+    public void delAllTasks() {
+        boolean goalAchieved = true;
+
+        printHeadOfTest("void delAllTasks()",
+                "удалить все задачи.",
+                "проверить хранилище с задачами в менеджере.",
+                "List<Task> getListAllTasks()",
+                "тест ошибочный, если остались задачи в менеджере.");
+
+        System.out.println("Выполняется удаление задач ..");
+        tracker.delAllTasks();
+
+        List<Task> listForCheck = tracker.getListAllTasks();
+        if (!listForCheck.isEmpty()) {
+            goalAchieved = false;
+        }
+
+        viewResult(goalAchieved);
+        System.out.println(listForCheck);
+    }
+
+    @Override
+    public void delAllSubTasks() {
+        boolean goalAchieved = true;
+
+        printHeadOfTest("void delAllSubTasks()",
+                "удалить все подзадачи.",
+                "проверить хранилище с подзадачами в менеджере. Проверить списки детей эпиков.",
+                "List<Task> getListAllSubTasks()",
+                "тест ошибочный, если остались подзадачи в менеджере или дети у эпиков.");
+
+        System.out.println("Выполняется удаление подзадач ..");
+        tracker.delAllSubTasks();
+
+        //Проверка
+        List<SubTask> listForCheck = tracker.getListAllSubTasks();
+        if (!listForCheck.isEmpty()) {
+            goalAchieved = false;
+        }
+        List<Epic> epicListForCheck = tracker.getListAllEpics();
+        for (Epic epic : epicListForCheck) {
+            if (epic.getChildrenList().size() > 0) {
+                goalAchieved = false;
+                break;
+            }
+        }
+
+        viewResult(goalAchieved);
+        System.out.println("ПОДЗАДАЧИ: " + listForCheck);
+        System.out.println("ЭПИКИ: " + epicListForCheck);
+    }
+
+    @Override
+    public void delAllEpics() {
+        boolean goalAchieved = true;
+
+        printHeadOfTest("void delAllEpics()",
+                "удалить все эпики.",
+                "проверить хранилище эпиков в менеджере.",
+                "List<Task> getListAllEpics()",
+                "тест ошибочный, если остались эпики или подзадачи в менеджере.");
+
+        System.out.println("Выполняется удаление эпиков ..");
+        tracker.delAllEpics();
+
+        List<Epic> listForCheck = tracker.getListAllEpics();
+        if (!listForCheck.isEmpty()) {
+            goalAchieved = false;
+        }
+        List<SubTask> subTaskListForCheck = tracker.getListAllSubTasks();
+        if (subTaskListForCheck.size() > 0) {
+            goalAchieved = false;
+        }
+
+        viewResult(goalAchieved);
+        System.out.println("ЭПИКИ: " + listForCheck);
+        System.out.println("ПОДЗАДАЧИ: " + subTaskListForCheck);
     }
 
     @Override
@@ -528,7 +649,7 @@ public class TestTaskManager implements TaskManager{
      * @param resultGood - результат True (достигнут) / False (что-то пошло не так)
      */
     public void viewResult(boolean resultGood) {
-        System.out.print("\nРезультат теста ");
+        System.out.print("Результат теста ");
         if (resultGood) {
             System.out.println(" ✅");
         } else {

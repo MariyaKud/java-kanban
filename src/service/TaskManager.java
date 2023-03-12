@@ -46,6 +46,12 @@ public interface TaskManager {
 
     void delAllIssues(IssueType issueType);
 
+    void delAllTasks();
+
+    void delAllSubTasks();
+
+    void delAllEpics();
+
     List<Issue> getListAllIssues(IssueType issueType);
 
     List<Task> getListAllTasks();

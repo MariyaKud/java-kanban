@@ -32,6 +32,12 @@ public class Main {
         test.getListAllIssues(IssueType.SUBTASK); //Тест getListAllIssues
         test.getListAllIssues(IssueType.EPIC);    //Тест getListAllIssues
 
+        //Очистить списки универсальным методом
+        test.delAllIssues(IssueType.TASK);
+        test.delAllIssues(IssueType.SUBTASK);
+        test.delAllIssues(IssueType.EPIC);
+        test.printTaskManager();
+
         //3. Добавляем задачи через специализированные методы
         test.addTask();
         test.getListAllTasks();
@@ -39,6 +45,10 @@ public class Main {
         test.addEpic(2);
         test.getListAllEpics();
         test.getListAllSubTasks();
+
+        test.delAllTasks();
+        test.delAllSubTasks();
+        test.delAllEpics();
 
         //Вывести общий результат в хранилищах
         test.printTaskManager();

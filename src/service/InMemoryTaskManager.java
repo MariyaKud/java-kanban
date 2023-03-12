@@ -417,6 +417,22 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    @Override
+    public void delAllTasks() {
+        tasksMap.clear();
+    }
+
+    @Override
+    public void delAllSubTasks() {
+        subTasksMap.clear();
+        epicsMap.clear();
+    }
+
+    @Override
+    public void delAllEpics() {
+        subTasksMap.clear();
+    }
+
     /**
      * Получить список всех подзадач для эпика.
      *
