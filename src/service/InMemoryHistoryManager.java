@@ -11,7 +11,6 @@ import java.util.List;
 public class InMemoryHistoryManager implements HistoryManager{
 
     private final List<Issue> historyOfViewIssueList = new ArrayList<>();
-    private final static byte SIZE_HISTORY_OF_VIEW_ISSUE_LIST = 10;
 
     @Override
     public void add(Issue issue) {
