@@ -9,17 +9,38 @@ public class Main {
 
     public static void main(String[] args) {
 
-        //Запускаем тест
-        //InMemoryTestManager test = new InMemoryTestManager(new InMemoryTaskManager());
         TestTaskManager test = new TestTaskManager();
-
         Scanner scanner = new Scanner(System.in);
         String command;
 
+        //Запускаем авто тест
         test.printLine();
         System.out.println("Поехали!");
         System.out.println("Запуск авто ТЕСТА для менеджера задач...");
 
+        //1. Тест методов создания всех видов задач, еще не внесенного в систему учета менеджера
+        test.addTask(null,null,null);
+        test.addTask(null,null);
+        test.addSubTask(null,null,null,null);
+        test.addEpic(null,null);
+
+        //2. Добавляем задачи
+        test.addTask();
+
+        //Тест getListAllIssues
+        test.getListAllIssues(IssueType.TASK);
+        test.getListAllIssues(IssueType.SUBTASK);
+        test.getListAllIssues(IssueType.EPIC);
+        test.printTaskManager();
+
+        //Выводим итоги авто теста
+        test.printLine();
+        System.out.print("Авто ТЕСТ завершен ");
+        test.viewResult(test.isCommonGoodResultAllTest());
+        //Перезапускаем тестер, для ручного тестирования
+        test.restartTest();
+
+        /*
         //Создать задачи
         test.testCreateForTask();
         test.testCreateForTask();
@@ -39,32 +60,28 @@ public class Main {
         test.testDelListOfAllIssueForType(IssueType.EPIC);
         test.testCreateForEpic(1);
         test.testUpdStatusForLastEpic(IssueStatus.DONE);
-        test.printManager();
+        test.printTaskManager();
 
         //Удалить задачи
         test.testDelAllIssueForType(IssueType.TASK);
         test.testDelAllIssueForType(IssueType.EPIC);
         test.testDelAllIssueForType(IssueType.SUBTASK);
-        test.printManager();
+        test.printTaskManager();
 
         //Очистить списки
         test.testDelListOfAllIssueForType(IssueType.TASK);
-        test.printManager();
+        test.printTaskManager();
         test.testDelListOfAllIssueForType(IssueType.SUBTASK);
-        test.printManager();
+        test.printTaskManager();
         test.testCreateForEpic(1);
-        test.printManager();
+        test.printTaskManager();
         test.testDelListOfAllIssueForType(IssueType.EPIC);
-        test.printManager();
+        test.printTaskManager();
 
         test.printLine();
         test.testGetHistory();
 
-        //Выводим итоги авто теста
-        test.printLine();
-        System.out.print("Авто ТЕСТ завершен ");
-        test.viewResult(test.isCommonGoodResultAllTest());
-        test.restartTest(); //Перезапускаем тестер, для ручного тестирования
+
 
         //Выводим меню для ручного тестирования
         while (true) {
@@ -84,7 +101,7 @@ public class Main {
                     System.out.print("ТЕСТ перезапущен.");
                     break;
                 case "2":// Вывести списки задач
-                    test.printManager();
+                    test.printTaskManager();
                     break;
                 case "3":// Создать задачу
                     test.testCreateForTask();
@@ -133,6 +150,7 @@ public class Main {
                     System.out.println("Извините, но такого теста пока нет.");
             }
         }
+         */
     }
 
     static void printMenu() {
