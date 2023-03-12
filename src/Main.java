@@ -1,5 +1,4 @@
 
-import model.IssueStatus;
 import model.IssueType;
 import service.TestTaskManager;
 
@@ -24,8 +23,12 @@ public class Main {
         test.addSubTask(null,null,null,null);
         test.addEpic(null,null);
 
-        //2. Добавляем задачи
+        //2. Добавляем задачи через универсальный метод
+        test.addIssueTask();
+        test.addIssueEpic(1);
+        //3. Добавляем задачи через специализированные методы
         test.addTask();
+        test.addEpic(2);
 
         //Тест getListAllIssues
         test.getListAllIssues(IssueType.TASK);

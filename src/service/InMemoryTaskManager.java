@@ -38,7 +38,6 @@ import java.util.Map;
  */
 public class InMemoryTaskManager implements TaskManager {
 
-    // Переменные класса
     private int id = 1; // идентификатор менеджера
     private final Map<Integer, Task> tasksMap = new HashMap<>();
     private final Map<Integer, Epic> epicsMap = new HashMap<>();
@@ -68,20 +67,33 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Создать новую задачу.
+     * Создать объект-задачу.
      */
     @Override
     public Task addTask(String title, String description, IssueStatus status) {
         return new Task(getId(), title, description, status);
     }
 
+    /**
+     * Создать объект-задачу.
+     */
     @Override
     public Task addTask(String title, String description) {
         return new Task(getId(), title, description);
     }
 
     /**
-     * Создать новую подзадачу.
+     * Создать задачу в менеджере задач
+     */
+    @Override
+    public void addTask(Task task) {
+        if (!tasksMap.containsValue(task) && task != null) {
+            tasksMap.put(task.getId(), task);
+        }
+    }
+
+    /**
+     * Создать объект-подзадачу.
      */
     @Override
     public SubTask addSubTask(String title, String description, Epic parent, IssueStatus status) {
@@ -97,7 +109,33 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Создать новый эпик.
+     * Создать подзадачу в менеджере задач.
+     */
+    @Override
+    public void addSubTask(SubTask subTask) {
+        if (!subTasksMap.containsValue(subTask) && subTask != null) {
+            Epic parent = subTask.getParent();
+            List<SubTask> children = parent.getChildrenList();
+
+            subTasksMap.put(subTask.getId(), subTask);
+
+            //Добавляем родителя, если его нет в хранилище
+            if (!epicsMap.containsValue(parent)) {
+                addEpic(parent);
+            }
+
+            //Добавляем родителю ребенка, если нужно
+            if (!children.contains(subTask)) {
+                children.add(subTask);
+            }
+
+            //Обновляем статус родителя
+            parent.updStatus();
+        }
+    }
+
+    /**
+     * Создать объект-эпик.
      */
     @Override
     public Epic addEpic(String title, String description) {
@@ -105,7 +143,25 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Создать задачу. Сам объект передается в качестве параметра.
+     * Создать эпик в менеджере задач
+     */
+    @Override
+    public void addEpic(Epic epic) {
+        if (!epicsMap.containsValue(epic) && epic != null) {
+            List<SubTask> children = epic.getChildrenList();
+
+            epicsMap.put(epic.getId(), epic);
+
+            //Проверяем наличие подзадач в хранилище менеджера, если не находим, то добавляем
+            for (SubTask child : children) {
+                addSubTask(child);
+            }
+            //Состав подзадач не меняем, значит статус пересчитывать не нужно
+        }
+    }
+
+    /**
+     * Универсальный метод создания задачи. Сам объект передается в качестве параметра.
      *
      * @param issue     экземпляр класса Issue
      */
@@ -113,39 +169,13 @@ public class InMemoryTaskManager implements TaskManager {
     public void addIssue(Issue issue) {
 
         if (issue instanceof Task) {
-            tasksMap.put(issue.getId(), (Task) issue);
+            addTask((Task) issue);
 
         } else if (issue instanceof Epic) {
-            List<SubTask> children = ((Epic) issue).getChildrenList();
-
-            epicsMap.put(issue.getId(), (Epic) issue);
-
-            //Проверяем наличие подзадач в хранилище менеджера, если не находим, то добавляем
-            for (SubTask child : children) {
-                if (!subTasksMap.containsValue(child)){
-                    addIssue(child);
-                }
-            }
-            //у нового эпика состав детей не меняется, значит не меняется и статус
+            addEpic((Epic) issue);
 
         } else if (issue instanceof SubTask) {
-            Epic parent = ((SubTask) issue).getParent();
-            List<SubTask> children = parent.getChildrenList();
-
-            subTasksMap.put(issue.getId(), (SubTask) issue);
-
-            //Добавляем родителя, если его нет в хранилище
-            if (!epicsMap.containsValue(parent)) {
-                addIssue(parent);
-            }
-
-            //Добавляем родителю ребенка, если нужно
-            if (!children.contains(issue)) {
-                children.add((SubTask) issue);
-            }
-
-            //Обновляем статус родителя
-            parent.updStatus();
+            addSubTask((SubTask) issue);
 
         } else {
             System.out.println(MSG_ERROR_TYPE_UN_KNOW);
@@ -410,7 +440,7 @@ public class InMemoryTaskManager implements TaskManager {
                 }
             }
         }
-        result.append("}").append("\n");
+        result.append("}");
 
         return result.toString();
     }
