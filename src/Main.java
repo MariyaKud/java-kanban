@@ -56,6 +56,20 @@ public class Main {
         //Тест истории просмотров
         test.getHistory();
 
+        //Тест удалить по id универсальный
+        test.delLastIssue(IssueType.TASK);
+        test.addEpic(2);
+        test.delLastIssue(IssueType.SUBTASK);
+        test.delLastIssue(IssueType.EPIC);
+
+        //Тест удаления по id
+        test.delLastTask();
+        test.delLastSubTask();
+        test.addEpic(1);
+        test.delLastSubTask();
+        test.delLastEpic();
+        test.printTaskManager();
+
         //Выводим итоги авто теста
         test.printLine();
         System.out.print("Авто ТЕСТ завершен ");

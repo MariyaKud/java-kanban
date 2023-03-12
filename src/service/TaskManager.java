@@ -42,6 +42,12 @@ public interface TaskManager {
 
     void delIssueById(IssueType issueType, int idIssue);
 
+    void delTaskById(int id);
+
+    void delSubTaskById(int id);
+
+    void delEpicById(int id);
+
     Issue getIssueById(IssueType issueType, int idIssue);
 
     void delAllIssues(IssueType issueType);

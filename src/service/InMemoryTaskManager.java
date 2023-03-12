@@ -253,7 +253,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Удалить задачу по идентификатору.
+     * Удалить сущность {Task, SubTask, Epic} по идентификатору.
      *
      * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
      * @param idIssue   идентификатор задачи к удалению
@@ -263,45 +263,69 @@ public class InMemoryTaskManager implements TaskManager {
 
         switch (issueType) {
             case TASK:
-                if (tasksMap.containsKey(idIssue)) {
-                    tasksMap.remove(idIssue);
-                } else {
-                    System.out.println(MSG_ERROR_ID_NOT_FOUND);
-                }
+                delTaskById(idIssue);
                 break;
 
             case SUBTASK:
-                if (subTasksMap.containsKey(idIssue)) {
-                    SubTask subTask = (SubTask) getIssueById(issueType, idIssue);
-                    if (subTask != null) {
-                        //Удаляем эту подзадачу в эпике
-                        subTask.getParent().getChildrenList().remove(subTask);
-                        //Обновляем статус родителя
-                        subTask.getParent().updStatus();
-                        //Удаляем из менеджера подзадачу
-                        subTasksMap.remove(idIssue);
-                    }
-                } else {
-                    System.out.println(MSG_ERROR_ID_NOT_FOUND);
-                }
+                delSubTaskById(idIssue);
                 break;
 
             case EPIC:
-                if (epicsMap.containsKey(idIssue)) {
-                    //удаляем подзадачи эпика в менеджере
-                    for (SubTask child : epicsMap.get(idIssue).getChildrenList()) {
-                        if (subTasksMap.containsValue(child)) {
-                            subTasksMap.remove(child.getId());
-                        }
-                    }
-                    epicsMap.remove(idIssue);
-                } else {
-                    System.out.println(MSG_ERROR_ID_NOT_FOUND);
-                }
+                delEpicById(idIssue);
                 break;
 
             default:
                 System.out.println(MSG_ERROR_TYPE_UN_KNOW);
+        }
+    }
+
+    /**
+     * Удалить задачу по id
+     */
+    @Override
+    public void delTaskById(int id) {
+        if (tasksMap.containsKey(id)) {
+            tasksMap.remove(id);
+        } else {
+            System.out.println(MSG_ERROR_ID_NOT_FOUND);
+        }
+    }
+
+    /**
+     * Удалить подзадачу по id
+     */
+    @Override
+    public void delSubTaskById(int id) {
+        if (subTasksMap.containsKey(id)) {
+            SubTask subTask = (SubTask) getIssueById(IssueType.SUBTASK, id);
+            if (subTask != null) {
+                //Удаляем эту подзадачу в эпике
+                subTask.getParent().getChildrenList().remove(subTask);
+                //Обновляем статус родителя
+                subTask.getParent().updStatus();
+                //Удаляем из менеджера подзадачу
+                subTasksMap.remove(id);
+            }
+        } else {
+            System.out.println(MSG_ERROR_ID_NOT_FOUND);
+        }
+    }
+
+    /**
+     * Удалить эпик по id
+     */
+    @Override
+    public void delEpicById(int id) {
+        if (epicsMap.containsKey(id)) {
+            //удаляем подзадачи эпика в менеджере
+            for (SubTask child : epicsMap.get(id).getChildrenList()) {
+                if (subTasksMap.containsValue(child)) {
+                    subTasksMap.remove(child.getId());
+                }
+            }
+            epicsMap.remove(id);
+        } else {
+            System.out.println(MSG_ERROR_ID_NOT_FOUND);
         }
     }
 

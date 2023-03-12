@@ -12,10 +12,10 @@ import java.util.List;
 /**
  * СЛУЖЕБНЫЙ КЛАСС для тестирования сервиса экземпляра класса, реализации интерфейса {@link TaskManager}
  */
-public class TestTaskManager implements TaskManager{
+public class TestTaskManager implements TaskManager {
 
     /**
-     tracker тестируемый менеджер {@link TaskManager}
+     * tracker тестируемый менеджер {@link TaskManager}
      */
     private final InMemoryTaskManager tracker;
 
@@ -25,8 +25,8 @@ public class TestTaskManager implements TaskManager{
     private int idTest;
 
     /**
-     *  Если при выполнении очередного теста случилась ошибка, то
-     *  необходимо установить commonGoodResultAllTest = false
+     * Если при выполнении очередного теста случилась ошибка, то
+     * необходимо установить commonGoodResultAllTest = false
      */
     private boolean commonGoodResultAllTest;
 
@@ -42,20 +42,19 @@ public class TestTaskManager implements TaskManager{
 
     /**
      * Тестируем метод создание объекта-задача с заданным статусом
-     *
      */
     @Override
     public Task addTask(String title, String description, IssueStatus status) {
 
-        Task newTask = tracker.addTask(null,null,null);
+        Task newTask = tracker.addTask(null, null, null);
 
         printHeadOfTest("Task addTask(String title, String description, IssueStatus status)",
-                        "создать новую задачу",
-                        "проверка на null - все входные параметры подменяем на null.",
-                        "",
-                        "метод вернет null");
+                "создать новую задачу",
+                "проверка на null - все входные параметры подменяем на null.",
+                "",
+                "метод вернет null");
 
-        viewResult(newTask!= null);
+        viewResult(newTask != null);
         System.out.println(newTask);
 
         return null;
@@ -63,12 +62,11 @@ public class TestTaskManager implements TaskManager{
 
     /**
      * Тестируем метод создание объекта-задача с дефолтным статусом NEW
-     *
      */
     @Override
     public Task addTask(String title, String description) {
 
-        Task newTask = tracker.addTask(null,null);
+        Task newTask = tracker.addTask(null, null);
 
         printHeadOfTest("Task addTask(String title, String description)",
                 "создать новую задачу",
@@ -76,7 +74,7 @@ public class TestTaskManager implements TaskManager{
                 "",
                 "метод вернет null");
 
-        viewResult(newTask!= null);
+        viewResult(newTask != null);
         System.out.println(newTask);
 
         return null;
@@ -84,7 +82,6 @@ public class TestTaskManager implements TaskManager{
 
     /**
      * Тестируем метод создания задачи в менеджере, используем метод для типа задач Task
-     *
      */
     @Override
     public void addTask(Task task) {
@@ -120,39 +117,36 @@ public class TestTaskManager implements TaskManager{
 
     /**
      * Тестируем метод создания задачи в менеджере, используем специализированный метод для типа задач Task
-     *
      */
     public void addTask() {
         int numberTask = tracker.getListAllIssues(IssueType.TASK).size() + 1;
-        addTask(tracker.addTask("Задача " + numberTask,"Описание задачи " + numberTask));
+        addTask(tracker.addTask("Задача " + numberTask, "Описание задачи " + numberTask));
     }
 
     /**
      * Тестируем метод создания задачи в менеджере, используем универсальный метод для любого потомка Issue
-     *
      */
     public void addIssueTask() {
         int numberTask = tracker.getListAllIssues(IssueType.TASK).size() + 1;
-        addIssue(tracker.addTask("Задача " + numberTask,"Описание задачи " + numberTask));
+        addIssue(tracker.addTask("Задача " + numberTask, "Описание задачи " + numberTask));
     }
 
     /**
      * Тестируем метод создание объекта-подзадача
-     *
      */
     @Override
     public SubTask addSubTask(String title, String description, Epic parent, IssueStatus status) {
 
-        SubTask newSubTask = tracker.addSubTask(null,null,null,null);
+        SubTask newSubTask = tracker.addSubTask(null, null, null, null);
 
         printHeadOfTest("SubTask addSubTask(String title, String description, Epic parent, " +
                         "IssueStatus status)",
-                       "создать новую подзадачу",
-                       "проверка на null - все входные параметры подменяем на null.",
-                       "getParent()",
-                       "метод вернет null");
+                "создать новую подзадачу",
+                "проверка на null - все входные параметры подменяем на null.",
+                "getParent()",
+                "метод вернет null");
 
-        viewResult(newSubTask!= null);
+        viewResult(newSubTask != null);
         System.out.println(newSubTask);
         if (newSubTask != null) {
             System.out.println(newSubTask.getParent());
@@ -163,7 +157,6 @@ public class TestTaskManager implements TaskManager{
 
     /**
      * Тестируем метод создания подзадачи в менеджере, используем метод для типа задач SubTask
-     *
      */
     @Override
     public void addSubTask(SubTask subTask) {
@@ -174,7 +167,7 @@ public class TestTaskManager implements TaskManager{
                 "создать новую подзадачу",
                 "выполняем поиск новой подзадачи в хранилище менеджера.",
                 "addTask(String title, String description), getListAllIssues(issueType)," +
-                         "getIssueById(IssueType issueType, int idIssue)",
+                        "getIssueById(IssueType issueType, int idIssue)",
                 "новая подзадача не найдена.");
 
         if (subTask != null) {
@@ -205,19 +198,18 @@ public class TestTaskManager implements TaskManager{
 
     /**
      * Тестируем метод создание объекта-эпика
-     *
      */
     @Override
     public Epic addEpic(String title, String description) {
 
-        Epic newEpic = tracker.addEpic(null,null);
+        Epic newEpic = tracker.addEpic(null, null);
         printHeadOfTest("addEpic(String title, String description)",
-                        "создать новый эпик.",
-                        "проверка на null - все входные параметры подменяем на null.",
-                        "",
-                        "метод вернет null");
+                "создать новый эпик.",
+                "проверка на null - все входные параметры подменяем на null.",
+                "",
+                "метод вернет null");
 
-        viewResult(newEpic!= null);
+        viewResult(newEpic != null);
         System.out.println(newEpic);
 
         return newEpic;
@@ -230,11 +222,11 @@ public class TestTaskManager implements TaskManager{
      */
     public void addIssueEpic(int quantitySubTask) {
         int numberEpic = tracker.getListAllIssues(IssueType.EPIC).size() + 1;
-        Epic newEpic   = tracker.addEpic("Эпик " + numberEpic,"Описание эпика " + numberEpic);
+        Epic newEpic = tracker.addEpic("Эпик " + numberEpic, "Описание эпика " + numberEpic);
         addIssue(newEpic);
         for (int i = 0; i < quantitySubTask; i++) {
-            addIssue(tracker.addSubTask("Эпик " + numberEpic,"Описание эпика " + numberEpic,
-                     newEpic, IssueStatus.NEW));
+            addIssue(tracker.addSubTask("Эпик " + numberEpic, "Описание эпика " + numberEpic,
+                    newEpic, IssueStatus.NEW));
         }
     }
 
@@ -245,17 +237,16 @@ public class TestTaskManager implements TaskManager{
      */
     public void addEpic(int quantitySubTask) {
         int numberEpic = tracker.getListAllIssues(IssueType.EPIC).size() + 1;
-        Epic newEpic   = tracker.addEpic("Эпик " + numberEpic,"Описание эпика " + numberEpic);
+        Epic newEpic = tracker.addEpic("Эпик " + numberEpic, "Описание эпика " + numberEpic);
         addEpic(newEpic);
         for (int i = 0; i < quantitySubTask; i++) {
-            addSubTask(tracker.addSubTask("Эпик " + numberEpic,"Описание эпика " + numberEpic,
-                       newEpic, IssueStatus.NEW));
+            addSubTask(tracker.addSubTask("Эпик " + numberEpic, "Описание эпика " + numberEpic,
+                    newEpic, IssueStatus.NEW));
         }
     }
 
     /**
      * Тестируем метод создания эпика в менеджере, используем метод для типа задач Epic
-     *
      */
     @Override
     public void addEpic(Epic epic) {
@@ -265,7 +256,7 @@ public class TestTaskManager implements TaskManager{
                 "создать новый эпик",
                 "выполняем поиск эпика в хранилище менеджера.",
                 "addEpic(String title, String description), getListAllIssues(issueType)," +
-                           "getIssueById(IssueType issueType, int idIssue)",
+                        "getIssueById(IssueType issueType, int idIssue)",
                 "эпик не найден.");
 
         //Обращение к методу
@@ -292,14 +283,14 @@ public class TestTaskManager implements TaskManager{
     public void addIssue(Issue issue) {
 
         boolean goalAchieved = true;                // тест пройден
-        IssueType issueType  = getIssueType(issue); // тип входной сущности
+        IssueType issueType = getIssueType(issue); // тип входной сущности
 
         printHeadOfTest("void addIssue(Issue issue)",
-                       "создать новую сущность в менеджере задач с типом " + issueType,
-                       "выполняем поиск новой сущности в хранилище менеджера.",
-                       "addTask(String title, String description), getListAllIssues(issueType)," +
-                                  "getIssueById(IssueType issueType, int idIssue)",
-                       "новая сущность не найдена или тип сущности не известен менеджеру.");
+                "создать новую сущность в менеджере задач с типом " + issueType,
+                "выполняем поиск новой сущности в хранилище менеджера.",
+                "addTask(String title, String description), getListAllIssues(issueType)," +
+                        "getIssueById(IssueType issueType, int idIssue)",
+                "новая сущность не найдена или тип сущности не известен менеджеру.");
 
         //Обращение к методу
         if (issueType != null) {
@@ -332,7 +323,170 @@ public class TestTaskManager implements TaskManager{
 
     @Override
     public void delIssueById(IssueType issueType, int idIssue) {
+        boolean goalAchieved = true;
 
+        printHeadOfTest("void delIssueById(IssueType issueType, int idIssue)",
+                "удалить сущность типа " + issueType,
+                "проверить данные в хранилище на наличие удаленной сущностей",
+                "Issue getIssueById(IssueType issueType, int idIssue)",
+                "тест ошибочный, если удаляемая сущность типа " + issueType + " будет найдена в менеджере.");
+
+        System.out.println("Попытка удаления сущности с Id = " + idIssue + " тип задачи = " + issueType);
+        tracker.delIssueById(issueType, idIssue);
+
+        //Проверка достижения цели - задачи в HashMap менеджера нет
+        if (tracker.getIssueById(issueType, idIssue) != null) {
+            goalAchieved = false;
+        } else if (issueType == IssueType.SUBTASK) {
+            //Дополнительно для подзадачи - необходимо проверить, что подзадачи нет в детях эпика
+            for (Issue issue : tracker.getListAllIssues(IssueType.EPIC)) {
+                for (SubTask subTask : tracker.getListSubTaskOfEpic((Epic) issue)) {
+                    if (subTask.getId() == idIssue) {
+                        goalAchieved = false;
+                        break;
+                    }
+                }
+            }
+        } else if (issueType == IssueType.EPIC) {
+            //Для эпика необходимо проверить, что нет подзадач с таким родителем
+            for (Issue issue : tracker.getListAllIssues(IssueType.SUBTASK)) {
+                if (((SubTask) issue).getParent().getId() == idIssue) {
+                    goalAchieved = false;
+                    break;
+                }
+            }
+        }
+
+        viewResult(goalAchieved);
+        printListAllIssues(issueType);
+    }
+
+    @Override
+    public void delTaskById(int id) {
+        boolean goalAchieved = true;
+
+        printHeadOfTest("void delTaskById(int id)",
+                "удалить задачу",
+                "проверить данные в хранилище на наличие удаленной задачи",
+                "Issue getIssueById(IssueType issueType, int idIssue), void delAllTasks()",
+                "тест ошибочный, если удаляемая задача будет найдена в менеджере.");
+
+        System.out.println("Попытка удаления задачи с Id = " + id);
+        tracker.delTaskById(id);
+
+        if (tracker.getIssueById(IssueType.TASK, id) != null) {
+            goalAchieved = false;
+        }
+
+        viewResult(goalAchieved);
+        for (Task listAllTask : tracker.getListAllTasks()) {
+            System.out.println(listAllTask);
+        }
+    }
+
+    @Override
+    public void delSubTaskById(int id) {
+        boolean goalAchieved = true;
+
+        printHeadOfTest("void delSubTaskById(int id)",
+                "удалить подзадачу",
+                "проверить данные в хранилище на наличие удаленной подзадачу",
+                "Issue getIssueById(IssueType issueType, int idIssue), void getListAllSubTasks()",
+                "тест ошибочный, если удаляемая подзадача будет найдена в менеджере.");
+
+        System.out.println("Попытка удаления подзадачи с Id = " + id);
+        tracker.delSubTaskById(id);
+
+        if (tracker.getIssueById(IssueType.TASK, id) != null) {
+            goalAchieved = false;
+        }
+
+        //Дополнительно для подзадачи - необходимо проверить, что подзадачи нет в детях эпика
+        for (Epic epic : tracker.getListAllEpics()) {
+            for (SubTask subTask : tracker.getListSubTaskOfEpic(epic)) {
+                if (subTask.getId() == id) {
+                    goalAchieved = false;
+                    break;
+                }
+            }
+        }
+
+        viewResult(goalAchieved);
+        for (SubTask listST : tracker.getListAllSubTasks()) {
+            System.out.println(listST);
+        }
+        for (Epic listE : tracker.getListAllEpics()) {
+            System.out.println(listE);
+        }
+    }
+
+    @Override
+    public void delEpicById(int id) {
+        boolean goalAchieved = true;
+
+        printHeadOfTest("void delEpicById(int id)",
+                "удалить эпик по id",
+                "проверить данные в хранилище на наличие удаляемого эпика",
+                "Issue getIssueById(IssueType issueType, int idIssue), void delAllTasks()",
+                "тест ошибочный, если удаляемый эпик будет найден в менеджере.");
+
+        System.out.println("Попытка удаления эпика с Id = " + id);
+        tracker.delEpicById(id);
+
+        if (tracker.getIssueById(IssueType.TASK, id) != null) {
+            goalAchieved = false;
+        }
+
+        //Для эпика необходимо проверить, что нет подзадач с таким родителем
+        for (SubTask subTask : tracker.getListAllSubTasks()) {
+            if (subTask.getParent().getId() == id) {
+                goalAchieved = false;
+                break;
+            }
+        }
+
+        viewResult(goalAchieved);
+        for (Epic listE : tracker.getListAllEpics()) {
+            System.out.println(listE);
+        }
+        for (SubTask listST : tracker.getListAllSubTasks()) {
+            System.out.println(listST);
+        }
+    }
+
+    /**
+     * Метод СЛУЖЕБНЫЙ - удалить последнюю созданную задачу, заданного типа
+     *
+     * @param type - тип задачи IssueType = {Task, SubTask, Epic}
+     */
+
+    public void delLastIssue(IssueType type) {
+
+        Integer id = getIdForLastIssue(type);
+        if (id != null) {
+            delIssueById(type, id);
+        }
+    }
+
+    public void delLastTask() {
+        Integer id = getIdForLastIssue(IssueType.TASK);
+        if (id != null) {
+            delTaskById(id);
+        }
+    }
+
+    public void delLastSubTask() {
+        Integer id = getIdForLastIssue(IssueType.SUBTASK);
+        if (id != null) {
+            delSubTaskById(id);
+        }
+    }
+
+    public void delLastEpic() {
+        Integer id = getIdForLastIssue(IssueType.EPIC);
+        if (id != null) {
+            delEpicById(id);
+        }
     }
 
     @Override
@@ -568,13 +722,13 @@ public class TestTaskManager implements TaskManager{
         printHeadOfTest("List<Issue> getHistory()",
                 "проверить историю просмотров.",
                 "создадим подряд задачи c просмотром для заполнения очереди просмотров." +
-                         " Порядок задач в истории должен встать по возрастанию",
+                        " Порядок задач в истории должен встать по возрастанию",
                 "void addTask(Task task), Issue getIssueById(IssueType issueType, int idIssue)",
                 "тест всегда считаем успешным. Историю просмотров оцениваем на экране.");
 
         //Создам задачи в количестве SIZE_HISTORY_OF_VIEW_ISSUE_LIST
-        for (int i = 0; i < HistoryManager.SIZE_HISTORY_OF_VIEW_ISSUE_LIST+1; i++) {
-            Task newTask = tracker.addTask("Задача " + numberTask,"Описание задачи " + numberTask);
+        for (int i = 0; i < HistoryManager.SIZE_HISTORY_OF_VIEW_ISSUE_LIST + 1; i++) {
+            Task newTask = tracker.addTask("Задача " + numberTask, "Описание задачи " + numberTask);
             tracker.addTask(newTask);
             System.out.println("Создана задача с id = " + newTask.getId());
             tracker.getIssueById(IssueType.TASK, newTask.getId());
@@ -607,9 +761,9 @@ public class TestTaskManager implements TaskManager{
 
     /**
      * Начать тест с начала:
-     *<p> - очищает все HashMap менеджера: задачи/подзадачи/эпики
-     *<p> - сбрасывает счетчик проводимых тестов (idTest = 1)
-     *<p> - сбрасывает результат получения ошибок, для нового теста их нет (commonGoodResultAllTest = true)
+     * <p> - очищает все HashMap менеджера: задачи/подзадачи/эпики
+     * <p> - сбрасывает счетчик проводимых тестов (idTest = 1)
+     * <p> - сбрасывает результат получения ошибок, для нового теста их нет (commonGoodResultAllTest = true)
      */
     public void restartTest() {
         tracker.restartTaskManager();
@@ -623,10 +777,10 @@ public class TestTaskManager implements TaskManager{
      * <p> - выводит описание проводимого теста
      * <p> - готовит номер для следующего теста (++idTest)
      *
-     * @param methodForTest  какой метод тестируем
+     * @param methodForTest какой метод тестируем
      * @param purposeMethod назначение метода
-     * @param wayForTest описание способа проверки метода
-     * @param usingMethod перечисление других методов менеджера, используемых для проверки
+     * @param wayForTest    описание способа проверки метода
+     * @param usingMethod   перечисление других методов менеджера, используемых для проверки
      * @param mistakeMethod описание ошибки метода
      */
     private void printHeadOfTest(String methodForTest, String purposeMethod, String wayForTest,
@@ -639,7 +793,7 @@ public class TestTaskManager implements TaskManager{
         if (!"".equals(usingMethod)) {
             System.out.println("Дополнительно используются методы: " + usingMethod);
         }
-        System.out.println("Условия ошибки в тесте: " + mistakeMethod+"\n");
+        System.out.println("Условия ошибки в тесте: " + mistakeMethod + "\n");
         ++idTest;
     }
 
