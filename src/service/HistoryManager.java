@@ -9,6 +9,8 @@ import java.util.List;
  */
 public interface HistoryManager {
 
+    byte SIZE_HISTORY_OF_VIEW_ISSUE_LIST = 10;
+
     void add(Issue issue);
 
     List<Issue> getHistory();
