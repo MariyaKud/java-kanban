@@ -36,6 +36,9 @@ public class Main {
         test.getListAllIssues(IssueType.EPIC);
         test.printTaskManager();
 
+        //Тест истории просмотров
+        test.getHistory();
+
         //Выводим итоги авто теста
         test.printLine();
         System.out.print("Авто ТЕСТ завершен ");

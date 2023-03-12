@@ -382,6 +382,32 @@ public class TestTaskManager implements TaskManager{
 
     @Override
     public List<Issue> getHistory() {
+        int numberTask = tracker.getListAllIssues(IssueType.TASK).size() + 1;
+
+        printHeadOfTest("List<Issue> getHistory()",
+                "проверить историю просмотров.",
+                "создадим подряд задачи c просмотром для заполнения очереди просмотров." +
+                         " Порядок задач в истории должен встать по возрастанию",
+                "void addTask(Task task), Issue getIssueById(IssueType issueType, int idIssue)",
+                "тест всегда считаем успешным. Историю просмотров оцениваем на экране.");
+
+        //Создам задачи в количестве SIZE_HISTORY_OF_VIEW_ISSUE_LIST
+        for (int i = 0; i < HistoryManager.SIZE_HISTORY_OF_VIEW_ISSUE_LIST+1; i++) {
+            Task newTask = tracker.addTask("Задача " + numberTask,"Описание задачи " + numberTask);
+            tracker.addTask(newTask);
+            System.out.println("Создана задача с id = " + newTask.getId());
+            tracker.getIssueById(IssueType.TASK, newTask.getId());
+            ++numberTask;
+        }
+
+        viewResult(true);
+
+        //Выводим список просмотров
+        System.out.println("История просмотров:");
+        for (Issue issue : tracker.getHistory()) {
+            System.out.println("\t" + issue);
+        }
+
         return null;
     }
 
