@@ -75,12 +75,25 @@ public class InMemoryTaskManager implements TaskManager {
         return new Task(getId(), title, description, status);
     }
 
+    @Override
+    public Task addTask(String title, String description) {
+        return new Task(getId(), title, description);
+    }
+
     /**
      * Создать новую подзадачу.
      */
     @Override
     public SubTask addSubTask(String title, String description, Epic parent, IssueStatus status) {
-        return new SubTask(getId(), title, description, parent, status);
+        if (parent == null) {
+            parent = addEpic("Родитель для подзадачи: " + title, "");
+
+        }
+        SubTask newSubTask = new SubTask(getId(), title, description, parent, status);
+        if (!parent.getChildrenList().contains(newSubTask)) {
+            parent.getChildrenList().add(newSubTask);
+        }
+        return newSubTask;
     }
 
     /**
@@ -376,17 +389,23 @@ public class InMemoryTaskManager implements TaskManager {
         StringBuilder result = new StringBuilder("Manager{" + "\n");
         if (tasksMap.size() != 0) {
             result.append("TASK:\n");
-            for (Task tsk : tasksMap.values()) {
-                result.append("\t").append(tsk).append("\n");
+            for (Task task : tasksMap.values()) {
+                result.append("\t").append(task).append("\n");
+            }
+        }
+        if (subTasksMap.size() != 0) {
+            result.append("SUBTASK:\n");
+            for (SubTask subtask: subTasksMap.values()) {
+                result.append("\t").append(subtask).append("\n");
             }
         }
         if (epicsMap.size() != 0) {
             result.append("EPIC:\n");
-            for (Epic epc : epicsMap.values()) {
-                result.append("\t").append(epc).append("\n");
-                if (epc.getChildrenList().size() != 0) {
-                    for (SubTask subtsk : epc.getChildrenList()) {
-                        result.append("\t\t").append(subtsk).append("\n");
+            for (Epic epic : epicsMap.values()) {
+                result.append("\t").append(epic).append("\n");
+                if (epic.getChildrenList().size() != 0) {
+                    for (SubTask subTask : epic.getChildrenList()) {
+                        result.append("\t\t").append(subTask).append("\n");
                     }
                 }
             }
