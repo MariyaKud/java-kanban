@@ -295,7 +295,7 @@ public class TestTaskManager implements TaskManager{
         IssueType issueType  = getIssueType(issue); // тип входной сущности
 
         printHeadOfTest("void addIssue(Issue issue)",
-                       "создать новую сущность с типом " + issueType,
+                       "создать новую сущность в менеджере задач с типом " + issueType,
                        "выполняем поиск новой сущности в хранилище менеджера.",
                        "addTask(String title, String description), getListAllIssues(issueType)," +
                                   "getIssueById(IssueType issueType, int idIssue)",
@@ -360,6 +360,66 @@ public class TestTaskManager implements TaskManager{
         System.out.println(issueType + ":");
         for (Issue issue : listIssue) {
             System.out.println("\t" + issue);
+        }
+
+        return null;
+    }
+
+    @Override
+    public List<Task> getListAllTasks() {
+
+        List<Task> lists = tracker.getListAllTasks();
+
+        printHeadOfTest("List<Task> getListAllTasks()",
+                "получить список всех задач.",
+                "визуализация полученного списка задач.",
+                "System.out.print",
+                "тест всегда считаем успешным.");
+
+        viewResult(true);
+        System.out.println("TASK:");
+        for (Issue ls : lists) {
+            System.out.println("\t" + ls);
+        }
+
+        return null;
+    }
+
+    @Override
+    public List<SubTask> getListAllSubTasks() {
+
+        List<SubTask> lists = tracker.getListAllSubTasks();
+
+        printHeadOfTest("List<SubTask> getListAllSubTasks()",
+                "получить список всех подзадач.",
+                "визуализация полученного списка подзадач.",
+                "System.out.print",
+                "тест всегда считаем успешным.");
+
+        viewResult(true);
+        System.out.println("SUBTASK:");
+        for (Issue ls : lists) {
+            System.out.println("\t" + ls);
+        }
+
+        return null;
+    }
+
+    @Override
+    public List<Epic> getListAllEpics() {
+
+        List<Epic> lists = tracker.getListAllEpics();
+
+        printHeadOfTest("List<Epic> getListAllEpics()",
+                "получить список всех эпиков.",
+                "визуализация полученного списка эпиков.",
+                "System.out.print",
+                "тест всегда считаем успешным.");
+
+        viewResult(true);
+        System.out.println("EPIC:");
+        for (Issue ls : lists) {
+            System.out.println("\t" + ls);
         }
 
         return null;
@@ -468,7 +528,7 @@ public class TestTaskManager implements TaskManager{
      * @param resultGood - результат True (достигнут) / False (что-то пошло не так)
      */
     public void viewResult(boolean resultGood) {
-        System.out.print("Результат теста ");
+        System.out.print("\nРезультат теста ");
         if (resultGood) {
             System.out.println(" ✅");
         } else {

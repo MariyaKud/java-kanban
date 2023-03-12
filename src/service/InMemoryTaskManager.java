@@ -343,7 +343,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public List<Issue> getListAllIssues(IssueType issueType) {
-        ArrayList<Issue> issues = new ArrayList<>();
+        List<Issue> issues = new ArrayList<>();
 
         switch (issueType) {
             case TASK:
@@ -362,6 +362,30 @@ public class InMemoryTaskManager implements TaskManager {
                 System.out.println(MSG_ERROR_TYPE_UN_KNOW);
         }
         return issues;
+    }
+
+    @Override
+    public List<Task> getListAllTasks() {
+        List<Task> tasksList = new ArrayList<>();
+        tasksList.addAll(tasksMap.values());
+
+        return tasksList;
+    }
+
+    @Override
+    public List<SubTask> getListAllSubTasks() {
+        List<SubTask> subTasksList = new ArrayList<>();
+        subTasksList.addAll(subTasksMap.values());
+
+        return subTasksList;
+    }
+
+    @Override
+    public List<Epic> getListAllEpics() {
+        List<Epic> epicList = new ArrayList<>();
+        epicList.addAll(epicsMap.values());
+
+        return epicList;
     }
 
     /**

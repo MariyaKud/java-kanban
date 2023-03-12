@@ -9,6 +9,7 @@ public class Main {
     public static void main(String[] args) {
 
         TestTaskManager test = new TestTaskManager();
+
         Scanner scanner = new Scanner(System.in);
         String command;
 
@@ -25,15 +26,21 @@ public class Main {
 
         //2. Добавляем задачи через универсальный метод
         test.addIssueTask();
+        test.getListAllIssues(IssueType.TASK);    //Тест getListAllIssues
+
         test.addIssueEpic(1);
+        test.getListAllIssues(IssueType.SUBTASK); //Тест getListAllIssues
+        test.getListAllIssues(IssueType.EPIC);    //Тест getListAllIssues
+
         //3. Добавляем задачи через специализированные методы
         test.addTask();
-        test.addEpic(2);
+        test.getListAllTasks();
 
-        //Тест getListAllIssues
-        test.getListAllIssues(IssueType.TASK);
-        test.getListAllIssues(IssueType.SUBTASK);
-        test.getListAllIssues(IssueType.EPIC);
+        test.addEpic(2);
+        test.getListAllEpics();
+        test.getListAllSubTasks();
+
+        //Вывести общий результат в хранилищах
         test.printTaskManager();
 
         //Тест истории просмотров

@@ -48,6 +48,12 @@ public interface TaskManager {
 
     List<Issue> getListAllIssues(IssueType issueType);
 
+    List<Task> getListAllTasks();
+
+    List<SubTask> getListAllSubTasks();
+
+    List<Epic> getListAllEpics();
+
     List<SubTask> getListSubTaskOfEpic(Epic epic);
 
     List<Issue> getHistory();
