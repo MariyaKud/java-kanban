@@ -1,5 +1,8 @@
 package model;
 
+/**
+ * Задача - класс для простых задач
+ */
 public class Task extends Issue {
 
     public Task(int id, String title, String description, IssueStatus status) {
