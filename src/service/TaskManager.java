@@ -117,14 +117,14 @@ public interface TaskManager {
     ///////////////////////////////////////////////
     /**
      * Удалить задачу определенного типа {@link Task},{@link SubTask},{@link Epic} по id
-     * @param issueType - тип задачи IssueType = {TASK, SUBTASK, EPIC}
-     * @param idIssue - идентификатор задачи
+     * @param issueType  тип задачи IssueType = {TASK, SUBTASK, EPIC}
+     * @param idIssue    идентификатор задачи к удалению
      */
     void delIssueById(IssueType issueType, int idIssue);
 
     /**
      * Удалить задачу {@link Task} по id
-     * @param id - идентификатор задачи
+     * @param id идентификатор задачи
      */
     void delTaskById(int id);
 
@@ -142,8 +142,8 @@ public interface TaskManager {
     ///////////////////////////////////////////////
     /**
      * Получить задачу определенного типа {@link Task},{@link SubTask},{@link Epic} по id. Может вернуть null.
-     * @param issueType - тип задачи IssueType = {TASK, SUBTASK, EPIC}
-     * @param idIssue - идентификатор задачи
+     * @param issueType  тип задачи IssueType = {TASK, SUBTASK, EPIC}
+     * @param idIssue    идентификатор задачи
      * @return задача запрошенного типа с указанным id. Если задача не найдена, то null
      */
     Issue getIssueById(IssueType issueType, int idIssue);
@@ -171,8 +171,9 @@ public interface TaskManager {
 
     ///////////////////////////////////////////////
     /**
-     * Удалить все задачи определенного типа {@link Task},{@link SubTask},{@link Epic}
-     * @param issueType - тип задачи IssueType = {TASK, SUBTASK, EPIC}
+     * Удалить все задачи по заданному типу {@link Task},{@link SubTask},{@link Epic}
+     *
+     * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
      */
     void delAllIssues(IssueType issueType);
 
@@ -193,9 +194,10 @@ public interface TaskManager {
 
     ///////////////////////////////////////////////
     /**
-     * Получить все задачи определенного типа {@link Task},{@link SubTask},{@link Epic}
-     * @param issueType - тип задачи IssueType = {TASK, SUBTASK, EPIC}
-     * @return список всех задач менеджера одного типа
+     * Получить список всех задач заданного типа {@link Task},{@link SubTask},{@link Epic}
+     *
+     * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
+     * @return возвращает список задач менеджера по заданному типу
      */
     List<Issue> getListAllIssues(IssueType issueType);
 
@@ -219,8 +221,9 @@ public interface TaskManager {
 
     ///////////////////////////////////////////////
     /**
-     * Получить все подзадачи эпика.
-     * @param epic - экземпляр класса {@link Epic}
+     * Получить список всех подзадач для эпика.
+     *
+     * @param epic эпик, по которому нужно получить список подзадач
      * @return список подзадач эпика
      */
     List<SubTask> getListSubTaskOfEpic(Epic epic);
@@ -228,6 +231,7 @@ public interface TaskManager {
     ///////////////////////////////////////////////
     /**
      * Получить историю просмотров задач.
+     *
      * @return список просмотренных задач = {Task, SubTask, Epic}
      */
     List<Issue> getHistory();

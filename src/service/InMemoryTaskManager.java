@@ -67,7 +67,11 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Создать объект-задачу.
+     * Создать экземпляр класса {@link Task}
+     * @param title заголовок
+     * @param description описание
+     * @param status - статус подзадачи {NEW, IN_PROGRESS,DONE}
+     * @return новый экземпляр класса {@link Task}
      */
     @Override
     public Task addTask(String title, String description, IssueStatus status) {
@@ -75,7 +79,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Создать объект-задачу.
+     * Создать экземпляр класса {@link Task}
+     * @param title заголовок
+     * @param description описание
+     * @return новый экземпляр класса {@link Task} со статусом NEW
      */
     @Override
     public Task addTask(String title, String description) {
@@ -83,17 +90,12 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Создать задачу в менеджере задач
-     */
-    @Override
-    public void addTask(Task task) {
-        if (!tasksMap.containsValue(task) && task != null) {
-            tasksMap.put(task.getId(), task);
-        }
-    }
-
-    /**
-     * Создать объект-подзадачу.
+     * Создать экземпляр класса {@link SubTask}
+     * @param title заголовок
+     * @param description описание
+     * @param parent - владелец подзадачи, экземпляр класса {@link Epic}
+     * @param status - статус подзадачи {NEW, IN_PROGRESS,DONE}
+     * @return новый экземпляр класса {@link Epic}, без детей со статусом NEW
      */
     @Override
     public SubTask addSubTask(String title, String description, Epic parent, IssueStatus status) {
@@ -109,7 +111,32 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Создать подзадачу в менеджере задач.
+     * Создать экземпляр класса {@link Epic}
+     * @param title заголовок
+     * @param description описание
+     * @return новый экземпляр класса Epic, без детей со статусом NEW
+     */
+    @Override
+    public Epic addEpic(String title, String description) {
+        return new Epic(getId(), title, description);
+    }
+
+    /**
+     * Добавить задачу менеджеру. Сам объект передается в качестве параметра.
+     *
+     * @param task экземпляр класса {@link Task}
+     */
+    @Override
+    public void addTask(Task task) {
+        if (!tasksMap.containsValue(task) && task != null) {
+            tasksMap.put(task.getId(), task);
+        }
+    }
+
+    /**
+     * Добавить подзадачу менеджеру. Сам объект передается в качестве параметра.
+     *
+     * @param subTask экземпляр класса {@link SubTask}
      */
     @Override
     public void addSubTask(SubTask subTask) {
@@ -135,15 +162,9 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Создать объект-эпик.
-     */
-    @Override
-    public Epic addEpic(String title, String description) {
-        return new Epic(getId(), title, description);
-    }
-
-    /**
-     * Создать эпик в менеджере задач
+     * Добавить эпик менеджеру. Сам объект передается в качестве параметра.
+     *
+     * @param epic экземпляр класса {@link Epic}
      */
     @Override
     public void addEpic(Epic epic) {
@@ -161,9 +182,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Универсальный метод создания задачи. Сам объект передается в качестве параметра.
+     * Добавить задачу менеджеру одного из типов: {@link Task},{@link SubTask},{@link Epic}
+     * наследники класса {@link Issue}. Сам объект передается в качестве параметра.
      *
-     * @param issue     экземпляр класса Issue
+     * @param issue экземпляр класса Issue
      */
     @Override
     public void addIssue(Issue issue) {
@@ -182,6 +204,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    ///////////////////////////////////////////////
     /**
      * Обновить задачу для любого типа: {@link Task},{@link SubTask},{@link Epic} .
      * Новая версия объекта передается в качестве параметра.
@@ -255,7 +278,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Обновить задачу. Новая версия объекта передается в качестве параметра.
-     *
      * @param task новая версия задачи с верным идентификатором, включая обновленный статус
      */
     @Override
@@ -272,6 +294,10 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    /**
+     * Обновить подзадачу. Новая версия объекта передается в качестве параметра.
+     * @param subTask новая версия объекта с верным идентификатором, включая обновленный статус
+     */
     @Override
     public void updSubTask(SubTask subTask) {
         SubTask oldSubTask  = getSubTaskById(subTask.getId());
@@ -302,6 +328,10 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    /**
+     * Обновить эпик. Новая версия объекта передается в качестве параметра.
+     * @param epic новая версия объекта с верным идентификатором
+     */
     @Override
     public void updEpic(Epic epic) {
         Epic oldEpic = getEpicById(epic.getId());
@@ -326,10 +356,9 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Удалить сущность {Task, SubTask, Epic} по идентификатору.
-     *
-     * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
-     * @param idIssue   идентификатор задачи к удалению
+     * Удалить задачу определенного типа {@link Task},{@link SubTask},{@link Epic} по id
+     * @param issueType  тип задачи IssueType = {TASK, SUBTASK, EPIC}
+     * @param idIssue    идентификатор задачи к удалению
      */
     @Override
     public void delIssueById(IssueType issueType, int idIssue) {
@@ -353,7 +382,8 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Удалить задачу по id
+     * Удалить задачу {@link Task} по id
+     * @param id идентификатор задачи
      */
     @Override
     public void delTaskById(int id) {
@@ -365,7 +395,8 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Удалить подзадачу по id
+     * Удалить подзадачу {@link SubTask} по id
+     * @param id - идентификатор задачи
      */
     @Override
     public void delSubTaskById(int id) {
@@ -385,7 +416,8 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Удалить эпик по id
+     * Удалить эпик {@link SubTask} по id
+     * @param id - идентификатор задачи
      */
     @Override
     public void delEpicById(int id) {
@@ -402,12 +434,12 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    ///////////////////////////////////////////////
     /**
-     * Получить задачу по идентификатору, если задача не найдена, то метод вернет NULL.
-     *
-     * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
-     * @param idIssue   идентификатор задачи для поиска
-     * @return - задачу по идентификатору или NULL
+     * Получить задачу определенного типа {@link Task},{@link SubTask},{@link Epic} по id. Может вернуть null.
+     * @param issueType  тип задачи IssueType = {TASK, SUBTASK, EPIC}
+     * @param idIssue    идентификатор задачи
+     * @return задача запрошенного типа с указанным id. Если задача не найдена, то null
      */
     @Override
     public Issue getIssueById(IssueType issueType, int idIssue) {
@@ -432,6 +464,11 @@ public class InMemoryTaskManager implements TaskManager {
         return issue;
     }
 
+    /**
+     * Получить задачу {@link Task} по id. Может вернуть null.
+     * @param id - идентификатор задачи
+     * @return задача типа {@link Task}. Если задача не найдена, то null
+     */
     @Override
     public Task getTaskById(int id) {
         Task task = tasksMap.get(id);
@@ -439,6 +476,11 @@ public class InMemoryTaskManager implements TaskManager {
         return task;
     }
 
+    /**
+     * Получить подзадачу {@link SubTask} по id. Может вернуть null.
+     * @param id - идентификатор задачи
+     * @return задача типа {@link SubTask}. Если задача не найдена, то null
+     */
     @Override
     public SubTask getSubTaskById(int id) {
         SubTask subTask = subTasksMap.get(id);
@@ -446,6 +488,11 @@ public class InMemoryTaskManager implements TaskManager {
         return subTask;
     }
 
+    /**
+     * Получить эпик {@link Epic} по id. Может вернуть null.
+     * @param id - идентификатор задачи
+     * @return задача типа {@link Epic}. Если задача не найдена, то null
+     */
     @Override
     public Epic getEpicById(int id) {
         Epic epic = epicsMap.get(id);
@@ -453,8 +500,9 @@ public class InMemoryTaskManager implements TaskManager {
         return epic;
     }
 
+    ///////////////////////////////////////////////
     /**
-     * Получить список всех задач заданного типа.
+     * Получить список всех задач заданного типа {@link Task},{@link SubTask},{@link Epic}
      *
      * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
      * @return возвращает список задач менеджера по заданному типу
@@ -482,6 +530,10 @@ public class InMemoryTaskManager implements TaskManager {
         return issues;
     }
 
+    /**
+     * Получить список всех задач менеджера.
+     * @return список задач {@link Task}
+     */
     @Override
     public List<Task> getListAllTasks() {
         List<Task> tasksList = new ArrayList<>();
@@ -490,6 +542,10 @@ public class InMemoryTaskManager implements TaskManager {
         return tasksList;
     }
 
+    /**
+     * Получить список всех подзадач менеджера.
+     * @return список подзадач {@link SubTask}
+     */
     @Override
     public List<SubTask> getListAllSubTasks() {
         List<SubTask> subTasksList = new ArrayList<>();
@@ -498,6 +554,10 @@ public class InMemoryTaskManager implements TaskManager {
         return subTasksList;
     }
 
+    /**
+     * Получить список всех эпиков менеджера.
+     * @return список эпиков {@link Epic}
+     */
     @Override
     public List<Epic> getListAllEpics() {
         List<Epic> epicList = new ArrayList<>();
@@ -505,9 +565,10 @@ public class InMemoryTaskManager implements TaskManager {
 
         return epicList;
     }
+    ///////////////////////////////////////////////
 
     /**
-     * Удалить все задачи по заданному типу.
+     * Удалить все задачи по заданному типу {@link Task},{@link SubTask},{@link Epic}
      *
      * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
      */
@@ -535,22 +596,32 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    /**
+     * Удалить все задачи {@link Task}
+     */
     @Override
     public void delAllTasks() {
         tasksMap.clear();
     }
 
+    /**
+     * Удалить все подзадачи {@link SubTask}
+     */
     @Override
     public void delAllSubTasks() {
         subTasksMap.clear();
         epicsMap.clear();
     }
 
+    /**
+     * Удалить все эпики {@link Epic}
+     */
     @Override
     public void delAllEpics() {
         subTasksMap.clear();
     }
 
+    ///////////////////////////////////////////////
     /**
      * Получить список всех подзадач для эпика.
      *
