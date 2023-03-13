@@ -19,9 +19,10 @@ public interface TaskManager {
     String MSG_ERROR_ID_NOT_FOUND = "Не найдена задача с указанным id.";
     String MSG_ERROR_TASK_EMPTY = "Список задач пуст.";
     String MSG_ERROR_WRONG_EPIC = "При обновлении эпика дети остаются неизменными.";
-    String MSG_ERROR_NOT_FOUND_EPIC = "Не найден эпик для подзадачи.";
+    String MSG_ERROR_NOT_FOUND_EPIC = "Эпик не найден.";
     String MSG_ERROR_FOR_METHOD = "Возникла проблема при проверке метода.";
 
+    ///////////////////////////////////////////////
     Task addTask(String title, String description, IssueStatus status);
 
     Task addTask(String title, String description);
@@ -38,8 +39,16 @@ public interface TaskManager {
 
     void addIssue(Issue issue);
 
+    ///////////////////////////////////////////////
     void updIssue(Issue issue);
 
+    void updTask(Task task);
+
+    void updSubTask(SubTask subTask);
+
+    void updEpic(Epic epic);
+
+    ///////////////////////////////////////////////
     void delIssueById(IssueType issueType, int idIssue);
 
     void delTaskById(int id);
@@ -47,9 +56,16 @@ public interface TaskManager {
     void delSubTaskById(int id);
 
     void delEpicById(int id);
-
+    ///////////////////////////////////////////////
     Issue getIssueById(IssueType issueType, int idIssue);
 
+    Task getTaskById(int id);
+
+    SubTask getSubTaskById(int id);
+
+    Epic getEpicById(int id);
+
+    ///////////////////////////////////////////////
     void delAllIssues(IssueType issueType);
 
     void delAllTasks();
@@ -58,6 +74,7 @@ public interface TaskManager {
 
     void delAllEpics();
 
+    ///////////////////////////////////////////////
     List<Issue> getListAllIssues(IssueType issueType);
 
     List<Task> getListAllTasks();
@@ -66,7 +83,10 @@ public interface TaskManager {
 
     List<Epic> getListAllEpics();
 
+    ///////////////////////////////////////////////
     List<SubTask> getListSubTaskOfEpic(Epic epic);
+
+    ///////////////////////////////////////////////
 
     List<Issue> getHistory();
 }

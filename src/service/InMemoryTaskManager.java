@@ -253,6 +253,78 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
+     * Обновить задачу. Новая версия объекта передается в качестве параметра.
+     *
+     * @param task новая версия задачи с верным идентификатором, включая обновленный статус
+     */
+    @Override
+    public void updTask(Task task) {
+
+        Task oldTask = getTaskById(task.getId());
+
+        //Мы можем обновить только существующий объект
+        if (oldTask != null) {
+            // обновляем задачу в менеджере
+            tasksMap.put(oldTask.getId(), task);
+        } else {
+            System.out.println(MSG_ERROR_ID_NOT_FOUND);
+        }
+    }
+
+    @Override
+    public void updSubTask(SubTask subTask) {
+        SubTask oldSubTask  = getSubTaskById(subTask.getId());
+
+        if (oldSubTask != null) {
+            if (epicsMap.containsValue(subTask.getParent())) {
+                // обновляем подзадачу
+                subTasksMap.put(subTask.getId(), subTask);
+
+                //Удаляем старую подзадачу у эпика родителя
+                oldSubTask.getParent().getChildrenList().remove(oldSubTask);
+
+                //Обновляем статус старого родителя
+                oldSubTask.getParent().updStatus();
+
+                //Добавляем обновленную подзадачу в эпик
+                if (!subTask.getParent().getChildrenList().contains(subTask)) {
+                    subTask.getParent().getChildrenList().add(subTask);
+                }
+                //Обновляем статус родителя
+                subTask.getParent().updStatus();
+
+            } else {
+                System.out.println(MSG_ERROR_NOT_FOUND_EPIC);
+            }
+        } else {
+            System.out.println(MSG_ERROR_ID_NOT_FOUND);
+        }
+    }
+
+    @Override
+    public void updEpic(Epic epic) {
+        Epic oldEpic = getEpicById(epic.getId());
+
+        if (oldEpic != null) {
+            //при обновлении эпика его дети остаются "старыми"
+            if (oldEpic.getChildrenList().equals((epic.getChildrenList()))) {
+                // обновляем эпик
+                epicsMap.put(oldEpic.getId(), epic);
+
+                //меняем родителя у детей
+                for (SubTask subTask : oldEpic.getChildrenList()) {
+                    subTask.setParent(epic);
+                }
+                //у обновляемого эпика состав детей не меняется, значит не меняется и статус
+            } else {
+                System.out.println(MSG_ERROR_WRONG_EPIC);
+            }
+        } else {
+            System.out.println(MSG_ERROR_ID_NOT_FOUND);
+        }
+    }
+
+    /**
      * Удалить сущность {Task, SubTask, Epic} по идентификатору.
      *
      * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
@@ -357,6 +429,27 @@ public class InMemoryTaskManager implements TaskManager {
 
         historyManager.add(issue);
         return issue;
+    }
+
+    @Override
+    public Task getTaskById(int id) {
+        Task task = tasksMap.get(id);
+        historyManager.add(task);
+        return task;
+    }
+
+    @Override
+    public SubTask getSubTaskById(int id) {
+        SubTask subTask = subTasksMap.get(id);
+        historyManager.add(subTask);
+        return subTask;
+    }
+
+    @Override
+    public Epic getEpicById(int id) {
+        Epic epic = epicsMap.get(id);
+        historyManager.add(epic);
+        return epic;
     }
 
     /**

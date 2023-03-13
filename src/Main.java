@@ -1,4 +1,5 @@
 
+import model.IssueStatus;
 import model.IssueType;
 import service.TestTaskManager;
 
@@ -69,6 +70,24 @@ public class Main {
         test.delLastSubTask();
         test.delLastEpic();
         test.printTaskManager();
+
+        //Тест обновления универсального
+        test.testUpdStatusForLastTask(IssueStatus.IN_PROGRESS);
+        test.testUpdStatusForLastTask(IssueStatus.DONE);
+        test.addEpic(1);
+        test.testUpdStatusForLastSubTask(IssueStatus.IN_PROGRESS);
+        test.testUpdStatusForLastSubTask(IssueStatus.DONE);
+        test.addEpic(1);
+        test.addEpic(1);
+        test.testUpdParentForLastSubTask();
+
+        //Тест индивидуальных update
+        test.addTask();
+        test.testUpdTaskForLastTask(IssueStatus.IN_PROGRESS);
+        test.testUpdTaskForLastTask(IssueStatus.DONE);
+        test.addEpic(1);
+        test.testUpdSubTaskForLastSubTask();
+        test.testUpdStatusForLastEpic();
 
         //Выводим итоги авто теста
         test.printLine();
