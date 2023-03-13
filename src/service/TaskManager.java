@@ -144,7 +144,7 @@ public interface TaskManager {
      * Получить задачу определенного типа {@link Task},{@link SubTask},{@link Epic} по id. Может вернуть null.
      * @param issueType  тип задачи IssueType = {TASK, SUBTASK, EPIC}
      * @param idIssue    идентификатор задачи
-     * @return задача запрошенного типа с указанным id. Если задача не найдена, то null
+     * @return Задача запрошенного типа с указанным id. Если задача не найдена, то null
      */
     Issue getIssueById(IssueType issueType, int idIssue);
 
