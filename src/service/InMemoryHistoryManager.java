@@ -6,12 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Объекта-история просмотров задач {Task, SubTask, Epic}
+ * Представитель контракта истории просмотров задач {Task, SubTask, Epic}
  */
 public class InMemoryHistoryManager implements HistoryManager{
 
     private final List<Issue> historyOfViewIssueList = new ArrayList<>();
 
+    /**
+     * Добавить задачу в конец стека
+     */
     @Override
     public void add(Issue issue) {
 
@@ -23,11 +26,17 @@ public class InMemoryHistoryManager implements HistoryManager{
         }
     }
 
+    /**
+     * Получить список задач в стеке
+     */
     @Override
     public List<Issue> getHistory() {
         return historyOfViewIssueList;
     }
 
+    /**
+     * Очистить список задач в стеке
+     */
     @Override
     public void clearHistory() {
         historyOfViewIssueList.clear();
