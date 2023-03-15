@@ -12,6 +12,9 @@ public class Epic extends Issue {
 
     /**
      * Содержит список элементов класса {@link SubTask}, содержащихся в экземпляре {@code Epic}
+     * В следующей версии тип хранимых данных в списке будет изменен на id детей
+     * Если другие менеджеры будут иметь другие правила формирования статуса эпика, то метод будет перенесен в менеджер,
+     * по текущим условиям задачи наличие этого метода в этом классе кажется более симпатичным и стабильным решением.
      */
     private final List<SubTask> childrenList = new ArrayList<>();
 
@@ -34,7 +37,7 @@ public class Epic extends Issue {
      * Если все подзадачи имеют статус DONE, то и эпик считается завершённым со статусом DONE.
      * Во всех остальных случаях статус должен быть IN_PROGRESS.
      */
-    public void updStatus() {
+    public void updateStatus() {
 
         if (childrenList.size() == 0) {
             setStatus(IssueStatus.NEW);
