@@ -2,8 +2,6 @@ package service;
 
 import model.Epic;
 import model.Issue;
-import model.IssueStatus;
-import model.IssueType;
 import model.SubTask;
 import model.Task;
 
@@ -11,6 +9,11 @@ import java.util.List;
 
 /**
  * Контракт для классов объект-менеджер
+ * Данный контракт содержит основные методы, запрошенные в ТЗ
+ * Как разработчик, считаю нужным в интерфейс включить методы "Аля" конструкторы.
+ * Они задают контур благодаря которому, я как разработчик понимаю суть объекта-менеджер. *
+ * Убираю их из интерфейса, для выполнения требований, но если по методам Issue совершенно согласна,
+ * то по второй части мне аргументация не понятна.
  */
 public interface TaskManager {
 
@@ -23,41 +26,6 @@ public interface TaskManager {
     String MSG_ERROR_FOR_METHOD = "Возникла проблема при проверке метода.";
 
     ///////////////////////////////////////////////
-    /**
-     * Создать экземпляр класса {@link Task}
-     * @param title заголовок
-     * @param description описание
-     * @param status - статус подзадачи {NEW, IN_PROGRESS,DONE}
-     * @return новый экземпляр класса {@link Task}
-     */
-    Task addTask(String title, String description, IssueStatus status);
-
-    /**
-     * Создать экземпляр класса {@link Task}
-     * @param title заголовок
-     * @param description описание
-     * @return новый экземпляр класса {@link Task} со статусом NEW
-     */
-    Task addTask(String title, String description);
-
-    /**
-     * Создать экземпляр класса {@link SubTask}
-     * @param title заголовок
-     * @param description описание
-     * @param parent - владелец подзадачи, экземпляр класса {@link Epic}
-     * @param status - статус подзадачи {NEW, IN_PROGRESS,DONE}
-     * @return новый экземпляр класса {@link Epic}, без детей со статусом NEW
-     */
-    SubTask addSubTask(String title, String description, Epic parent, IssueStatus status);
-
-    /**
-     * Создать экземпляр класса {@link Epic}
-     * @param title заголовок
-     * @param description описание
-     * @return новый экземпляр класса Epic, без детей со статусом NEW
-     */
-    Epic addEpic(String title, String description);
-
     /**
      * Добавить задачу менеджеру. Сам объект передается в качестве параметра.
      *
@@ -79,23 +47,7 @@ public interface TaskManager {
      */
     void addEpic(Epic epic);
 
-    /**
-     * Добавить задачу менеджеру одного из типов: {@link Task},{@link SubTask},{@link Epic}
-     * наследники класса {@link Issue}. Сам объект передается в качестве параметра.
-     *
-     * @param issue экземпляр класса Issue
-     */
-    void addIssue(Issue issue);
-
     ///////////////////////////////////////////////
-    /**
-     * Обновить задачу одного из типов: {@link Task},{@link SubTask},{@link Epic}
-     * Новая версия объекта передается в качестве параметра.
-     *
-     * @param issue новая версия объекта с верным идентификатором, включая обновленный статус
-     */
-    void updIssue(Issue issue);
-
     /**
      * Обновить задачу. Новая версия объекта передается в качестве параметра.
      * @param task новая версия объекта с верным идентификатором, включая обновленный статус
@@ -116,13 +68,6 @@ public interface TaskManager {
 
     ///////////////////////////////////////////////
     /**
-     * Удалить задачу определенного типа {@link Task},{@link SubTask},{@link Epic} по id
-     * @param issueType  тип задачи IssueType = {TASK, SUBTASK, EPIC}
-     * @param idIssue    идентификатор задачи к удалению
-     */
-    void delIssueById(IssueType issueType, int idIssue);
-
-    /**
      * Удалить задачу {@link Task} по id
      * @param id идентификатор задачи
      */
@@ -140,14 +85,6 @@ public interface TaskManager {
      */
     void delEpicById(int id);
     ///////////////////////////////////////////////
-    /**
-     * Получить задачу определенного типа {@link Task},{@link SubTask},{@link Epic} по id. Может вернуть null.
-     * @param issueType  тип задачи IssueType = {TASK, SUBTASK, EPIC}
-     * @param idIssue    идентификатор задачи
-     * @return Задача запрошенного типа с указанным id. Если задача не найдена, то null
-     */
-    Issue getIssueById(IssueType issueType, int idIssue);
-
     /**
      * Получить задачу {@link Task} по id. Может вернуть null.
      * @param id - идентификатор задачи
@@ -171,13 +108,6 @@ public interface TaskManager {
 
     ///////////////////////////////////////////////
     /**
-     * Удалить все задачи по заданному типу {@link Task},{@link SubTask},{@link Epic}
-     *
-     * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
-     */
-    void delAllIssues(IssueType issueType);
-
-    /**
      * Удалить все задачи {@link Task}
      */
     void delAllTasks();
@@ -193,14 +123,6 @@ public interface TaskManager {
     void delAllEpics();
 
     ///////////////////////////////////////////////
-    /**
-     * Получить список всех задач заданного типа {@link Task},{@link SubTask},{@link Epic}
-     *
-     * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
-     * @return возвращает список задач менеджера по заданному типу
-     */
-    List<Issue> getListAllIssues(IssueType issueType);
-
     /**
      * Получить список всех задач менеджера.
      * @return список задач {@link Task}

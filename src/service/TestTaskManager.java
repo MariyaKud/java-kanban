@@ -43,7 +43,6 @@ public class TestTaskManager implements TaskManager {
     /**
      * Тестируем метод создание объекта-задача с заданным статусом
      */
-    @Override
     public Task addTask(String title, String description, IssueStatus status) {
 
         Task newTask = tracker.addTask(null, null, null);
@@ -63,7 +62,6 @@ public class TestTaskManager implements TaskManager {
     /**
      * Тестируем метод создание объекта-задача с дефолтным статусом NEW
      */
-    @Override
     public Task addTask(String title, String description) {
 
         Task newTask = tracker.addTask(null, null);
@@ -134,7 +132,6 @@ public class TestTaskManager implements TaskManager {
     /**
      * Тестируем метод создание объекта-подзадача
      */
-    @Override
     public SubTask addSubTask(String title, String description, Epic parent, IssueStatus status) {
 
         SubTask newSubTask = tracker.addSubTask(null, null, null, null);
@@ -199,7 +196,6 @@ public class TestTaskManager implements TaskManager {
     /**
      * Тестируем метод создание объекта-эпика
      */
-    @Override
     public Epic addEpic(String title, String description) {
 
         Epic newEpic = tracker.addEpic(null, null);
@@ -280,7 +276,6 @@ public class TestTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void addIssue(Issue issue) {
 
         boolean goalAchieved = true;                // тест пройден
@@ -381,7 +376,6 @@ public class TestTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void updIssue(Issue issue) {
         boolean goalAchieved = true;
         IssueType issueType = getIssueType(issue);
@@ -632,17 +626,19 @@ public class TestTaskManager implements TaskManager {
         //для эксперимента есть нужное количество эпиков
         if (listEpics.size() > 1) {
             Epic epicFirst = tracker.getEpicById(tracker.getListAllEpics().get(0).getId());
-            Epic epicLast  = tracker.getEpicById(getIdForLastIssue(IssueType.EPIC));
-            Epic newEpic = new Epic(epicLast.getId(), epicFirst.getTitle() + "(обновлена)",
-                    epicFirst.getDescription());
-            for (SubTask subTask : epicLast.getChildrenList()) {
-                newEpic.getChildrenList().add(subTask);
+            Integer idEpicLast = getIdForLastIssue(IssueType.EPIC);
+            if (idEpicLast != null) {
+                Epic epicLast = tracker.getEpicById(idEpicLast);
+                Epic newEpic = new Epic(epicLast.getId(), epicFirst.getTitle() + "(обновлена)",
+                        epicFirst.getDescription());
+                for (SubTask subTask : epicLast.getChildrenList()) {
+                    newEpic.getChildrenList().add(subTask);
+                }
+                updEpic(newEpic);
             }
-            updEpic(newEpic);
         }
     }
 
-    @Override
     public void delIssueById(IssueType issueType, int idIssue) {
         boolean goalAchieved = true;
 
@@ -810,7 +806,6 @@ public class TestTaskManager implements TaskManager {
         }
     }
 
-    @Override
     public void delAllIssues(IssueType issueType) {
 
         boolean goalAchieved = true;
@@ -936,7 +931,6 @@ public class TestTaskManager implements TaskManager {
         System.out.println("ПОДЗАДАЧИ: " + subTaskListForCheck);
     }
 
-    @Override
     public List<Issue> getListAllIssues(IssueType issueType) {
 
         List<Issue> listIssue = tracker.getListAllIssues(issueType);
@@ -1028,12 +1022,6 @@ public class TestTaskManager implements TaskManager {
 
     @Override
     public List<SubTask> getListSubTaskOfEpic(Epic epic) {
-        //Данный метод тестируется косвенно в других тестах
-        return null;
-    }
-
-    @Override
-    public Issue getIssueById(IssueType issueType, int idIssue) {
         //Данный метод тестируется косвенно в других тестах
         return null;
     }

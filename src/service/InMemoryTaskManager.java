@@ -58,6 +58,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Перезапустить менеджер задач:
      * <p> - очищает хранилища: задачи/подзадачи/эпики
      * <p> - устанавливает счетчик задач в 1 (id = 1)
+     * метод ситуативный, возможно в следующих реализациях он будет упразднен, но сейчас он вполне уместен.
      */
     public void restartTaskManager() {
         delAllIssues(IssueType.TASK);
@@ -73,8 +74,7 @@ public class InMemoryTaskManager implements TaskManager {
      * @param status - статус подзадачи {NEW, IN_PROGRESS,DONE}
      * @return новый экземпляр класса {@link Task}
      */
-    @Override
-    public Task addTask(String title, String description, IssueStatus status) {
+     public Task addTask(String title, String description, IssueStatus status) {
         return new Task(getId(), title, description, status);
     }
 
@@ -84,7 +84,6 @@ public class InMemoryTaskManager implements TaskManager {
      * @param description описание
      * @return новый экземпляр класса {@link Task} со статусом NEW
      */
-    @Override
     public Task addTask(String title, String description) {
         return new Task(getId(), title, description);
     }
@@ -97,7 +96,6 @@ public class InMemoryTaskManager implements TaskManager {
      * @param status - статус подзадачи {NEW, IN_PROGRESS,DONE}
      * @return новый экземпляр класса {@link Epic}, без детей со статусом NEW
      */
-    @Override
     public SubTask addSubTask(String title, String description, Epic parent, IssueStatus status) {
         if (parent == null) {
             parent = addEpic("Родитель для подзадачи: " + title, "");
@@ -116,7 +114,6 @@ public class InMemoryTaskManager implements TaskManager {
      * @param description описание
      * @return новый экземпляр класса Epic, без детей со статусом NEW
      */
-    @Override
     public Epic addEpic(String title, String description) {
         return new Epic(getId(), title, description);
     }
@@ -157,7 +154,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
 
             //Обновляем статус родителя
-            parent.updStatus();
+            parent.updateStatus();
         }
     }
 
@@ -187,7 +184,6 @@ public class InMemoryTaskManager implements TaskManager {
      *
      * @param issue экземпляр класса Issue
      */
-    @Override
     public void addIssue(Issue issue) {
 
         if (issue instanceof Task) {
@@ -211,7 +207,6 @@ public class InMemoryTaskManager implements TaskManager {
      *
      * @param issue новая версия объекта с верным идентификатором, включая обновленный статус
      */
-    @Override
     public void updIssue(Issue issue) {
 
         if (issue instanceof Task) {
@@ -256,14 +251,14 @@ public class InMemoryTaskManager implements TaskManager {
                     //Удаляем старую подзадачу у эпика родителя
                     oldSubTask.getParent().getChildrenList().remove(oldSubTask);
                     //Обновляем статус старого родителя
-                    oldSubTask.getParent().updStatus();
+                    oldSubTask.getParent().updateStatus();
 
                     //Добавляем обновленную подзадачу в эпик
                     if (!parent.getChildrenList().contains((SubTask) issue)) {
                         parent.getChildrenList().add((SubTask) issue);
                     }
                     //Обновляем статус нового родителя
-                    parent.updStatus();
+                    parent.updateStatus();
 
                 } else {
                     System.out.println(MSG_ERROR_NOT_FOUND_EPIC);
@@ -311,14 +306,14 @@ public class InMemoryTaskManager implements TaskManager {
                 oldSubTask.getParent().getChildrenList().remove(oldSubTask);
 
                 //Обновляем статус старого родителя
-                oldSubTask.getParent().updStatus();
+                oldSubTask.getParent().updateStatus();
 
                 //Добавляем обновленную подзадачу в эпик
                 if (!subTask.getParent().getChildrenList().contains(subTask)) {
                     subTask.getParent().getChildrenList().add(subTask);
                 }
                 //Обновляем статус родителя
-                subTask.getParent().updStatus();
+                subTask.getParent().updateStatus();
 
             } else {
                 System.out.println(MSG_ERROR_NOT_FOUND_EPIC);
@@ -360,7 +355,6 @@ public class InMemoryTaskManager implements TaskManager {
      * @param issueType  тип задачи IssueType = {TASK, SUBTASK, EPIC}
      * @param idIssue    идентификатор задачи к удалению
      */
-    @Override
     public void delIssueById(IssueType issueType, int idIssue) {
 
         switch (issueType) {
@@ -406,7 +400,7 @@ public class InMemoryTaskManager implements TaskManager {
                 //Удаляем эту подзадачу в эпике
                 subTask.getParent().getChildrenList().remove(subTask);
                 //Обновляем статус родителя
-                subTask.getParent().updStatus();
+                subTask.getParent().updateStatus();
                 //Удаляем из менеджера подзадачу
                 subTasksMap.remove(id);
             }
@@ -441,7 +435,6 @@ public class InMemoryTaskManager implements TaskManager {
      * @param idIssue    идентификатор задачи
      * @return Задача запрошенного типа с указанным id. Если задача не найдена, то null
      */
-    @Override
     public Issue getIssueById(IssueType issueType, int idIssue) {
         Issue issue;
 
@@ -507,7 +500,6 @@ public class InMemoryTaskManager implements TaskManager {
      * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
      * @return возвращает список задач менеджера по заданному типу
      */
-    @Override
     public List<Issue> getListAllIssues(IssueType issueType) {
         List<Issue> issues = new ArrayList<>();
 
@@ -572,7 +564,6 @@ public class InMemoryTaskManager implements TaskManager {
      *
      * @param issueType тип задачи IssueType = {Task, SubTask, Epic}
      */
-    @Override
     public void delAllIssues(IssueType issueType) {
         switch (issueType) {
             case TASK:
