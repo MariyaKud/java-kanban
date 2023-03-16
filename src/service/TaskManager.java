@@ -9,21 +9,21 @@ import java.util.List;
 
 /**
  * Контракт для классов объект-менеджер
- * Данный контракт содержит основные методы, запрошенные в ТЗ
- * Как разработчик, считаю нужным в интерфейс включить методы "Аля" конструкторы.
- * Они задают контур благодаря которому, я как разработчик понимаю суть объекта-менеджер. *
- * Убираю их из интерфейса, для выполнения требований, но если по методам Issue совершенно согласна,
- * то по второй части мне аргументация не понятна.
  */
 public interface TaskManager {
 
     //Текст сообщений об ошибках
-    String MSG_ERROR_TYPE_UN_KNOW = "Для выбранного типа задач не создан обработчик в методе.";
     String MSG_ERROR_ID_NOT_FOUND = "Не найдена задача с указанным id.";
-    String MSG_ERROR_TASK_EMPTY = "Список задач пуст.";
     String MSG_ERROR_WRONG_EPIC = "При обновлении эпика дети остаются неизменными.";
     String MSG_ERROR_NOT_FOUND_EPIC = "Эпик не найден.";
-    String MSG_ERROR_FOR_METHOD = "Возникла проблема при проверке метода.";
+
+    /**
+     * Метод выдает очередной идентификатор для новой задачи,
+     * <p> готовит идентификатор для следующей задачи.
+     *
+     * @return возвращает очередной свободный идентификатор
+     */
+    int getId();
 
     ///////////////////////////////////////////////
     /**
@@ -52,38 +52,38 @@ public interface TaskManager {
      * Обновить задачу. Новая версия объекта передается в качестве параметра.
      * @param task новая версия объекта с верным идентификатором, включая обновленный статус
      */
-    void updTask(Task task);
+    void updateTask(Task task);
 
     /**
      * Обновить подзадачу. Новая версия объекта передается в качестве параметра.
      * @param subTask новая версия объекта с верным идентификатором, включая обновленный статус
      */
-    void updSubTask(SubTask subTask);
+    void updateSubTask(SubTask subTask);
 
     /**
      * Обновить эпик. Новая версия объекта передается в качестве параметра.
      * @param epic новая версия объекта с верным идентификатором
      */
-    void updEpic(Epic epic);
+    void updateEpic(Epic epic);
 
     ///////////////////////////////////////////////
     /**
      * Удалить задачу {@link Task} по id
      * @param id идентификатор задачи
      */
-    void delTaskById(int id);
+    void deleteTaskById(int id);
 
     /**
      * Удалить подзадачу {@link SubTask} по id
      * @param id - идентификатор задачи
      */
-    void delSubTaskById(int id);
+    void deleteSubTaskById(int id);
 
     /**
      * Удалить эпик {@link SubTask} по id
      * @param id - идентификатор задачи
      */
-    void delEpicById(int id);
+    void deleteEpicById(int id);
     ///////////////////////////////////////////////
     /**
      * Получить задачу {@link Task} по id. Может вернуть null.
@@ -110,17 +110,17 @@ public interface TaskManager {
     /**
      * Удалить все задачи {@link Task}
      */
-    void delAllTasks();
+    void deleteAllTasks();
 
     /**
      * Удалить все подзадачи {@link SubTask}
      */
-    void delAllSubTasks();
+    void deleteAllSubTasks();
 
     /**
      * Удалить все эпики {@link Epic}
      */
-    void delAllEpics();
+    void deleteAllEpics();
 
     ///////////////////////////////////////////////
     /**
@@ -148,7 +148,7 @@ public interface TaskManager {
      * @param epic эпик, по которому нужно получить список подзадач
      * @return список подзадач эпика
      */
-    List<SubTask> getListSubTaskOfEpic(Epic epic);
+    List<SubTask> getListSubTasksOfEpic(Epic epic);
 
     ///////////////////////////////////////////////
     /**
