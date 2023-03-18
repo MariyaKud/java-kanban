@@ -7,7 +7,7 @@ package model;
 public class SubTask extends Issue {
 
     /**
-     * Владелец текущего экземпляра класса {@code SubTask}
+     * Родитель экземпляр класса {@link Epic}, владелец текущего экземпляра класса {@code SubTask}
      */
     private Epic parent;
 
@@ -17,10 +17,11 @@ public class SubTask extends Issue {
         this.setStatus(status);
     }
 
-    /**
-     * Получить родителя экземпляра класса {@code SubTask}
-     * @return - владелец экземпляр класса {@link Epic}
-     */
+    public SubTask(SubTask other) {
+        super(other);
+        this.parent = other.getParent();
+    }
+
     public Epic getParent() {
         return parent;
     }
