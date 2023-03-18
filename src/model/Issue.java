@@ -6,7 +6,7 @@ package model;
  */
 public abstract class Issue {
 
-    private final int id;             // Идентификатор
+    private int id;             // Идентификатор
     private final String title;       // Название
     private final String description; // Описание
     private IssueStatus status;       // Статус
@@ -16,6 +16,12 @@ public abstract class Issue {
         this.title = title;
         this.description = description;
         this.status = IssueStatus.NEW;
+    }
+
+    // конструктор копии
+    public Issue(Issue other) {
+        this(other.getId(), other.getTitle(), other.getDescription());
+        this.status = other.getStatus();
     }
 
     public int getId() {
@@ -34,8 +40,12 @@ public abstract class Issue {
         return status;
     }
 
-    protected void setStatus(IssueStatus status) {
+    public void setStatus(IssueStatus status) {
         this.status = status;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     @Override
