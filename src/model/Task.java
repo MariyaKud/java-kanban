@@ -15,6 +15,10 @@ public class Task extends Issue {
         this.setStatus(IssueStatus.NEW);
     }
 
+    public Task(Task other) {
+        super(other);
+    }
+
     @Override
     public String toString() {
         return super.toString();
