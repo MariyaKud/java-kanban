@@ -19,43 +19,53 @@ public class Main {
         System.out.println("Запуск авто ТЕСТА для менеджера задач...");
 
         //Создать задачу/подзадачу/эпик
-        test.testScriptAddTaskOneMore();
-        test.testScriptAddEpicWithChildren(2);
+        test.testScriptAddTaskOneMore();                   //Тест №1
+        test.testScriptAddEpicWithChildren(2);//Тест №2-4
 
         //Получить списки
-        test.testGetListAllTasks();
-        test.testGetListAllEpics();
-        test.testGetListAllSubTasks();
+        test.testGetListAllTasks();                        //Тест №5
+        test.testGetListAllEpics();                        //Тест №6
+        test.testGetListAllSubTasks();                     //Тест №7
 
         //Тест истории просмотров
-        test.testGetHistory();
+        test.testGetHistory();                             //Тест №8
 
         //тест удаления списков
-        test.testDeleteAllTasks();
-        test.testDeleteAllSubTasks();
-        test.testDeleteAllEpics();
+        test.testDeleteAllTasks();                         //Тест №9
+        test.testDeleteAllSubTasks();                      //Тест №10
+        test.testDeleteAllEpics();                         //Тест №11
 
         //Вывести общий результат в хранилищах
-        test.printTaskManager();
+        test.printTaskManager(); // должно быть пусто
 
         //Тест удаления по id
-        test.testScriptAddTaskOneMore();
-        test.testScriptDeleteLastTask();
-        test.testScriptAddEpicWithChildren(2);
-        test.testScriptDeleteSubTask();
-        test.testScriptDeleteLastEpic();
+        test.testScriptAddTaskOneMore();                   //Тест №12
+        test.testScriptDeleteLastTask();                   //Тест №13
+        test.testScriptAddEpicWithChildren(2);//Тест №14-16
+        test.testScriptDeleteLastSubTask();                //Тест №17
+        test.testScriptDeleteLastEpic();                   //Тест №18
 
         //Вывести общий результат в хранилищах
-        test.printTaskManager();
+        test.printTaskManager();// должно быть пусто
 
-        //Тест обновлений
-        test.testScriptAddTaskOneMore();
-        test.testUpdateTaskForLastTask(IssueStatus.IN_PROGRESS);
-        test.testUpdateTaskForLastTask(IssueStatus.DONE);
-        test.testScriptAddEpicWithChildren(1);
-        test.testScriptAddEpicWithChildren(2);
-        test.testUpdateSubTaskForLastSubTask();
-        test.testUpdateStatusForLastEpic();
+        //Тест обновлений:
+        //Обновляем статус задачи
+        test.testScriptAddTaskOneMore();                        //Тест №19
+        test.testUpdateTaskForLastTask(IssueStatus.IN_PROGRESS);//Тест №20
+        test.testUpdateTaskForLastTask(IssueStatus.DONE);       //Тест №21
+        //Обновляем статус у подзадачи
+        test.testScriptAddEpicWithChildren(1);          //Тест №22,23
+        test.testUpdateStatusForLastSubTask(IssueStatus.IN_PROGRESS);//Тест №24
+        test.testUpdateStatusForLastSubTask(IssueStatus.DONE);       //Тест №25
+        //Обновляем родителя у подзадачи
+        test.testScriptAddEpicWithChildren(1);   //Тест №26,27
+        test.testUpdateSubTaskForLastSubTask();               //Тест №28
+        //Проверим статус эпика, для нескольких подзадач, должен стать Done
+        test.testUpdateStatusForLastSubTask(IssueStatus.DONE);//Тест №29
+        //Обновляем эпик, попытаемся поставить статус DONE
+        //Менеджер не должен этого допустить
+        test.testScriptAddEpicWithChildren(1);   //Тест №30,31
+        test.testUpdateStatusForLastEpic(IssueStatus.DONE);   //Тест №32
 
         //Выводим итоги авто теста
         test.printLine();
@@ -95,7 +105,7 @@ public class Main {
                     test.testScriptDeleteLastEpic();
                     break;
                 case "7":// Удалить последнюю подзадачу
-                    test.testScriptDeleteSubTask();
+                    test.testScriptDeleteLastSubTask();
                     break;
                 case "8": // показать результат тестов
                     System.out.print("Общий результат всех тестов ");
@@ -105,7 +115,7 @@ public class Main {
                     test.testUpdateTaskForLastTask(IssueStatus.DONE);
                     break;
                 case "10":// Обновить последний эпик
-                    test.testUpdateStatusForLastEpic();
+                    test.testUpdateStatusForLastEpic(IssueStatus.DONE);
                     break;
                 case "11":// Обновить последнюю подзадачу
                     test.testUpdateSubTaskForLastSubTask();

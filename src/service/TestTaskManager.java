@@ -55,7 +55,7 @@ public class TestTaskManager {
      * @return новый экземпляр класса {@link Task} со статусом NEW
      */
     private Task addTask(String title, String description) {
-        return new Task(tracker.getId(), title, description);
+        return new Task(0, title, description);
     }
 
     /**
@@ -70,7 +70,7 @@ public class TestTaskManager {
             parent = addEpic("Родитель для подзадачи: " + title, "");
 
         }
-        SubTask newSubTask = new SubTask(tracker.getId(), title, description, parent, IssueStatus.NEW);
+        SubTask newSubTask = new SubTask(0, title, description, parent, IssueStatus.NEW);
         if (!parent.getChildrenList().contains(newSubTask)) {
             parent.getChildrenList().add(newSubTask);
         }
@@ -84,7 +84,7 @@ public class TestTaskManager {
      * @return новый экземпляр класса Epic, без детей со статусом NEW
      */
     private Epic addEpic(String title, String description) {
-        return new Epic(tracker.getId(), title, description);
+        return new Epic(0, title, description);
     }
 
     /**
@@ -96,9 +96,9 @@ public class TestTaskManager {
 
         printHeadOfTest("void addTask(Task task)",
                 "создать новую задачу",
-                "выполняем поиск новой задачи в хранилище менеджера.",
+                "найти задачу в менеджере.",
                 "Task getTaskById(int id)",
-                "задача не найдена.");
+                "новая задача не найдена.");
 
         //Обращение к методу
         tracker.addTask(task);
@@ -129,7 +129,7 @@ public class TestTaskManager {
 
         printHeadOfTest("void addSubTask(SubTask subTask)",
                 "создать новую подзадачу",
-                "выполняем поиск новой подзадачи в хранилище менеджера.",
+                "найти подзадачу в менеджере.",
                 "SubTask getSubTaskById(int id)",
                 "новая подзадача не найдена.");
 
@@ -167,9 +167,9 @@ public class TestTaskManager {
 
         printHeadOfTest("void addEpic(Epic epic)",
                 "создать новый эпик",
-                "выполняем поиск эпика в хранилище менеджера.",
+                "найти эпик в менеджере.",
                 "Epic getEpicById(int id)",
-                "эпик не найден.");
+                "новый эпик не найден.");
 
         //Обращение к методу
         tracker.addEpic(epic);
@@ -231,9 +231,11 @@ public class TestTaskManager {
             //Выводим данные по старой задаче
             System.out.println("Найдена задача по id = " + taskToUpdate.getId() + " : " + taskToUpdate);
 
-            //Обновляем задачу, выводим информацию по обновленной задаче по правильному id
+            //Выводим данные по новой задаче
+            System.out.println("\nОбновлена задача с id = " + task.getId() + " : " + task + "\n");
+
+            //Обновляем задачу
             tracker.updateTask(task);
-            System.out.println("\nОбновлена задача с id = " + task.getId() + " : " + task);
 
             Task updateTask = tracker.getTaskById(task.getId());
             if (!task.getTitle().equals(updateTask.getTitle()) ||
@@ -267,23 +269,23 @@ public class TestTaskManager {
         SubTask subTaskToUpdate = tracker.getSubTaskById(subTask.getId());
         if (subTaskToUpdate != null) {
 
-            //Выводим данные по старой задаче
+            //Выводим данные по старой подзадаче
             System.out.println("Найдена подзадача по id = " + subTaskToUpdate.getId() + " : " + subTaskToUpdate);
-
+            // Дополнительная информация
             Epic parent = subTaskToUpdate.getParent();
             System.out.println("Родитель подзадачи эпик с id = " + parent.getId() + " : " + parent);
             System.out.println("Все подзадачи эпика с id = " + parent.getId() + " : " + parent.getChildrenList());
 
-
-            //Обновляем задачу, выводим информацию по обновленной задаче по правильному id
-            tracker.updateSubTask(subTask);
-            System.out.println("\nОбновлена подзадачу с id = " + subTask.getId() + " : " + subTask);
-
+            //Выводим данные по новой подзадаче
+            System.out.println("\nВходная подзадача с id = " + subTask.getId() + " : " + subTask);
             // Дополнительная информация
             Epic newParent = subTask.getParent();
             System.out.println("Родитель подзадачи эпик с id = " + newParent.getId() + " : " + newParent);
-            System.out.println("Все подзадачи эпика с id = " + newParent.getId() + " : " + newParent.getChildrenList());
+            System.out.println("Все подзадачи эпика с id = " + newParent.getId() + " : "
+                               + newParent.getChildrenList() + "\n");
 
+            //Обновляем подзадачу
+            tracker.updateSubTask(subTask);
 
             SubTask updateSubTask = tracker.getSubTaskById(subTask.getId());
             if (!subTask.getTitle().equals(updateSubTask.getTitle()) ||
@@ -314,24 +316,25 @@ public class TestTaskManager {
                 "по входному id находим эпик в менеджере, сравниваем поля (title,description). " +
                         "Статус как и дети при обновлении меняться не должен.",
                 "Epic getEpicById(int id);",
-                "если не найден эпик по входному id, не совпали дети, не корректно обновлены поля или" +
-                        "поменялся статус.");
+                "если не найден эпик по входному id, не совпали дети, не корректно обновлены поля.");
 
         Epic epicToUpdate = tracker.getEpicById(epic.getId());
         if (epicToUpdate != null) {
 
-            //Выводим данные по старой задаче
-            System.out.println("Найдена эпик по id = " + epic.getId() + " : " + epicToUpdate);
+            //Выводим данные по старому эпику
+            System.out.println("Найден эпик по id = " + epic.getId() + " : " + epicToUpdate);
+            // Дополнительная информация
             System.out.println("Все подзадачи эпика с id = " + epicToUpdate.getId() + " : "
                     + epicToUpdate.getChildrenList());
 
-            //Обновляем задачу, выводим информацию по обновленной задаче по правильному id
-            tracker.updateEpic(epic);
-            System.out.println("\nОбновлен эпик с id = " + epic.getId() + " : " + epic);
-
+            //Выводим данные по новому эпику
+            System.out.println("\nВходной эпик с id = " + epic.getId() + " : " + epic);
             // Дополнительная информация
             System.out.println("Все подзадачи эпика с id = " + epic.getId() + " : "
-                    + epic.getChildrenList());
+                    + epic.getChildrenList() + "\n");
+
+            //Обновляем эпик
+            tracker.updateEpic(epic);
 
             Epic updateEpic = tracker.getEpicById(epic.getId());
             if (!epic.getTitle().equals(updateEpic.getTitle()) ||
@@ -354,7 +357,8 @@ public class TestTaskManager {
     }
 
     /**
-     * Сценарий тестирования метода обновить задачу
+     * Сценарий тестирования метода обновить задачу.
+     * Обновляем статус
      */
     public void testUpdateTaskForLastTask(IssueStatus status) {
         Integer id = getIdForLastIssue(IssueType.TASK);
@@ -373,10 +377,26 @@ public class TestTaskManager {
     }
 
     /**
-     * Сценарий тестирования метода обновить подзадачу
+     * Сценарий тестирования метода обновить подзадачу, обновляем статус
+     */
+    public void testUpdateStatusForLastSubTask(IssueStatus issueStatus) {
+        Integer id = getIdForLastIssue(IssueType.SUBTASK);
+        if (id != null) {
+            SubTask lastSubTask = tracker.getSubTaskById(id);
+            SubTask cloneSubTask = new SubTask(lastSubTask);
+            cloneSubTask.setStatus(issueStatus);
+            testUpdateSubTask(cloneSubTask);
+        } else {
+            System.out.println(MSG_ERROR_ID_NOT_FOUND);
+        }
+    }
+
+    /**
+     * Сценарий тестирования метода обновить подзадачу, обновляем родителя
      */
     public void testUpdateSubTaskForLastSubTask() {
         Integer id = getIdForLastIssue(IssueType.SUBTASK);
+
         //Для простоты берем первый эпик и последнюю подзадачу, нам нужно, чтобы эпиков было минимум 2
         List<Epic> listEpics= tracker.getListAllEpics();
 
@@ -407,22 +427,18 @@ public class TestTaskManager {
 
     /**
      * Сценарий тестирования метода обновить эпик (статус рассчитывается по состоянию подзадач)
+     * Подставляем эпик с новым статусом, не меняя подазадчи
      */
-    public void testUpdateStatusForLastEpic() {
-        List<Epic> listEpics= tracker.getListAllEpics();
-        //для эксперимента есть нужное количество эпиков
-        if (listEpics.size() > 1) {
-            Epic epicFirst = tracker.getEpicById(tracker.getListAllEpics().get(0).getId());
-            Integer idEpicLast = getIdForLastIssue(IssueType.EPIC);
-            if (idEpicLast != null) {
-                Epic epicLast = tracker.getEpicById(idEpicLast);
-                Epic newEpic = new Epic(epicLast.getId(), epicFirst.getTitle() + "(обновлена)",
-                        epicFirst.getDescription());
-                for (SubTask subTask : epicLast.getChildrenList()) {
-                    newEpic.getChildrenList().add(subTask);
-                }
-                testUpdateEpic(newEpic);
-            }
+    public void testUpdateStatusForLastEpic(IssueStatus issueStatus) {
+
+        Integer id = getIdForLastIssue(IssueType.EPIC);
+        if (id != null) {
+            Epic lastEpic  = tracker.getEpicById(id);
+            Epic cloneEpic = new Epic(lastEpic);
+            cloneEpic.setStatus(issueStatus);
+            testUpdateEpic(cloneEpic);
+        } else {
+            System.out.println(MSG_ERROR_ID_NOT_FOUND);
         }
     }
 
@@ -441,6 +457,7 @@ public class TestTaskManager {
         System.out.println("Попытка удаления задачи с Id = " + id);
         tracker.deleteTaskById(id);
 
+        System.out.println("Поиск задачи с Id = " + id);
         if (tracker.getTaskById(id) != null) {
             goalAchieved = false;
         }
@@ -466,6 +483,7 @@ public class TestTaskManager {
         System.out.println("Попытка удаления подзадачи с Id = " + id);
         tracker.deleteSubTaskById(id);
 
+        System.out.println("Поиск подзадачи с Id = " + id);
         if (tracker.getSubTaskById(id) != null) {
             goalAchieved = false;
         }
@@ -504,6 +522,7 @@ public class TestTaskManager {
         System.out.println("Попытка удаления эпика с Id = " + id);
         tracker.deleteEpicById(id);
 
+        System.out.println("Поиск эпика с Id = " + id);
         if (tracker.getEpicById(id) != null) {
             goalAchieved = false;
         }
@@ -538,7 +557,7 @@ public class TestTaskManager {
     /**
      * Сценарий тестирования метода удаления подзадачи
      */
-    public void testScriptDeleteSubTask() {
+    public void testScriptDeleteLastSubTask() {
         Integer id = getIdForLastIssue(IssueType.SUBTASK);
         if (id != null) {
             testDeleteSubTaskById(id);
@@ -565,7 +584,7 @@ public class TestTaskManager {
                 "удалить все задачи.",
                 "проверить хранилище с задачами в менеджере.",
                 "List<Task> getListAllTasks()",
-                "тест ошибочный, если остались задачи в менеджере.");
+                "список задач в менеджере не пуст.");
 
         System.out.println("Выполняется удаление задач ..");
         tracker.deleteAllTasks();
@@ -589,7 +608,7 @@ public class TestTaskManager {
                 "удалить все подзадачи.",
                 "проверить хранилище с подзадачами в менеджере. Проверить списки детей эпиков.",
                 "List<Task> getListAllSubTasks()",
-                "тест ошибочный, если остались подзадачи в менеджере или дети у эпиков.");
+                "список подзадач в менеджере не пуст или остались дети у эпиков.");
 
         System.out.println("Выполняется удаление подзадач ..");
         tracker.deleteAllSubTasks();
