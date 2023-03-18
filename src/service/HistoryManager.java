@@ -26,9 +26,4 @@ public interface HistoryManager {
      * Получить список задач в стеке
      */
     List<Issue> getHistory();
-
-    /**
-     * Очистить список задач в стеке
-     */
-    void clearHistory();
 }

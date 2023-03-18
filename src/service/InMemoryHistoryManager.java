@@ -33,12 +33,4 @@ public class InMemoryHistoryManager implements HistoryManager{
     public List<Issue> getHistory() {
         return historyOfViewIssueList;
     }
-
-    /**
-     * Очистить список задач в стеке
-     */
-    @Override
-    public void clearHistory() {
-        historyOfViewIssueList.clear();
-    }
 }
