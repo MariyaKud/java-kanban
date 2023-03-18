@@ -28,7 +28,7 @@ public class Main {
         test.testGetListAllSubTasks();                     //Тест №7
 
         //Тест истории просмотров
-        test.testGetHistory();                             //Тест №8
+        test.testScriptGetHistory();                             //Тест №8
 
         //тест удаления списков
         test.testDeleteAllTasks();                         //Тест №9
@@ -51,17 +51,17 @@ public class Main {
         //Тест обновлений:
         //Обновляем статус задачи
         test.testScriptAddTaskOneMore();                        //Тест №19
-        test.testUpdateTaskForLastTask(IssueStatus.IN_PROGRESS);//Тест №20
-        test.testUpdateTaskForLastTask(IssueStatus.DONE);       //Тест №21
+        test.testScriptUpdateStatusForLastTask(IssueStatus.IN_PROGRESS);//Тест №20
+        test.testScriptUpdateStatusForLastTask(IssueStatus.DONE);       //Тест №21
         //Обновляем статус у подзадачи
         test.testScriptAddEpicWithChildren(1);          //Тест №22,23
-        test.testUpdateStatusForLastSubTask(IssueStatus.IN_PROGRESS);//Тест №24
-        test.testUpdateStatusForLastSubTask(IssueStatus.DONE);       //Тест №25
+        test.testScriptUpdateStatusForLastSubTask(IssueStatus.IN_PROGRESS);//Тест №24
+        test.testScriptUpdateStatusForLastSubTask(IssueStatus.DONE);       //Тест №25
         //Обновляем родителя у подзадачи
         test.testScriptAddEpicWithChildren(1);   //Тест №26,27
-        test.testUpdateSubTaskForLastSubTask();               //Тест №28
+        test.testUpdateParentForLastSubTask();               //Тест №28
         //Проверим статус эпика, для нескольких подзадач, должен стать Done
-        test.testUpdateStatusForLastSubTask(IssueStatus.DONE);//Тест №29
+        test.testScriptUpdateStatusForLastSubTask(IssueStatus.DONE);//Тест №29
         //Обновляем эпик, попытаемся поставить статус DONE
         //Менеджер не должен этого допустить
         test.testScriptAddEpicWithChildren(1);   //Тест №30,31
@@ -112,13 +112,13 @@ public class Main {
                     test.viewResult(test.isCommonGoodResultAllTest());
                     break;
                 case "9":// Обновить последнюю задачу
-                    test.testUpdateTaskForLastTask(IssueStatus.DONE);
+                    test.testScriptUpdateStatusForLastTask(IssueStatus.DONE);
                     break;
                 case "10":// Обновить последний эпик
                     test.testUpdateStatusForLastEpic(IssueStatus.DONE);
                     break;
                 case "11":// Обновить последнюю подзадачу
-                    test.testUpdateSubTaskForLastSubTask();
+                    test.testUpdateParentForLastSubTask();
                     break;
                 case "12":// Очистить список задач
                     test.testDeleteAllTasks();
@@ -130,7 +130,7 @@ public class Main {
                     test.testDeleteAllSubTasks();
                     break;
                 case "15": // показать историю просмотров
-                    test.testGetHistory();
+                    test.testScriptGetHistory();
                     break;
                 default:
                     System.out.println("Извините, но такого теста пока нет.");
