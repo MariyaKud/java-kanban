@@ -19,6 +19,11 @@ public class Epic extends Issue {
         super(id, title, description);
     }
 
+    public Epic(Epic other) {
+        super(other);
+        this.childrenList.addAll(other.getChildrenList());
+    }
+
     /**
      * Получить всех детей экземпляра класса {@code Epic}
      * @return - список элементов класса {@link SubTask}, содержащихся в экземпляре {@code Epic}
@@ -27,43 +32,6 @@ public class Epic extends Issue {
         return childrenList;
     }
 
-    /**
-     * <b>Рассчитать статус эпика</b>
-     * <p>Правило установки статуса эпика:
-     * Если у эпика нет подзадач или все они имеют статус NEW, то статус должен быть NEW.
-     * Если все подзадачи имеют статус DONE, то и эпик считается завершённым со статусом DONE.
-     * Во всех остальных случаях статус должен быть IN_PROGRESS.
-     */
-    public void updateStatus() {
-
-        if (childrenList.size() == 0) {
-            setStatus(IssueStatus.NEW);
-        } else {
-            boolean allNew = true;
-            boolean allDone = true;
-
-            for (SubTask child : childrenList) {
-                if (child.getStatus() != IssueStatus.NEW) {
-                    allNew = false;
-                }
-                if (child.getStatus() != IssueStatus.DONE) {
-                    allDone = false;
-                }
-                //Прерываем цикл, ничего нового мы дальше не узнаем
-                if (!allNew && !allDone) {
-                    break;
-                }
-            }
-
-            if (allNew) {
-                setStatus(IssueStatus.NEW);
-            } else if (allDone) {
-                setStatus(IssueStatus.DONE);
-            } else {
-                setStatus(IssueStatus.IN_PROGRESS);
-            }
-        }
-    }
 
     @Override
     public String toString() {
