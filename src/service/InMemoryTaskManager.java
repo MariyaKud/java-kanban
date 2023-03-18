@@ -294,6 +294,7 @@ public class InMemoryTaskManager implements TaskManager {
     ///////////////////////////////////////////////
     /**
      * Получить задачу {@link Task} по id. Может вернуть null.
+     *
      * @param id - идентификатор задачи
      * @return задача типа {@link Task}. Если задача не найдена, то null
      */
@@ -311,6 +312,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Получить подзадачу {@link SubTask} по id. Может вернуть null.
+     *
      * @param id - идентификатор задачи
      * @return задача типа {@link SubTask}. Если задача не найдена, то null
      */
@@ -345,6 +347,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Получить список всех задач менеджера.
+     *
      * @return список задач {@link Task}
      */
     @Override
@@ -354,6 +357,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Получить список всех подзадач менеджера.
+     *
      * @return список подзадач {@link SubTask}
      */
     @Override
@@ -363,6 +367,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Получить список всех эпиков менеджера.
+     *
      * @return список эпиков {@link Epic}
      */
     @Override
@@ -384,6 +389,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * <b>Рассчитать статус эпика</b>
+     *
      * <p>Правило установки статуса эпика:
      * Если у эпика нет подзадач или все они имеют статус NEW, то статус должен быть NEW.
      * Если все подзадачи имеют статус DONE, то и эпик считается завершённым со статусом DONE.
@@ -430,5 +436,4 @@ public class InMemoryTaskManager implements TaskManager {
     public List<Issue> getHistory() {
         return historyManager.getHistory();
     }
-
 }
