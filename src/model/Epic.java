@@ -57,9 +57,8 @@ public class Epic extends Issue {
         result.append(", children.hash='").append(hashChildren).append('\'').append("}");
 
         if (getChildrenList().size() != 0) {
-            result.append("\n");
             for (SubTask subTask : getChildrenList()) {
-                result.append("\t\t").append(subTask).append("\n");
+                result.append("\n").append("\t\t").append(subTask);
             }
         }
 

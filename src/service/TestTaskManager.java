@@ -128,7 +128,7 @@ public class TestTaskManager {
     public void testAddEpic(Epic epic) {
         boolean goalAchieved = true;// тест пройден
 
-        printHeadOfTest("void addEpic(Epic epic)",
+        printHeadOfTest("Epic addEpic(Epic epic)",
                 "создать новый эпик",
                 "найти эпик в менеджере.",
                 "Epic getEpicById(int id)",
@@ -163,7 +163,7 @@ public class TestTaskManager {
 
         boolean goalAchieved = true;
 
-        printHeadOfTest("void UpdateTask(Task task)",
+        printHeadOfTest("Task UpdateTask(Task task)",
                 "обновить задачу",
                 "по входному id находим задачу в менеджере, сравниваем поля (title,description,status).",
                 "Task getTaskById(int id)",
@@ -207,7 +207,7 @@ public class TestTaskManager {
     public void testUpdateSubTask(SubTask subTask) {
         boolean goalAchieved = true;
 
-        printHeadOfTest("void UpdateSubTask(SubTask subTask)",
+        printHeadOfTest("SubTask UpdateSubTask(SubTask subTask)",
                 "обновить подзадачу",
                 "по входному id находим подзадачу в менеджере, сравниваем поля " +
                          "(title,description,status, parent).",
@@ -268,7 +268,7 @@ public class TestTaskManager {
     public void testUpdateEpic(Epic epic) {
         boolean goalAchieved = true;
 
-        printHeadOfTest("void updEpic(Epic epic)",
+        printHeadOfTest("Epic updEpic(Epic epic)",
                 "обновить эпик",
                 "по входному id находим эпик в менеджере, сравниваем поля (title,description). " +
                         "Статус как и дети при обновлении меняться не должен.",
