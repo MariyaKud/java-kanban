@@ -37,6 +37,7 @@ public class SubTask extends Issue {
                 ", parentId=" + parent.getId() +
                 ", status="   + getStatus() +
                 ", title='"   + getTitle() + '\'' +
+                ", description='"   + getDescription() + '\'' +
                 ", hash='"    + hashCode() + '\'' +
                 ", parent.hash='" + parent.hashCode() + '\'' +
                 '}';
