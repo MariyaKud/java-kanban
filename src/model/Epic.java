@@ -32,14 +32,14 @@ public class Epic extends Issue {
         return childrenList;
     }
 
-
     @Override
     public String toString() {
         //Идентификаторы детей эпика через ","
         StringBuilder idChildren = new StringBuilder();
         StringBuilder hashChildren = new StringBuilder();
+        StringBuilder result = new StringBuilder();
 
-        for (SubTask child : this.childrenList) {
+        for (SubTask child : childrenList) {
             if (idChildren.length() == 0) {
                 idChildren.append(child.getId());
                 hashChildren.append(child.hashCode());
@@ -49,14 +49,20 @@ public class Epic extends Issue {
             }
         }
 
-        return "Epic{" +
-                "id=" + getId() +
-                ", status=" + getStatus() +
-                ", children.size='" + childrenList.size() + '\'' +
-                ", children.id='" + idChildren + '\'' +
-                ", title='" + getTitle() + '\'' +
-                ", hash='" + hashCode() + '\'' +
-                ", children.hash='" + hashChildren + '\'' +
-                '}';
+        result.append("Epic{").append("id=").append(getId()).append(", status=").append(getStatus());
+        result.append(", title='").append(getTitle() ).append('\'').append(", description='").append(getDescription());
+        result.append('\'').append(", hash='").append(hashCode()).append('\'');
+        result.append(", children.size='").append(childrenList.size()).append('\'');
+        result.append(", children.id='").append(idChildren).append('\'');
+        result.append(", children.hash='").append(hashChildren).append('\'').append("}");
+
+        if (getChildrenList().size() != 0) {
+            result.append("\n");
+            for (SubTask subTask : getChildrenList()) {
+                result.append("\t\t").append(subTask).append("\n");
+            }
+        }
+
+        return result.toString();
     }
 }
