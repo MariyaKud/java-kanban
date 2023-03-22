@@ -28,7 +28,7 @@ public class Main {
         test.testGetListAllSubTasks();                     //Тест №7
 
         //Тест истории просмотров
-        test.testScriptGetHistory();                             //Тест №8
+        test.testScriptGetHistory();                       //Тест №8
 
         //тест удаления списков
         test.testDeleteAllTasks();                         //Тест №9
@@ -50,22 +50,24 @@ public class Main {
 
         //Тест обновлений:
         //Обновляем статус задачи
-        test.testScriptAddTaskOneMore();                        //Тест №19
-        test.testScriptUpdateStatusForLastTask(IssueStatus.IN_PROGRESS);//Тест №20
-        test.testScriptUpdateStatusForLastTask(IssueStatus.DONE);       //Тест №21
+        test.testScriptAddTaskOneMore();                                   //Тест №19
+        test.testScriptUpdateStatusForLastTask(IssueStatus.IN_PROGRESS);   //Тест №20
+        test.testScriptUpdateStatusForLastTask(IssueStatus.DONE);          //Тест №21
         //Обновляем статус у подзадачи
-        test.testScriptAddEpicWithChildren(1);          //Тест №22,23
+        test.testScriptAddEpicWithChildren(1);                //Тест №22,23
         test.testScriptUpdateStatusForLastSubTask(IssueStatus.IN_PROGRESS);//Тест №24
         test.testScriptUpdateStatusForLastSubTask(IssueStatus.DONE);       //Тест №25
         //Обновляем родителя у подзадачи
-        test.testScriptAddEpicWithChildren(1);   //Тест №26,27
-        test.testUpdateParentForLastSubTask();               //Тест №28
+        test.testScriptAddEpicWithChildren(1);                //Тест №26,27
+        // для проверки теста смены родителя выведем стартовое состояние
+        test.printTaskManager();
+        test.testUpdateParentForLastSubTask();                             //Тест №28
         //Проверим статус эпика, для нескольких подзадач, должен стать Done
-        test.testScriptUpdateStatusForLastSubTask(IssueStatus.DONE);//Тест №29
+        test.testScriptUpdateStatusForLastSubTask(IssueStatus.DONE);       //Тест №29
         //Обновляем эпик, попытаемся поставить статус DONE
         //Менеджер не должен этого допустить
-        test.testScriptAddEpicWithChildren(1);   //Тест №30,31
-        test.testUpdateStatusForLastEpic(IssueStatus.DONE);   //Тест №32
+        test.testScriptAddEpicWithChildren(1);                //Тест №30,31
+        test.testUpdateStatusForLastEpic(IssueStatus.DONE);                //Тест №32
 
         //Выводим итоги авто теста
         test.printLine();
@@ -150,5 +152,4 @@ public class Main {
         System.out.println("8 - Получить результат теста.     |  15 - Получить историю просмотров задач.");
         System.out.println("-------------------------------------------");
     }
-
 }

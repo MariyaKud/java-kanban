@@ -24,21 +24,21 @@ public interface TaskManager {
      *
      * @param task экземпляр класса {@link Task}
      */
-    void addTask(Task task);
+    Task addTask(Task task);
 
     /**
      * Добавить подзадачу менеджеру. Сам объект передается в качестве параметра.
      *
      * @param subTask экземпляр класса {@link SubTask}
      */
-    void addSubTask(SubTask subTask);
+    SubTask addSubTask(SubTask subTask);
 
     /**
      * Добавить эпик менеджеру. Сам объект передается в качестве параметра.
      *
      * @param epic экземпляр класса {@link Epic}
      */
-    void addEpic(Epic epic);
+    Epic addEpic(Epic epic);
 
     ///////////////////////////////////////////////
     /**
@@ -46,21 +46,21 @@ public interface TaskManager {
      *
      * @param task новая версия объекта с верным идентификатором, включая обновленный статус
      */
-    void updateTask(Task task);
+    Task updateTask(Task task);
 
     /**
      * Обновить подзадачу. Новая версия объекта передается в качестве параметра.
      *
      * @param subTask новая версия объекта с верным идентификатором, включая обновленный статус
      */
-    void updateSubTask(SubTask subTask);
+    SubTask updateSubTask(SubTask subTask);
 
     /**
      * Обновить эпик. Новая версия объекта передается в качестве параметра.
      *
      * @param epic новая версия объекта с верным идентификатором
      */
-    void updateEpic(Epic epic);
+    Epic updateEpic(Epic epic);
 
     ///////////////////////////////////////////////
     /**
@@ -83,6 +83,23 @@ public interface TaskManager {
      * @param id - идентификатор задачи
      */
     void deleteEpicById(int id);
+
+    ///////////////////////////////////////////////
+    /**
+     * Удалить все задачи {@link Task}
+     */
+    void deleteAllTasks();
+
+    /**
+     * Удалить все подзадачи {@link SubTask}
+     */
+    void deleteAllSubTasks();
+
+    /**
+     * Удалить все эпики {@link Epic}
+     */
+    void deleteAllEpics();
+
     ///////////////////////////////////////////////
     /**
      * Получить задачу {@link Task} по id. Может вернуть null.
@@ -107,22 +124,6 @@ public interface TaskManager {
      * @return задача типа {@link Epic}. Если задача не найдена, то null
      */
     Epic getEpicById(int id);
-
-    ///////////////////////////////////////////////
-    /**
-     * Удалить все задачи {@link Task}
-     */
-    void deleteAllTasks();
-
-    /**
-     * Удалить все подзадачи {@link SubTask}
-     */
-    void deleteAllSubTasks();
-
-    /**
-     * Удалить все эпики {@link Epic}
-     */
-    void deleteAllEpics();
 
     ///////////////////////////////////////////////
     /**
@@ -163,7 +164,7 @@ public interface TaskManager {
      * Если все подзадачи имеют статус DONE, то и эпик считается завершённым со статусом DONE.
      * Во всех остальных случаях статус должен быть IN_PROGRESS.
      */
-    void updateStatusEpic(Epic epic);
+    Epic updateStatusEpic(Epic epic);
 
     ///////////////////////////////////////////////
     /**
