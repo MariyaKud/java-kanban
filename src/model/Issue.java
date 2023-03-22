@@ -47,15 +47,4 @@ public abstract class Issue {
     public void setId(int id) {
         this.id = id;
     }
-
-    @Override
-    public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                ", hash='"  + hashCode() + '\'' +
-                '}';
-    }
 }

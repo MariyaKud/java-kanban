@@ -11,8 +11,7 @@ public class Task extends Issue {
     }
 
     public Task(int id, String title, String description) {
-        super(id,title,description);
-        this.setStatus(IssueStatus.NEW);
+        this(id,title,description,IssueStatus.NEW);
     }
 
     public Task(Task other) {
@@ -21,6 +20,12 @@ public class Task extends Issue {
 
     @Override
     public String toString() {
-        return super.toString();
+        return "Task{" +
+                "id=" + getId() +
+                ", status=" + getStatus() +
+                ", title='" + getTitle() + '\'' +
+                ", description='" + getDescription() + '\'' +
+                ", hash='"  + hashCode() + '\'' +
+                '}';
     }
 }
