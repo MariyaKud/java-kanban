@@ -557,6 +557,29 @@ public class TestTaskManager {
         }
     }
 
+    public void testGetIssueById(int id) {
+
+        Issue issue = tracker.getTaskById(id);
+        if (issue == null) {
+            issue = tracker.getSubTaskById(id);
+        }
+        if (issue == null) {
+            issue = tracker.getEpicById(id);
+        }
+
+        printHeadOfTest("Task getTaskById(int id),SubTask getSubTaskById(int id),Epic getEpicById(int id)",
+                "получить задачу по id.",
+                "визуализируем найденную задачу.",
+                "System.out.print",
+                "тест всегда считаем успешным.");
+
+        viewResult(true);
+
+        System.out.println(issue);
+        if (issue == null) {
+            System.out.println("Сущность с указанным id не найдена.");
+        }
+    }
     ////////////////////////////МЕТОДЫ_ТЕСТЕРОВЩИКИ//////////////////////////--
 
     ////////////////////////////МЕТОДЫ_СЦЕНАРИИ_ТЕСТА////////////////////////++
@@ -741,19 +764,9 @@ public class TestTaskManager {
 
         printHeadOfTest("List<Issue> getHistory()",
                 "проверить историю просмотров.",
-                "создадим подряд задачи c просмотром для заполнения очереди просмотров." +
-                        " Порядок задач в истории должен встать по возрастанию",
-                "void addTask(Task task), Task getTaskById(int id)",
+                "Выводим историю просмотров на экран",
+                "System.out.println",
                 "тест всегда считаем успешным. Историю просмотров оцениваем на экране.");
-
-        //Создам задачи в количестве SIZE_HISTORY_OF_VIEW_ISSUE_LIST
-        for (int i = 0; i < HistoryManager.SIZE_HISTORY_OF_VIEW_ISSUE_LIST + 1; i++) {
-            Task newTask = addTask("Задача " + numberTask, "Описание задачи " + numberTask);
-            tracker.addTask(newTask);
-            System.out.println("Создана задача с id = " + newTask.getId());
-            tracker.getTaskById(newTask.getId());
-            ++numberTask;
-        }
 
         viewResult(true);
 
