@@ -240,6 +240,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteTaskById(int id) {
         if (tasksMap.containsKey(id)) {
             tasksMap.remove(id);
+            historyManager.remove(id);
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
         }
@@ -260,6 +261,8 @@ public class InMemoryTaskManager implements TaskManager {
                 updateStatusEpic(subTask.getParent());
                 //Удаляем из менеджера подзадачу
                 subTasksMap.remove(id);
+                //Удаляем подзадачу из истории просмотров
+                historyManager.remove(id);
             }
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
@@ -277,9 +280,13 @@ public class InMemoryTaskManager implements TaskManager {
             for (SubTask child : epicsMap.get(id).getChildrenList()) {
                 if (subTasksMap.containsValue(child)) {
                     subTasksMap.remove(child.getId());
+                    //Удаляем подзадачу из истории просмотров
+                    historyManager.remove(child.getId());
                 }
             }
             epicsMap.remove(id);
+            //Удаляем эпик из истории просмотров
+            historyManager.remove(id);
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
         }
@@ -291,6 +298,9 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void deleteAllTasks() {
+        for (Integer id : tasksMap.keySet()) {
+            historyManager.remove(id);
+        }
         tasksMap.clear();
     }
 
@@ -299,6 +309,9 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void deleteAllSubTasks() {
+        for (Integer id : subTasksMap.keySet()) {
+            historyManager.remove(id);
+        }
         subTasksMap.clear();
         for (Epic value : epicsMap.values()) {
             value.getChildrenList().clear();
@@ -310,7 +323,13 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void deleteAllEpics() {
+        for (Integer id : subTasksMap.keySet()) {
+            historyManager.remove(id);
+        }
         subTasksMap.clear();
+        for (Integer id : epicsMap.keySet()) {
+            historyManager.remove(id);
+        }
         epicsMap.clear();
     }
 
