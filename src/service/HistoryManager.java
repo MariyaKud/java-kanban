@@ -8,22 +8,27 @@ import model.Task;
 import java.util.List;
 
 /**
- * Контракт для стека с историей просмотров задач типа: {@link Task},{@link SubTask},{@link Epic}
+ * Контракт для очереди с историей просмотров задач типа: {@link Task},{@link SubTask},{@link Epic}
  */
 public interface HistoryManager {
 
     /**
-     * Размер стека просмотренных пользователем задач
+     * Размер очереди просмотренных пользователем задач
      */
     byte SIZE_HISTORY_OF_VIEW_ISSUE_LIST = 10;
 
     /**
-     * Добавить задачу в конец стека
+     * Добавить задачу в конец очереди
      */
     void add(Issue issue);
 
     /**
-     * Получить список задач в стеке
+     * Удалить задачу в очереди по id
+     */
+    void remove(int id);
+
+    /**
+     * Получить список задач в очереди
      */
     List<Issue> getHistory();
 }
