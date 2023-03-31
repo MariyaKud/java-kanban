@@ -73,7 +73,7 @@ public class InMemoryHistoryManager implements HistoryManager {
      *  <p> - Собрать все сущности из него в обычный ArrayList
      *  <p> - Удаление произвольного узла списка
      */
-    private static class CustomLinkedList<T> {
+    private class CustomLinkedList<T> {
 
         /**
          * Указатель на первый элемент списка. Он же first
