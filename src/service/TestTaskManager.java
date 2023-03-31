@@ -760,7 +760,6 @@ public class TestTaskManager {
      * <p>Выводим на экран пул с историей просмотров, задачи должны выводиться с ID по возрастанию
      */
     public void testScriptGetHistory() {
-        int numberTask = tracker.getListAllTasks().size() + 1;
 
         printHeadOfTest("List<Issue> getHistory()",
                 "проверить историю просмотров.",

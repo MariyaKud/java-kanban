@@ -148,21 +148,16 @@ public class InMemoryHistoryManager implements HistoryManager {
                 } else if (node.prev == null) {
                     //Удалили first, значит новый first тот, что был следующим
                     head = node.next;
-                    if (node.next != null) {
-                        node.next.prev = null;
-                    }
+                    node.next.prev = null;
                 } else {
                     //Удалили last, значит новый last тот, что был предыдущим
                     tail = node.prev;
-                    if (node.prev != null) {
-                        node.prev.next = null;
-                    }
+                    node.prev.next = null;
                 }
                 size--;
                 return true;
             }
             return false;
         }
-
     }
 }

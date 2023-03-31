@@ -1,85 +1,20 @@
 
 import model.IssueStatus;
 import service.TestTaskManager;
-
-import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
 
+        //Создаем экземпляр тестировщика
         TestTaskManager test = new TestTaskManager();
-
+        //Создаем объект сканера
         Scanner scanner = new Scanner(System.in);
+        //Переменная для введенной команды
         String command;
-
-        /* Запускаем авто тест
-        test.printLine();
-        System.out.println("Поехали!");
-        System.out.println("Запуск авто ТЕСТА для менеджера задач...");
-
-        //Создать задачу/подзадачу/эпик
-        test.testScriptAddTaskOneMore();                   //Тест №1
-        test.testScriptAddEpicWithChildren(2);//Тест №2-4
-
-        //Получить списки
-        test.testGetListAllTasks();                        //Тест №5
-        test.testGetListAllEpics();                        //Тест №6
-        test.testGetListAllSubTasks();                     //Тест №7
-
-        //Тест истории просмотров
-        test.testScriptGetHistory();                       //Тест №8
-
-        //тест удаления списков
-        test.testDeleteAllTasks();                         //Тест №9
-        test.testDeleteAllSubTasks();                      //Тест №10
-        test.testDeleteAllEpics();                         //Тест №11
-
-        //Вывести общий результат в хранилищах
-        test.printTaskManager(); // должно быть пусто
-
-        test.testScriptGetHistory();
-
-        //Тест удаления по id
-        test.testScriptAddTaskOneMore();                   //Тест №12
-        test.testScriptDeleteLastTask();                   //Тест №13
-        test.testScriptAddEpicWithChildren(2);//Тест №14-16
-        test.testScriptDeleteLastSubTask();                //Тест №17
-        test.testScriptDeleteLastEpic();                   //Тест №18
-
-        //Вывести общий результат в хранилищах
-        test.printTaskManager();// должно быть пусто
-
-        //Тест обновлений:
-        //Обновляем статус задачи
-        test.testScriptAddTaskOneMore();                                   //Тест №19
-        test.testScriptUpdateStatusForLastTask(IssueStatus.IN_PROGRESS);   //Тест №20
-        test.testScriptUpdateStatusForLastTask(IssueStatus.DONE);          //Тест №21
-        //Обновляем статус у подзадачи
-        test.testScriptAddEpicWithChildren(1);                //Тест №22,23
-        test.testScriptUpdateStatusForLastSubTask(IssueStatus.IN_PROGRESS);//Тест №24
-        test.testScriptUpdateStatusForLastSubTask(IssueStatus.DONE);       //Тест №25
-        //Обновляем родителя у подзадачи
-        test.testScriptAddEpicWithChildren(1);                //Тест №26,27
-        // для проверки теста смены родителя выведем стартовое состояние
-        test.printTaskManager();
-        test.testUpdateParentForLastSubTask();                             //Тест №28
-        //Проверим статус эпика, для нескольких подзадач, должен стать Done
-        test.testScriptUpdateStatusForLastSubTask(IssueStatus.DONE);       //Тест №29
-        //Обновляем эпик, попытаемся поставить статус DONE
-        //Менеджер не должен этого допустить
-        test.testScriptAddEpicWithChildren(1);                //Тест №30,31
-        test.testUpdateStatusForLastEpic(IssueStatus.DONE);                //Тест №32
-
-        //Выводим итоги авто теста
-        test.printLine();
-        System.out.print("Авто ТЕСТ завершен ");
-        test.viewResult(test.isCommonGoodResultAllTest());
-         */
-
-        //Создаем нового тестировщика для ручного тестирования
-        //test = new TestTaskManager();
+        //Переменная для ввода id
+        int inputId;
 
         //Выводим меню для ручного тестирования
         while (true) {
@@ -122,8 +57,13 @@ public class Main {
                     break;
                 case "10":// Найти задачу
                     System.out.println("Укажите id для поиска:");
-                    int userInput = scanner.nextInt();
-                    test.testGetIssueById(userInput);
+                    if (scanner.hasNextInt()) {
+                        inputId = scanner.nextInt();
+                        test.testGetIssueById(inputId);
+                        scanner.nextLine();
+                    } else {
+                        System.out.println("Тест не выполнился. Для выполнения этого теста необходимо внести число.");
+                    }
                     break;
                 case "11":// Получить историю просмотров задач.
                     test.testScriptGetHistory();
@@ -154,7 +94,7 @@ public class Main {
                     test.viewResult(test.isCommonGoodResultAllTest());
                     break;
                 default:
-                    System.out.println("Извините, но такого теста пока нет.");
+                    System.out.println("Такой функционал не предусмотрен.");
             }
         }
     }

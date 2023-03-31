@@ -13,11 +13,6 @@ import java.util.List;
 public interface HistoryManager {
 
     /**
-     * Размер очереди просмотренных пользователем задач
-     */
-    byte SIZE_HISTORY_OF_VIEW_ISSUE_LIST = 10;
-
-    /**
      * Добавить задачу в конец очереди
      */
     void add(Issue issue);
