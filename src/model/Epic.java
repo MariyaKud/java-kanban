@@ -21,14 +21,14 @@ public class Epic extends Issue {
 
     public Epic(Epic other) {
         super(other);
-        this.childrenList.addAll(other.getChildrenList());
+        this.childrenList.addAll(other.getChildren());
     }
 
     /**
      * Получить всех детей экземпляра класса {@code Epic}
      * @return - список элементов класса {@link SubTask}, содержащихся в экземпляре {@code Epic}
      */
-    public List<SubTask> getChildrenList() {
+    public List<SubTask> getChildren() {
         return childrenList;
     }
 
@@ -56,12 +56,9 @@ public class Epic extends Issue {
         result.append(", children.id='").append(idChildren).append('\'');
         result.append(", children.hash='").append(hashChildren).append('\'').append("}");
 
-        if (getChildrenList().size() != 0) {
-            for (SubTask subTask : getChildrenList()) {
-                result.append("\n").append("\t\t").append(subTask);
-            }
+        for (SubTask subTask : getChildren()) {
+            result.append("\n").append("\t\t").append(subTask);
         }
-
         return result.toString();
     }
 }
