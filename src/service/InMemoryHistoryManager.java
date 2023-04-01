@@ -5,6 +5,7 @@ import model.Node;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,14 +19,14 @@ public class InMemoryHistoryManager implements HistoryManager {
      *  Её ключом будет id задачи, просмотр которой требуется удалить,
      *  а значением — место просмотра этой задачи в списке, то есть узел связного списка.
      */
-    private final Map<Integer, Node<Issue>> historyMap = new HashMap<>();
+    private final Map<Integer, Node<Issue>> historyStorage = new HashMap<>();
 
     /**
      * Список для хранения порядка вызова задач
      * Если какая-либо задача просматривалась несколько раз,
      * в истории должен отобразиться только последний просмотр.
      */
-    private final CustomLinkedList<Issue> historyList = new CustomLinkedList<>();
+    private final CustomLinkedList<Issue> historyQueue = new CustomLinkedList<>();
 
     /**
      * Добавить задачу в конец очереди
@@ -34,17 +35,17 @@ public class InMemoryHistoryManager implements HistoryManager {
     public void add(Issue issue) {
 
         if (issue != null) {
-            if (historyMap.containsKey(issue.getId())) {
+            if (historyStorage.containsKey(issue.getId())) {
                 //Если в хранилище уже есть id, значит есть и в списке.
                 //Удаляем из списка задачу, т.к. нас интересует только последний просмотр
-                historyList.removeNode(historyMap.get(issue.getId()));
+                historyQueue.removeNode(historyStorage.get(issue.getId()));
             }
 
             //Добавляем в конец двусвязного списка
-            Node<Issue> node = historyList.linkLast(issue);
+            Node<Issue> node = historyQueue.linkLast(issue);
 
             //Добавляем в HashMap
-            historyMap.put(issue.getId(), node);
+            historyStorage.put(issue.getId(), node);
         }
     }
 
@@ -53,8 +54,8 @@ public class InMemoryHistoryManager implements HistoryManager {
      */
     @Override
     public void remove(int id) {
-        if (historyList.removeNode(historyMap.get(id))) {
-            historyMap.remove(id);
+        if (historyQueue.removeNode(historyStorage.get(id))) {
+            historyStorage.remove(id);
         }
     }
 
@@ -63,17 +64,17 @@ public class InMemoryHistoryManager implements HistoryManager {
      */
     @Override
     public List<Issue> getHistory() {
-        return historyList.getTasks();
+        return historyQueue.getTasks();
     }
 
     /**
-     * Двусвязный список задач
+     * Внутренний класс - двусвязный списка, для хранения последовательности обращений к задачам
      * <p> Доступные операции:
      *  <p> - Добавить сущность в конец списка
      *  <p> - Собрать все сущности из него в обычный ArrayList
      *  <p> - Удаление произвольного узла списка
      */
-    private class CustomLinkedList<T> {
+    private static class CustomLinkedList<T> {
 
         /**
          * Указатель на первый элемент списка. Он же first
@@ -90,12 +91,6 @@ public class InMemoryHistoryManager implements HistoryManager {
          */
         private int size = 0;
 
-        /**
-         * Конструктор пустого списка
-         */
-        public CustomLinkedList() {
-        }
-
         public int size() {
             return size;
         }
@@ -107,14 +102,12 @@ public class InMemoryHistoryManager implements HistoryManager {
             final Node<T> last = tail;
             final Node<T> node = new Node<>(issue, null, last);
             tail = node;
-
-            if (last == null)
+            if (last == null) {
                 head = node;
-            else
+            } else {
                 last.next = node;
-
+            }
             size++;
-
             return node;
         }
 
@@ -135,20 +128,21 @@ public class InMemoryHistoryManager implements HistoryManager {
         public boolean removeNode(Node<T> node) {
 
             if (node != null) {
-                //Если node<>first в списке, то надо удалить ссылку у предыдущего элемента
-                if (node.prev != null && node.next != null) {
-                    //привязываем ссылку предыдущего элемента к следующему за удаляемым элементом
-                    node.prev.next = node.next;
-                    node.next.prev = node.prev;
-                } else if (node.prev == null && node.next == null) {
-                    //в списке один элемент и мы его удаляем
+                final Node<T> prev = node.prev;
+                final Node<T> next = node.next;
+
+                if (prev == null && next == null) {
+                    //Удалить в списке последний элемент
                     head = null;
                     tail = null;
-                    size = 0;
+                } else if (prev != null && next != null) {
+                    //Связать предыдущий и следующий элементы
+                    prev.next = next;
+                    next.prev = prev;
                 } else if (node.prev == null) {
                     //Удалили first, значит новый first тот, что был следующим
-                    head = node.next;
-                    node.next.prev = null;
+                    head = next;
+                    next.prev = null;
                 } else {
                     //Удалили last, значит новый last тот, что был предыдущим
                     tail = node.prev;
