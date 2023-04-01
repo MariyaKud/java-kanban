@@ -48,7 +48,6 @@ public class Epic extends Issue {
                 hashChildren.append(",").append(child.hashCode());
             }
         }
-
         result.append("Epic{").append("id=").append(getId()).append(", status=").append(getStatus());
         result.append(", title='").append(getTitle() ).append('\'').append(", description='").append(getDescription());
         result.append('\'').append(", hash='").append(hashCode()).append('\'');

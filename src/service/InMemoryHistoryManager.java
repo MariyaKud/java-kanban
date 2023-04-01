@@ -39,10 +39,10 @@ public class InMemoryHistoryManager implements HistoryManager {
                 historyQueue.removeNode(historyStorage.get(issue.getId()));
             }
 
-            //Добавляем в конец двусвязного списка
+            //Добавить в конец LinkedList
             Node<Issue> node = historyQueue.linkLast(issue);
 
-            //Добавляем в HashMap
+            //Добавить в HashMap
             historyStorage.put(issue.getId(), node);
         }
     }
@@ -67,7 +67,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
-     * Узел двусвязного списка истории просмотров
+     * Узел CustomLinkedList истории просмотров задач
      */
     private static class Node<T> {
         private final T issue;
@@ -82,7 +82,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     /**
-     * Внутренний класс - двусвязный списка, для хранения последовательности обращений к задачам.
+     * Внутренний класс для хранения последовательности обращений к задачам.
      * <p> Доступные методы:
      *  <p> - Добавить сущность в конец списка
      *  <p> - Собрать все сущности из него в обычный ArrayList
