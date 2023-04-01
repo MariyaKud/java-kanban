@@ -31,9 +31,9 @@ import java.util.Map;
 public class InMemoryTaskManager implements TaskManager {
 
     private int id = 1; // идентификатор менеджера
-    private final Map<Integer, Task> tasksMap = new HashMap<>();
-    private final Map<Integer, Epic> epicsMap = new HashMap<>();
-    private final Map<Integer, SubTask> subTasksMap = new HashMap<>();
+    private final Map<Integer, Task> tasks = new HashMap<>();
+    private final Map<Integer, Epic> epics = new HashMap<>();
+    private final Map<Integer, SubTask> subTasks = new HashMap<>();
     private final HistoryManager historyManager = Managers.getDefaultHistory();
 
     /**
@@ -54,17 +54,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task addTask(Task task) {
         if (task != null) {
-            //Добавляем только новые задачи с 0 идентификатором
-            if (task.getId() == 0) {
-                task.setId(getId());
-                tasksMap.put(task.getId(), task);
-            } else {
-                System.out.println(MSG_ERROR_NOT_NEW);
-            }
+            task.setId(getId());
+            tasks.put(task.getId(), task);
         } else {
             System.out.println(MSG_ERROR_NULL);
         }
-
         return task;
     }
 
@@ -76,26 +70,24 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public SubTask addSubTask(SubTask subTask) {
         if (subTask != null) {
-            Epic parent = epicsMap.get(subTask.getParent().getId());
-            if (subTask.getId() == 0 && parent != null) {
-                List<SubTask> children = parent.getChildrenList();
-
-                //Ставим подзадаче родителя из менеджера
-                if (parent != subTask.getParent()) {
-                    subTask.setParent(parent);
-                }
+            Epic parent = epics.get(subTask.getParent().getId());
+            if (parent != null) {
+                List<SubTask> children = parent.getChildren();
 
                 //Устанавливаем новый свободный id
                 subTask.setId(getId());
 
-                //Помещаем подзадачу с корректным родителем
-                subTasksMap.put(subTask.getId(), subTask);
+                //Устанавливаем подзадаче родителя из хранилища менеджера
+                if (parent != subTask.getParent()) {
+                    subTask.setParent(parent);
+                }
+                //Помещаем подзадачу с корректным родителем в хранилище менеджера
+                subTasks.put(subTask.getId(), subTask);
 
                 //Добавляем родителю ребенка, если нужно
                 if (!children.contains(subTask)) {
                     children.add(subTask);
                 }
-
                 //Обновляем статус родителя
                 updateStatusEpic(parent);
             } else {
@@ -104,7 +96,6 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             System.out.println(MSG_ERROR_NULL);
         }
-
         return subTask;
     }
 
@@ -116,109 +107,97 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Epic addEpic(Epic epic) {
         if (epic != null) {
-            if (epic.getId() == 0) {
-                List<SubTask> children = epic.getChildrenList();
+            List<SubTask> children = epic.getChildren();
 
-                epic.setId(getId());
-                epicsMap.put(epic.getId(), epic);
+            epic.setId(getId());
+            epics.put(epic.getId(), epic);
 
-                //Проверяем наличие подзадач в хранилище менеджера, если не находим, то добавляем
-                for (SubTask child : children) {
-                    addSubTask(child);
-                }
-
-                updateStatusEpic(epic);
-
-            } else {
-                System.out.println(MSG_ERROR_NOT_NEW);
+            //Проверяем наличие подзадач в хранилище менеджера, если не находим, то добавляем
+            for (SubTask child : children) {
+                addSubTask(child);
             }
+            //Актуализируем статус, хоть он и не должен меняться, но вдруг, на входе, нам дали не корректный
+            updateStatusEpic(epic);
         } else {
             System.out.println(MSG_ERROR_NULL);
         }
-
         return epic;
     }
 
     ///////////////////////////////////////////////
-     /**
+    /**
      * Обновить задачу. Новая версия объекта передается в качестве параметра.
+     *
      * @param task новая версия задачи с верным идентификатором, включая обновленный статус
      */
     @Override
     public Task updateTask(Task task) {
-
-        Task oldTask = tasksMap.get(task.getId());
+        Task oldTask = tasks.get(task.getId());
 
         //Мы можем обновить только существующий объект
         if (oldTask != null) {
             // обновляем задачу в менеджере
-            tasksMap.put(oldTask.getId(), task);
+            tasks.put(oldTask.getId(), task);
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
         }
-
-        return tasksMap.get(task.getId());
+        return tasks.get(task.getId());
     }
 
     /**
      * Обновить подзадачу. Новая версия объекта передается в качестве параметра.
+     *
      * @param subTask новая версия объекта с верным идентификатором, включая обновленный статус
      */
     @Override
     public SubTask updateSubTask(SubTask subTask) {
-        SubTask oldSubTask = subTasksMap.get(subTask.getId());
-        Epic newParent = epicsMap.get(subTask.getParent().getId());
+        SubTask oldSubTask = subTasks.get(subTask.getId());
+        if (oldSubTask != null) {
+            Epic newParent = epics.get(subTask.getParent().getId());
+            if (newParent != null) {
+                // обновляем подзадачу
+                subTasks.put(subTask.getId(), subTask);
 
-        if (oldSubTask != null && newParent != null) {
-            // обновляем подзадачу
-            subTasksMap.put(subTask.getId(), subTask);
-
-            //берем корректного родителя их менеджера по id
-            if (newParent != oldSubTask.getParent()) {
-                subTask.setParent(newParent);
-                //Удаляем старую подзадачу у старого эпика родителя
-                oldSubTask.getParent().getChildrenList().remove(oldSubTask);
-                //Обновляем статус старого родителя
-                updateStatusEpic(oldSubTask.getParent());
+                if (newParent != oldSubTask.getParent()) {
+                    //Установить корректного родителя из хранилища менеджера по id
+                    subTask.setParent(newParent);
+                    //Удалить старую подзадачу у старого эпика родителя
+                    oldSubTask.getParent().getChildren().remove(oldSubTask);
+                    //Обновляем статус старого родителя
+                    updateStatusEpic(oldSubTask.getParent());
+                }
+                //Устанавливаем подзадачу ребенком корректного родителя
+                newParent.getChildren().set(subTask.getId(), subTask);
+                //Обновляем статус родителя
+                updateStatusEpic(newParent);
             } else {
-                //Удаляем ссылку на старую задачу
-                newParent.getChildrenList().remove(oldSubTask);
+                System.out.println(MSG_ERROR_ID_NOT_FOUND);
             }
-
-            //Добавляем обновленную подзадачу в эпик
-            if (!newParent.getChildrenList().contains(subTask)) {
-                newParent.getChildrenList().add(subTask);
-            }
-
-            //Обновляем статус родителя
-            updateStatusEpic(newParent);
-
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
         }
-
-        return subTasksMap.get(subTask.getId());
+        return subTasks.get(subTask.getId());
     }
 
     /**
      * Обновить эпик. Новая версия объекта передается в качестве параметра.
+     *
      * @param epic новая версия объекта с верным идентификатором
      */
     @Override
     public Epic updateEpic(Epic epic) {
-        Epic oldEpic = epicsMap.get(epic.getId());
+        Epic oldEpic = epics.get(epic.getId());
 
         if (oldEpic != null) {
-            //при обновлении эпика его дети остаются "старыми"
-            if (oldEpic.getChildrenList().equals((epic.getChildrenList()))) {
+            //при обновлении эпика его дети не меняются
+            if (oldEpic.getChildren().equals((epic.getChildren()))) {
                 // обновляем эпик
-                epicsMap.put(oldEpic.getId(), epic);
+                epics.put(oldEpic.getId(), epic);
 
                 //меняем родителя у детей
-                for (SubTask subTask : oldEpic.getChildrenList()) {
+                for (SubTask subTask : oldEpic.getChildren()) {
                     subTask.setParent(epic);
                 }
-
                 //Контроль статуса
                 updateStatusEpic(epic);
             } else {
@@ -227,68 +206,74 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
         }
-
-        return epicsMap.get(epic.getId());
+        return epics.get(epic.getId());
     }
 
     ///////////////////////////////////////////////
     /**
      * Удалить задачу {@link Task} по id
+     *
      * @param id идентификатор задачи
      */
     @Override
-    public void deleteTaskById(int id) {
-        if (tasksMap.containsKey(id)) {
-            tasksMap.remove(id);
+    public boolean deleteTaskById(int id) {
+        if (tasks.containsKey(id)) {
+            tasks.remove(id);
             historyManager.remove(id);
+            return true;
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
+            return false;
         }
     }
 
     /**
      * Удалить подзадачу {@link SubTask} по id
+     *
      * @param id - идентификатор задачи
      */
     @Override
-    public void deleteSubTaskById(int id) {
-        if (subTasksMap.containsKey(id)) {
-            SubTask subTask = subTasksMap.get(id);
-            if (subTask != null) {
-                //Удаляем эту подзадачу в эпике
-                subTask.getParent().getChildrenList().remove(subTask);
-                //Обновляем статус родителя
-                updateStatusEpic(subTask.getParent());
-                //Удаляем из менеджера подзадачу
-                subTasksMap.remove(id);
-                //Удаляем подзадачу из истории просмотров
-                historyManager.remove(id);
-            }
+    public boolean deleteSubTaskById(int id) {
+        if (subTasks.containsKey(id)) {
+            //Обработать родителя удаляемой подзадачи
+            Epic parent = subTasks.get(id).getParent();
+            //Удаляем эту подзадачу в эпике
+            parent.getChildren().remove(id);
+            //Обновляем статус родителя
+            updateStatusEpic(parent);
+
+            //Удаляем из менеджера подзадачу
+            subTasks.remove(id);
+            //Удаляем подзадачу из истории просмотров
+            historyManager.remove(id);
+            return true;
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
+            return false;
         }
     }
 
     /**
      * Удалить эпик {@link SubTask} по id
+     *
      * @param id - идентификатор задачи
      */
     @Override
-    public void deleteEpicById(int id) {
-        if (epicsMap.containsKey(id)) {
-            //удаляем подзадачи эпика в менеджере
-            for (SubTask child : epicsMap.get(id).getChildrenList()) {
-                if (subTasksMap.containsValue(child)) {
-                    subTasksMap.remove(child.getId());
-                    //Удаляем подзадачу из истории просмотров
-                    historyManager.remove(child.getId());
-                }
+    public boolean deleteEpicById(int id) {
+        if (epics.containsKey(id)) {
+            //Удалить подзадачи эпика в хранилище менеджера
+            for (SubTask child : epics.get(id).getChildren()) {
+               subTasks.remove(child.getId());
+               historyManager.remove(child.getId());
             }
-            epicsMap.remove(id);
-            //Удаляем эпик из истории просмотров
+            //Удалить эпик из хранилища менеджера
+            epics.remove(id);
+            //Удалить эпик из истории просмотров
             historyManager.remove(id);
+            return true;
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
+            return false;
         }
     }
 
@@ -298,10 +283,10 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void deleteAllTasks() {
-        for (Integer id : tasksMap.keySet()) {
+        for (Integer id : tasks.keySet()) {
             historyManager.remove(id);
         }
-        tasksMap.clear();
+        tasks.clear();
     }
 
     /**
@@ -309,12 +294,14 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void deleteAllSubTasks() {
-        for (Integer id : subTasksMap.keySet()) {
+        for (Integer id : subTasks.keySet()) {
             historyManager.remove(id);
         }
-        subTasksMap.clear();
-        for (Epic value : epicsMap.values()) {
-            value.getChildrenList().clear();
+        subTasks.clear();
+
+        for (Epic epic : epics.values()) {
+            epic.getChildren().clear();
+            updateStatusEpic(epic);
         }
     }
 
@@ -323,14 +310,15 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void deleteAllEpics() {
-        for (Integer id : subTasksMap.keySet()) {
+        for (Integer id : subTasks.keySet()) {
             historyManager.remove(id);
         }
-        subTasksMap.clear();
-        for (Integer id : epicsMap.keySet()) {
+        subTasks.clear();
+
+        for (Integer id : epics.keySet()) {
             historyManager.remove(id);
         }
-        epicsMap.clear();
+        epics.clear();
     }
 
     ///////////////////////////////////////////////
@@ -342,7 +330,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public Task getTaskById(int id) {
-        Task task = tasksMap.get(id);
+        Task task = tasks.get(id);
         if (task != null) {
             historyManager.add(task);
             return task;
@@ -360,7 +348,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public SubTask getSubTaskById(int id) {
-        SubTask subTask = subTasksMap.get(id);
+        SubTask subTask = subTasks.get(id);
         if (subTask != null) {
             historyManager.add(subTask);
             return subTask;
@@ -372,12 +360,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Получить эпик {@link Epic} по id. Может вернуть null.
+     *
      * @param id - идентификатор задачи
      * @return задача типа {@link Epic}. Если задача не найдена, то null
      */
     @Override
     public Epic getEpicById(int id) {
-        Epic epic = epicsMap.get(id);
+        Epic epic = epics.get(id);
         if (epic != null) {
             historyManager.add(epic);
             return epic;
@@ -394,8 +383,8 @@ public class InMemoryTaskManager implements TaskManager {
      * @return список задач {@link Task}
      */
     @Override
-    public List<Task> getListAllTasks() {
-        return new ArrayList<>(tasksMap.values());
+    public List<Task> getAllTasks() {
+        return new ArrayList<>(tasks.values());
     }
 
     /**
@@ -404,8 +393,8 @@ public class InMemoryTaskManager implements TaskManager {
      * @return список подзадач {@link SubTask}
      */
     @Override
-    public List<SubTask> getListAllSubTasks() {
-        return new ArrayList<>(subTasksMap.values());
+    public List<SubTask> getAllSubTasks() {
+        return new ArrayList<>(subTasks.values());
     }
 
     /**
@@ -414,20 +403,27 @@ public class InMemoryTaskManager implements TaskManager {
      * @return список эпиков {@link Epic}
      */
     @Override
-    public List<Epic> getListAllEpics() {
-        return new ArrayList<>(epicsMap.values());
+    public List<Epic> getAllEpics() {
+        return new ArrayList<>(epics.values());
     }
 
     ///////////////////////////////////////////////
+
     /**
-     * Получить список всех подзадач для эпика.
+     * <b>Получить список всех подзадач для эпика.</b>
      *
-     * @param epic эпик, по которому нужно получить список подзадач
+     * @param id  идентификатор эпика, по которому нужно получить список детей
      * @return список подзадач эпика
      */
     @Override
-    public List<SubTask> getListSubTasksOfEpic(Epic epic) {
-        return new ArrayList<>(epic.getChildrenList());
+    public List<SubTask> getChildrenOfEpicById(int id) {
+        List<SubTask> children = new ArrayList<>();
+        Epic epic = epics.get(id);
+
+        if (epic != null) {
+            children.addAll(epic.getChildren());
+        }
+        return children;
     }
 
     /**
@@ -438,16 +434,14 @@ public class InMemoryTaskManager implements TaskManager {
      * Если все подзадачи имеют статус DONE, то и эпик считается завершённым со статусом DONE.
      * Во всех остальных случаях статус должен быть IN_PROGRESS.
      */
-    @Override
-    public Epic updateStatusEpic(Epic epic) {
-
-        if (epic.getChildrenList().size() == 0) {
+    private IssueStatus updateStatusEpic(Epic epic) {
+        if (epic.getChildren().isEmpty()) {
             epic.setStatus(IssueStatus.NEW);
         } else {
             boolean allNew = true;
             boolean allDone = true;
 
-            for (SubTask child : epic.getChildrenList()) {
+            for (SubTask child : epic.getChildren()) {
                 if (child.getStatus() != IssueStatus.NEW) {
                     allNew = false;
                 }
@@ -459,7 +453,6 @@ public class InMemoryTaskManager implements TaskManager {
                     break;
                 }
             }
-
             if (allNew) {
                 epic.setStatus(IssueStatus.NEW);
             } else if (allDone) {
@@ -468,8 +461,7 @@ public class InMemoryTaskManager implements TaskManager {
                 epic.setStatus(IssueStatus.IN_PROGRESS);
             }
         }
-
-        return epic;
+        return epic.getStatus();
     }
 
     /**

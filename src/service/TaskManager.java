@@ -14,8 +14,8 @@ public interface TaskManager {
 
     //Текст сообщений об ошибках
     String MSG_ERROR_NULL = "Метод не отработал. Вместо сущности в качестве параметра передан NULL";
-    String MSG_ERROR_NOT_NEW = "Метод не отработал. В метод передана сущность с не годным id.";
     String MSG_ERROR_ID_NOT_FOUND = "Не найдена сущность с указанным id.";
+    String MSG_ERROR_NOT_NEW = "Метод не отработал. В метод передана сущность с не годным id.";
     String MSG_ERROR_WRONG_EPIC = "Метод не отработал. При обновлении эпика дети не должны меняться.";
 
     ///////////////////////////////////////////////
@@ -68,21 +68,21 @@ public interface TaskManager {
      *
      * @param id идентификатор задачи
      */
-    void deleteTaskById(int id);
+    boolean deleteTaskById(int id);
 
     /**
      * Удалить подзадачу {@link SubTask} по id
      *
      * @param id - идентификатор задачи
      */
-    void deleteSubTaskById(int id);
+    boolean deleteSubTaskById(int id);
 
     /**
      * Удалить эпик {@link SubTask} по id
      *
      * @param id - идентификатор задачи
      */
-    void deleteEpicById(int id);
+    boolean deleteEpicById(int id);
 
     ///////////////////////////////////////////////
     /**
@@ -131,40 +131,30 @@ public interface TaskManager {
      *
      * @return список задач {@link Task}
      */
-    List<Task> getListAllTasks();
+    List<Task> getAllTasks();
 
     /**
      * Получить список всех подзадач менеджера.
      *
      * @return список подзадач {@link SubTask}
      */
-    List<SubTask> getListAllSubTasks();
+    List<SubTask> getAllSubTasks();
 
     /**
      * Получить список всех эпиков менеджера.
      *
      * @return список эпиков {@link Epic}
      */
-    List<Epic> getListAllEpics();
+    List<Epic> getAllEpics();
 
     ///////////////////////////////////////////////
     /**
      * <b>Получить список всех подзадач для эпика.</b>
      *
-     * @param epic эпик, по которому нужно получить список подзадач
+     * @param id  идентификатор эпика, по которому нужно получить список детей
      * @return список подзадач эпика
      */
-    List<SubTask> getListSubTasksOfEpic(Epic epic);
-
-    /**
-     * <b>Рассчитать статус эпика</b>
-     *
-     * <p>Правило установки статуса эпика:
-     * Если у эпика нет подзадач или все они имеют статус NEW, то статус должен быть NEW.
-     * Если все подзадачи имеют статус DONE, то и эпик считается завершённым со статусом DONE.
-     * Во всех остальных случаях статус должен быть IN_PROGRESS.
-     */
-    Epic updateStatusEpic(Epic epic);
+    List<SubTask> getChildrenOfEpicById(int id);
 
     ///////////////////////////////////////////////
     /**
