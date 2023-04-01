@@ -42,7 +42,7 @@ public class TestTaskManager {
     public TestTaskManager() {
         this.idTest = 1;
         this.commonGoodResultAllTest = true;
-        this.tracker = Managers.getDefault();
+        this.tracker = (InMemoryTaskManager) Managers.getDefault();
     }
 
     public boolean isCommonGoodResultAllTest() {
@@ -224,7 +224,7 @@ public class TestTaskManager {
                 Epic parent = subTaskToUpdate.getParent();
                 System.out.println("Родитель подзадачи эпик с id = " + parent.getId() + " : " + parent);
                 System.out.println("Все подзадачи эпика с id = " + parent.getId() + " : ");
-                for (SubTask subTaskChild : parent.getChildrenList()) {
+                for (SubTask subTaskChild : parent.getChildren()) {
                     System.out.println(subTaskChild);
                 }
 
@@ -234,7 +234,7 @@ public class TestTaskManager {
                 Epic newParent = subTask.getParent();
                 System.out.println("Родитель подзадачи эпик с id = " + newParent.getId() + " : " + newParent);
                 System.out.println("Все подзадачи эпика с id = " + newParent.getId() + " : ");
-                for (SubTask subTaskChild : newParent.getChildrenList()) {
+                for (SubTask subTaskChild : newParent.getChildren()) {
                     System.out.println(subTaskChild);
                 }
 
@@ -283,13 +283,13 @@ public class TestTaskManager {
                 System.out.println("Найден эпик по id = " + epic.getId() + " : " + epicToUpdate);
                 // Дополнительная информация
                 System.out.println("Все подзадачи эпика с id = " + epicToUpdate.getId() + " : "
-                        + epicToUpdate.getChildrenList());
+                        + epicToUpdate.getChildren());
 
                 //Выводим данные по новому эпику
                 System.out.println("\nВходной эпик с id = " + epic.getId() + " : " + epic);
                 // Дополнительная информация
                 System.out.println("Все подзадачи эпика с id = " + epic.getId() + " : "
-                        + epic.getChildrenList() + "\n");
+                        + epic.getChildren() + "\n");
 
                 //Обновляем эпик
                 tracker.updateEpic(epic);
@@ -300,7 +300,7 @@ public class TestTaskManager {
                         !epic.getDescription().equals(updateEpic.getDescription())) {
                     goalAchieved = false;
                 }
-                if (!epicToUpdate.getChildrenList().equals((updateEpic.getChildrenList()))) {
+                if (!epicToUpdate.getChildren().equals((updateEpic.getChildren()))) {
                     goalAchieved = false;
                 }
 
@@ -362,8 +362,8 @@ public class TestTaskManager {
         }
 
         //Дополнительно для подзадачи - необходимо проверить, что подзадачи нет в детях эпика
-        for (Epic epic : tracker.getListAllEpics()) {
-            for (SubTask subTask : tracker.getListSubTasksOfEpic(epic)) {
+        for (Epic epic : tracker.getAllEpics()) {
+            for (SubTask subTask : tracker.getChildrenOfEpicById(id)) {
                 if (subTask.getId() == id) {
                     goalAchieved = false;
                     break;
@@ -397,7 +397,7 @@ public class TestTaskManager {
         }
 
         //Для эпика необходимо проверить, что нет подзадач с таким родителем
-        for (SubTask subTask : tracker.getListAllSubTasks()) {
+        for (SubTask subTask : tracker.getAllSubTasks()) {
             if (subTask.getParent().getId() == id) {
                 goalAchieved = false;
                 break;
@@ -425,7 +425,7 @@ public class TestTaskManager {
         tracker.deleteAllTasks();
 
         //Проверка
-        List<Task> listForCheck = tracker.getListAllTasks();
+        List<Task> listForCheck = tracker.getAllTasks();
         if (!listForCheck.isEmpty()) {
             goalAchieved = false;
         }
@@ -450,13 +450,13 @@ public class TestTaskManager {
         tracker.deleteAllSubTasks();
 
         //Проверка
-        List<SubTask> listForCheck = tracker.getListAllSubTasks();
+        List<SubTask> listForCheck = tracker.getAllSubTasks();
         if (!listForCheck.isEmpty()) {
             goalAchieved = false;
         }
-        List<Epic> epicListForCheck = tracker.getListAllEpics();
+        List<Epic> epicListForCheck = tracker.getAllEpics();
         for (Epic epic : epicListForCheck) {
-            if (epic.getChildrenList().size() > 0) {
+            if (epic.getChildren().size() > 0) {
                 goalAchieved = false;
                 break;
             }
@@ -483,11 +483,11 @@ public class TestTaskManager {
         tracker.deleteAllEpics();
 
         //Проверка
-        List<Epic> listForCheck = tracker.getListAllEpics();
+        List<Epic> listForCheck = tracker.getAllEpics();
         if (!listForCheck.isEmpty()) {
             goalAchieved = false;
         }
-        List<SubTask> subTaskListForCheck = tracker.getListAllSubTasks();
+        List<SubTask> subTaskListForCheck = tracker.getAllSubTasks();
         if (subTaskListForCheck.size() > 0) {
             goalAchieved = false;
         }
@@ -502,7 +502,7 @@ public class TestTaskManager {
      */
     public void testGetListAllTasks() {
 
-        List<Task> lists = tracker.getListAllTasks();
+        List<Task> lists = tracker.getAllTasks();
 
         printHeadOfTest("List<Task> getListAllTasks()",
                 "получить список всех задач.",
@@ -522,7 +522,7 @@ public class TestTaskManager {
      */
     public void testGetListAllSubTasks() {
 
-        List<SubTask> lists = tracker.getListAllSubTasks();
+        List<SubTask> lists = tracker.getAllSubTasks();
 
         printHeadOfTest("List<SubTask> getListAllSubTasks()",
                 "получить список всех подзадач.",
@@ -542,7 +542,7 @@ public class TestTaskManager {
      */
     public void testGetListAllEpics() {
 
-        List<Epic> lists = tracker.getListAllEpics();
+        List<Epic> lists = tracker.getAllEpics();
 
         printHeadOfTest("List<Epic> getListAllEpics()",
                 "получить список всех эпиков.",
@@ -589,7 +589,7 @@ public class TestTaskManager {
      * <p>Применяем тест метода создания задачи в менеджере.
      */
     public void testScriptAddTaskOneMore(){
-        int numberTask=tracker.getListAllTasks().size() + 1;
+        int numberTask=tracker.getAllTasks().size() + 1;
         testAddTask(addTask("Задача" + numberTask,"Описание задачи" + numberTask));
     }
 
@@ -598,8 +598,8 @@ public class TestTaskManager {
      * @param quantitySubTask количество подзадач эпика
      */
     public void testScriptAddEpicWithChildren(int quantitySubTask) {
-        int numberEpic    = tracker.getListAllEpics().size() + 1;
-        int numberSubTask = tracker.getListAllSubTasks().size() + 1;
+        int numberEpic    = tracker.getAllEpics().size() + 1;
+        int numberSubTask = tracker.getAllSubTasks().size() + 1;
         Epic newEpic = addEpic("Эпик " + numberEpic, "Описание эпика " + numberEpic);
         testAddEpic(newEpic);
         for (int i = 0; i < quantitySubTask; i++) {
@@ -668,7 +668,7 @@ public class TestTaskManager {
      */
     public void testUpdateParentForLastSubTask() {
         Integer id = getIdForLastIssue(IssueType.SUBTASK);
-        List<Epic> listEpics= tracker.getListAllEpics();
+        List<Epic> listEpics= tracker.getAllEpics();
 
         if (listEpics.size() > 1) {
             int idNewParent = listEpics.get(0).getId();
@@ -817,7 +817,7 @@ public class TestTaskManager {
      * Печать списка задач
      */
     private void printListAllTasks() {
-        List<Task> listTask = tracker.getListAllTasks();
+        List<Task> listTask = tracker.getAllTasks();
         System.out.println("TASKS:");
         for (Task task : listTask) {
             System.out.println("\t" + task);
@@ -828,7 +828,7 @@ public class TestTaskManager {
      * Печать списка подзадач
      */
     private void printListAllSubTasks() {
-        List<SubTask> listSubTask = tracker.getListAllSubTasks();
+        List<SubTask> listSubTask = tracker.getAllSubTasks();
         System.out.println("SUBTASKS:");
         for (SubTask subTask : listSubTask) {
             System.out.println("\t" + subTask);
@@ -839,7 +839,7 @@ public class TestTaskManager {
      * Печать списка эпиков
      */
     private void printListAllEpic() {
-        List<Epic> Epic = tracker.getListAllEpics();
+        List<Epic> Epic = tracker.getAllEpics();
         System.out.println("EPICS:");
         for (Epic epic : Epic) {
             System.out.println("\t" + epic);
@@ -874,6 +874,79 @@ public class TestTaskManager {
 
     ////////////////////////////МЕТОДЫ_ПЕЧАТИ/////////////////////////////////
 
+    ////////////////////////////Класс_ТЕСТ////////////////////////////////////
+    /**
+     * Описание проведенного теста
+     */
+     private class Test {
+        /**
+         * Номер теста
+         */
+        private int idTest;
+        /**
+         * Тестируемый метод
+         */
+        private String method;
+        /**
+         * Цель теста
+         */
+        private String goal;
+        /**
+         * Способ проверки
+         */
+        private String way;
+        /**
+         * Дополнительно используются методы
+         */
+        private String use;
+
+        /**
+         * Условия ошибки в тесте
+         */
+        private String errorCondition;
+
+        /**
+         * Дополнительная информация по тесту
+         */
+        private String testMessage;
+
+        /**
+         * Результат теста
+         */
+        private boolean result;
+
+        /**
+         * Сообщение к результату
+         */
+        private String resultMessage;
+
+        public Test(int idTest, String method, String goal, String way, String use, String errorCondition,
+                     String testMessage) {
+            this.idTest = idTest;
+            this.method = method;
+            this.goal = goal;
+            this.way = way;
+            this.use = use;
+            this.errorCondition = errorCondition;
+            this.testMessage = testMessage;
+        }
+
+        public void setResult(boolean result) {
+            this.result = result;
+        }
+
+        public void setResultMessage(String resultMessage) {
+            this.resultMessage = resultMessage;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder result = new StringBuilder();
+
+            return result.toString();
+        }
+    }
+
     ////////////////////////////СЛУЖЕБНЫЕ/////////////////////////////////////
     /**
      * Получить последнюю задачу менеджера заданного типа, может вернуть NULL.
@@ -887,16 +960,16 @@ public class TestTaskManager {
 
         switch(issueType){
             case TASK:
-                List<Task> tasksList = tracker.getListAllTasks();
+                List<Task> tasksList = tracker.getAllTasks();
                 issues.addAll(tasksList);
                 break;
 
             case EPIC:
-                List<Epic> epicsList = tracker.getListAllEpics();
+                List<Epic> epicsList = tracker.getAllEpics();
                 issues.addAll(epicsList);
                 break;
             case SUBTASK:
-                List<SubTask> subTaskList = tracker.getListAllSubTasks();
+                List<SubTask> subTaskList = tracker.getAllSubTasks();
                 issues.addAll(subTaskList);
                 break;
             default:
@@ -937,8 +1010,8 @@ public class TestTaskManager {
 
         }
         SubTask newSubTask = new SubTask(0, title, description, parent, IssueStatus.NEW);
-        if (!parent.getChildrenList().contains(newSubTask)) {
-            parent.getChildrenList().add(newSubTask);
+        if (!parent.getChildren().contains(newSubTask)) {
+            parent.getChildren().add(newSubTask);
         }
         return newSubTask;
     }
