@@ -10,10 +10,18 @@ package service;
 public class Managers {
 
     /**
+     * Приватный конструктор для закрытия возможности создать объект.
+     * Дефолтный конструктор класса - публичный, нам нужно его перекрыть,
+     * т.к. все методы класса static объект нам не нужен.
+     */
+    private Managers() {
+    }
+
+    /**
      * Получить дефолтный объект-менеджера
      * @return  объект-менеджер
      */
-    public static InMemoryTaskManager getDefault() {
+    public static TaskManager getDefault() {
         return new InMemoryTaskManager();
     }
 
@@ -21,7 +29,7 @@ public class Managers {
      * Получить дефолтный объект-история просмотров
      * @return  объект-история просмотров
      */
-    public static InMemoryHistoryManager getDefaultHistory() {
+    public static HistoryManager getDefaultHistory() {
         return new InMemoryHistoryManager();
     }
 }
