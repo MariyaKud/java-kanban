@@ -1,8 +1,5 @@
 
-import model.Issue;
 import model.IssueStatus;
-import service.HistoryManager;
-import service.InMemoryHistoryManager;
 import service.TestTaskManager;
 import java.util.Scanner;
 
@@ -19,7 +16,51 @@ public class Main {
         //Переменная для ввода id
         int inputId;
 
+        System.out.println("Запущен авто тест...");
+        test.testScriptAddTaskOneMore();
+        test.testScriptAddTaskOneMore();
+        test.testScriptAddEpicWithChildren(2);
+        test.printTaskManager();
+        test.testScriptUpdateStatusForLastTask(IssueStatus.IN_PROGRESS);
+        test.testScriptUpdateStatusForLastTask(IssueStatus.DONE);
+        test.testScriptUpdateStatusForLastSubTask(IssueStatus.IN_PROGRESS);
+        test.testScriptUpdateStatusForLastSubTask(IssueStatus.DONE);
+        test.testScriptAddEpicWithChildren(1);
+        test.testUpdateParentForLastSubTask();
+        test.printTaskManager();
+        test.testUpdateStatusForLastEpic(IssueStatus.DONE);
+        test.testGetHistory();
+        test.testScriptDeleteLastTask();
+        test.testScriptDeleteLastSubTask();
+        test.testScriptDeleteLastEpic();
+        test.testGetHistory();
+        test.testDeleteAllTasks();
+        test.testGetHistory();
+        test.testDeleteAllSubTasks();
+        test.testGetHistory();
+        test.testDeleteAllEpics();
+        test.testGetHistory();
+        test.testScriptAddTaskOneMore();
+        test.testScriptAddTaskOneMore();
+        test.printInfoAboutAllTests();
+        test.printTaskManager();
+        System.out.println("-------------------------------------------");
+        System.out.println("Укажите id для поиска:");
+        if (scanner.hasNextInt()) {
+            inputId = scanner.nextInt();
+            test.testGetIssueById(inputId);
+            scanner.nextLine();
+        } else {
+            System.out.println("Тест не выполнился. Для выполнения этого теста необходимо внести число.");
+            scanner.nextLine();
+        }
+
+        System.out.println("Авто тест завершен!");
+        System.out.println("-------------------------------------------");
+        System.out.println("Запущено ручное тестирование..");
         //Выводим меню для ручного тестирования
+        test = new TestTaskManager();
+
         while (true) {
 
             printMenu();
@@ -27,8 +68,8 @@ public class Main {
 
             switch (command) {
                 case "0":// Закончить тест
-                    System.out.print("Ваш тест завершен ");
-                    test.viewResult(test.isCommonGoodResultAllTest());
+                    System.out.println("Ваш тест завершен.");
+                    test.printInfoAboutAllTests();
                     scanner.close();
                     return;
                 case "1":// Вывести списки задач
@@ -53,7 +94,7 @@ public class Main {
                     test.testDeleteAllTasks();
                     break;
                 case "8": // Очистить подзадачи.
-                   test.testDeleteAllSubTasks();
+                    test.testDeleteAllSubTasks();
                     break;
                 case "9":// Очистить эпики.
                     test.testDeleteAllEpics();
@@ -69,7 +110,7 @@ public class Main {
                     }
                     break;
                 case "11":// Получить историю просмотров задач.
-                    test.testScriptGetHistory();
+                    test.testGetHistory();
                     break;
                 case "12":// Обновить последнюю подзадачу
                     test.testScriptDeleteLastTask();
@@ -93,21 +134,15 @@ public class Main {
                     test.testUpdateStatusForLastEpic(IssueStatus.DONE);
                     break;
                 case "19": // Получить результат теста.
-                    System.out.print("Общий результат всех тестов ");
-                    test.viewResult(test.isCommonGoodResultAllTest());
+                    test.printInfoAboutAllTests();
                     break;
-                /*case "20": // Новая история
-                    InMemoryHistoryManager newMemory = new InMemoryHistoryManager();
-                    System.out.println(newMemory.getHistory());
-                    break;
-                */
                 default:
                     System.out.println("Такой функционал не предусмотрен.");
             }
         }
     }
 
-    static void printMenu() {
+    private static void  printMenu() {
         System.out.println("-------------------------------------------");
         System.out.println("1  - Вывести все списки менеджера. | 11 - Получить историю просмотров задач.");
         System.out.println("2  - Создать задачу.               | 12 - Удалить задачу.");
@@ -122,3 +157,5 @@ public class Main {
         System.out.println("-------------------------------------------");
     }
 }
+
+

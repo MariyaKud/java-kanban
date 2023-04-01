@@ -165,9 +165,14 @@ public class InMemoryTaskManager implements TaskManager {
                     oldSubTask.getParent().getChildren().remove(oldSubTask);
                     //Обновляем статус старого родителя
                     updateStatusEpic(oldSubTask.getParent());
+                } else {
+                    //Удаляем ссылку на старую задачу
+                    newParent.getChildren().remove(oldSubTask);
                 }
-                //Устанавливаем подзадачу ребенком корректного родителя
-                newParent.getChildren().set(subTask.getId(), subTask);
+                //Добавляем обновленную подзадачу в эпик
+                if (!newParent.getChildren().contains(subTask)) {
+                    newParent.getChildren().add(subTask);
+                }
                 //Обновляем статус родителя
                 updateStatusEpic(newParent);
             } else {
@@ -235,15 +240,13 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public boolean deleteSubTaskById(int id) {
         if (subTasks.containsKey(id)) {
+            SubTask delSubTask = subTasks.remove(id);
             //Обработать родителя удаляемой подзадачи
-            Epic parent = subTasks.get(id).getParent();
+            Epic parent = delSubTask.getParent();
             //Удаляем эту подзадачу в эпике
-            parent.getChildren().remove(id);
+            parent.getChildren().remove(delSubTask);
             //Обновляем статус родителя
             updateStatusEpic(parent);
-
-            //Удаляем из менеджера подзадачу
-            subTasks.remove(id);
             //Удаляем подзадачу из истории просмотров
             historyManager.remove(id);
             return true;
@@ -335,7 +338,7 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.add(task);
             return task;
         } else {
-            System.out.println(MSG_ERROR_ID_NOT_FOUND);
+            System.out.println(MSG_ERROR_ID_NOT_FOUND + " в хранилище задач.");
             return null;
         }
     }
@@ -353,7 +356,7 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.add(subTask);
             return subTask;
         } else {
-            System.out.println(MSG_ERROR_ID_NOT_FOUND);
+            System.out.println(MSG_ERROR_ID_NOT_FOUND + " в хранилище подзадач.");
             return null;
         }
     }
@@ -371,7 +374,7 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.add(epic);
             return epic;
         } else {
-            System.out.println(MSG_ERROR_ID_NOT_FOUND);
+            System.out.println(MSG_ERROR_ID_NOT_FOUND + " в хранилище эпиков.");
             return null;
         }
     }
@@ -434,7 +437,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Если все подзадачи имеют статус DONE, то и эпик считается завершённым со статусом DONE.
      * Во всех остальных случаях статус должен быть IN_PROGRESS.
      */
-    private IssueStatus updateStatusEpic(Epic epic) {
+    private void updateStatusEpic(Epic epic) {
         if (epic.getChildren().isEmpty()) {
             epic.setStatus(IssueStatus.NEW);
         } else {
@@ -461,12 +464,10 @@ public class InMemoryTaskManager implements TaskManager {
                 epic.setStatus(IssueStatus.IN_PROGRESS);
             }
         }
-        return epic.getStatus();
     }
 
     /**
      * Получить историю просмотров задач.
-     *
      * @return список просмотренных задач = {Task, SubTask, Epic}
      */
     @Override
