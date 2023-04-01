@@ -1,5 +1,8 @@
 
+import model.Issue;
 import model.IssueStatus;
+import service.HistoryManager;
+import service.InMemoryHistoryManager;
 import service.TestTaskManager;
 import java.util.Scanner;
 
@@ -93,6 +96,11 @@ public class Main {
                     System.out.print("Общий результат всех тестов ");
                     test.viewResult(test.isCommonGoodResultAllTest());
                     break;
+                /*case "20": // Новая история
+                    InMemoryHistoryManager newMemory = new InMemoryHistoryManager();
+                    System.out.println(newMemory.getHistory());
+                    break;
+                */
                 default:
                     System.out.println("Такой функционал не предусмотрен.");
             }

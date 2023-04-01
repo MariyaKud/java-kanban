@@ -1,11 +1,9 @@
 package service;
 
 import model.Issue;
-import model.Node;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -67,24 +65,39 @@ public class InMemoryHistoryManager implements HistoryManager {
         return historyQueue.getTasks();
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
-     * Внутренний класс - двусвязный списка, для хранения последовательности обращений к задачам
-     * <p> Доступные операции:
+     * Узел двусвязного списка истории просмотров
+     */
+    private static class Node<T> {
+        private final T issue;
+        private Node<T> next;
+        private Node<T> prev;
+
+        public Node(T issue, Node<T> next, Node<T> prev) {
+            this.issue = issue;
+            this.next = next;
+            this.prev = prev;
+        }
+    }
+
+    /**
+     * Внутренний класс - двусвязный списка, для хранения последовательности обращений к задачам.
+     * <p> Доступные методы:
      *  <p> - Добавить сущность в конец списка
      *  <p> - Собрать все сущности из него в обычный ArrayList
      *  <p> - Удаление произвольного узла списка
      */
     private static class CustomLinkedList<T> {
-
         /**
          * Указатель на первый элемент списка. Он же first
          */
-        public Node<T> head = null;
+        private Node<T> head = null;
 
         /**
          * Указатель на последний элемент списка. Он же last
          */
-        public Node<T> tail = null;
+        private Node<T> tail = null;
 
         /**
          * Размер списка
@@ -126,7 +139,6 @@ public class InMemoryHistoryManager implements HistoryManager {
          * Удаляет узел из списка
          */
         public boolean removeNode(Node<T> node) {
-
             if (node != null) {
                 final Node<T> prev = node.prev;
                 final Node<T> next = node.next;
