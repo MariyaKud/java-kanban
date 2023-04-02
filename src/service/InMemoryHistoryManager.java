@@ -151,14 +151,14 @@ public class InMemoryHistoryManager implements HistoryManager {
                     //Связать предыдущий и следующий элементы
                     prev.next = next;
                     next.prev = prev;
-                } else if (node.prev == null) {
+                } else if (prev == null) {
                     //Удалили first, значит новый first тот, что был следующим
                     head = next;
                     next.prev = null;
                 } else {
                     //Удалили last, значит новый last тот, что был предыдущим
-                    tail = node.prev;
-                    node.prev.next = null;
+                    tail = prev;
+                    prev.next = null;
                 }
                 size--;
                 return true;
