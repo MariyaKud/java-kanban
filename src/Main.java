@@ -42,19 +42,11 @@ public class Main {
         test.testGetHistory();
         test.testScriptAddTaskOneMore();
         test.testScriptAddTaskOneMore();
-        test.printInfoAboutAllTests();
         test.printTaskManager();
-        System.out.println("-------------------------------------------");
-        System.out.println("Укажите id для поиска:");
-        if (scanner.hasNextInt()) {
-            inputId = scanner.nextInt();
-            test.testGetIssueById(inputId);
-            scanner.nextLine();
-        } else {
-            System.out.println("Тест не выполнился. Для выполнения этого теста необходимо внести число.");
-            scanner.nextLine();
-        }
+        test.testGetIssueById(8);
+        test.testGetHistory();
 
+        test.printInfoAboutAllTests();
         System.out.println("Авто тест завершен!");
         System.out.println("-------------------------------------------");
         System.out.println("Запущено ручное тестирование..");

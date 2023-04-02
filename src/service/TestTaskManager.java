@@ -10,6 +10,7 @@ import model.Task;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -563,6 +564,28 @@ public class TestTaskManager {
             }
             return resultOut.toString();
         }
+
+        @Override
+        public int hashCode() {
+            return  Objects.hash(method);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            // 1
+            if (this == o) {
+                return true;
+            }
+
+            // 2
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            // 3
+            Test test = (Test) o;
+            return method.equals(test.method);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -572,9 +595,13 @@ public class TestTaskManager {
     public void printInfoAboutAllTests() {
         int positive = 0;
         int negative = 0;
+
         printLine();
         System.out.println("РЕЗУЛЬТАТ ТЕСТИРОВАНИЯ:");
         System.out.println("Количество проведенных тестов  = " + (idTest-1));
+        System.out.println("Количество проверенных методов = " + tests.size());
+        printLine();
+
         for (Test test : tests) {
             System.out.println(test + "\n");
             if (test.resultTest) {
@@ -583,6 +610,7 @@ public class TestTaskManager {
                 ++negative;
             }
         }
+
         System.out.print("Положительный результат = " + positive);
         System.out.println(" ✅");
         System.out.print("Отрицательный результат = " + negative);
