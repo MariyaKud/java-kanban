@@ -1,5 +1,9 @@
 
+import model.Issue;
 import model.IssueStatus;
+import model.Task;
+import service.Managers;
+import service.TaskManager;
 import service.TestTaskManager;
 import java.util.Scanner;
 

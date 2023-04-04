@@ -7,9 +7,9 @@ package model;
 public abstract class Issue {
 
     private int id;             // Идентификатор
-    private final String title;       // Название
-    private final String description; // Описание
-    private IssueStatus status;       // Статус
+    private String title; // Название
+    private String description; // Описание
+    private IssueStatus status; // Статус
 
     public Issue(int id, String title, String description) {
         this.id = id;
@@ -46,5 +46,13 @@ public abstract class Issue {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

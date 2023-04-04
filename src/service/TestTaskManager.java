@@ -808,6 +808,7 @@ public class TestTaskManager {
             if (lastTask != null) {
                 Task cloneTask = new Task(lastTask);
                 cloneTask.setStatus(status);
+                cloneTask.setDescription(lastTask.getDescription() + "(Обновлена)");
                 testUpdateTask(cloneTask);
             } else {
                 printLine();

@@ -141,7 +141,7 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
         }
-        return tasks.get(task.getId());
+        return getTaskById(task.getId());
     }
 
     /**
@@ -181,7 +181,7 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
         }
-        return subTasks.get(subTask.getId());
+        return getSubTaskById(subTask.getId());
     }
 
     /**
@@ -211,7 +211,7 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
         }
-        return epics.get(epic.getId());
+        return getEpicById(epic.getId());
     }
 
     ///////////////////////////////////////////////
