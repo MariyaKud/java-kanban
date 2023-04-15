@@ -1,6 +1,9 @@
 package service;
 
+import model.Epic;
 import model.Issue;
+import model.SubTask;
+import model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,26 +11,29 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Представитель контракта истории просмотров задач {Task, SubTask, Epic}
+ * Представитель контракта истории просмотров {@link HistoryManager} задач {@link Task}, {@link SubTask}, {@link Epic}
+ * для менеджера, реализующего интерфейс {@link TaskManager}
  */
+
 public class InMemoryHistoryManager implements HistoryManager {
 
     /**
-     *  HashMap для хранения истории просмотров.
-     *  Её ключом будет id задачи, просмотр которой требуется удалить,
-     *  а значением — место просмотра этой задачи в списке, то есть узел связного списка.
+     *  HashMap - истории просмотров задач
+     *  Ключ: id просмотренной задачи
+     *  Значением: узел связного списка, хранящего последовательно истории просмотров задач
      */
     private final Map<Integer, Node<Issue>> historyStorage = new HashMap<>();
 
     /**
-     * Список для хранения порядка вызова задач
-     * Если какая-либо задача просматривалась несколько раз,
+     * Связный список для хранения порядка просмотра задач
+     * Если какая-либо задача просматривалась несколько раз, то
      * в истории должен отобразиться только последний просмотр.
      */
     private final CustomLinkedList<Issue> historyQueue = new CustomLinkedList<>();
 
     /**
      * Добавить задачу в конец очереди
+     * @param issue - добавляемая задача
      */
     @Override
     public void add(Issue issue) {
@@ -49,16 +55,18 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     /**
      * Удалить задачу в очереди по id
+     * @param id - идентификатор удаляемой задачи
      */
     @Override
     public void remove(int id) {
-        if (historyQueue.removeNode(historyStorage.get(id))) {
+        if (historyQueue.removeNode(historyStorage.get(id)) != null) {
             historyStorage.remove(id);
         }
     }
 
     /**
-     * Получить список задач в очереди
+     * Получить историю просмотров задач
+     * @return - список просмотренных задач
      */
     @Override
     public List<Issue> getHistory() {
@@ -68,6 +76,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
      * Узел CustomLinkedList истории просмотров задач
+     * @param <T> - тип хранимых задач в связном списке
      */
     private static class Node<T> {
         private final T issue;
@@ -83,25 +92,21 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     /**
      * Внутренний класс для хранения последовательности обращений к задачам.
-     * <p> Доступные методы:
+     *  <p> Доступные методы:
      *  <p> - Добавить сущность в конец списка
      *  <p> - Собрать все сущности из него в обычный ArrayList
      *  <p> - Удаление произвольного узла списка
+     * @param <T> - тип хранимых задач в связном списке
      */
     private static class CustomLinkedList<T> {
-        /**
-         * Указатель на первый элемент списка. Он же first
-         */
+
+        //Указатель на первый элемент списка. Он же first
         private Node<T> head = null;
 
-        /**
-         * Указатель на последний элемент списка. Он же last
-         */
+        //Указатель на последний элемент списка. Он же last
         private Node<T> tail = null;
 
-        /**
-         * Размер списка
-         */
+        //Размер списка
         private int size = 0;
 
         public int size() {
@@ -110,6 +115,8 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         /**
          * Добавлять задачу в конец списка
+         * @param issue - добавляемая в историю задача
+         * @return узел истории просмотров с добавленной задачей
          */
         public Node<T> linkLast(T issue) {
             final Node<T> last = tail;
@@ -125,7 +132,8 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
 
         /**
-         * Собирает все задачи из списка в обычный ArrayList
+         * Собирает все задачи из связного списка в обычный ArrayList
+         * @return - список просмотренных задач
          */
         public List<T> getTasks() {
             List<T> list = new ArrayList<>();
@@ -137,8 +145,10 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         /**
          * Удаляет узел из списка
+         * @param node удаляемый узел
+         * @return задача из удаленного узла
          */
-        public boolean removeNode(Node<T> node) {
+        public T removeNode(Node<T> node) {
             if (node != null) {
                 final Node<T> prev = node.prev;
                 final Node<T> next = node.next;
@@ -161,9 +171,11 @@ public class InMemoryHistoryManager implements HistoryManager {
                     prev.next = null;
                 }
                 size--;
-                return true;
+            } else {
+                return null;
             }
-            return false;
+
+            return node.issue;
         }
     }
 }

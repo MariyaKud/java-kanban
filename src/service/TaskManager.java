@@ -21,68 +21,68 @@ public interface TaskManager {
     ///////////////////////////////////////////////
     /**
      * Добавить задачу менеджеру. Сам объект передается в качестве параметра.
-     *
      * @param task экземпляр класса {@link Task}
+     * @return - добавленная задача
      */
     Task addTask(Task task);
 
     /**
      * Добавить подзадачу менеджеру. Сам объект передается в качестве параметра.
-     *
      * @param subTask экземпляр класса {@link SubTask}
+     * @return добавленная подзадача
      */
     SubTask addSubTask(SubTask subTask);
 
     /**
      * Добавить эпик менеджеру. Сам объект передается в качестве параметра.
-     *
      * @param epic экземпляр класса {@link Epic}
+     * @return добавленный эпик
      */
     Epic addEpic(Epic epic);
 
     ///////////////////////////////////////////////
     /**
      * Обновить задачу. Новая версия объекта передается в качестве параметра.
-     *
      * @param task новая версия объекта с верным идентификатором, включая обновленный статус
+     * @return - обновленная задача
      */
     Task updateTask(Task task);
 
     /**
      * Обновить подзадачу. Новая версия объекта передается в качестве параметра.
-     *
      * @param subTask новая версия объекта с верным идентификатором, включая обновленный статус
+     * @return обновленная подзадача
      */
     SubTask updateSubTask(SubTask subTask);
 
     /**
      * Обновить эпик. Новая версия объекта передается в качестве параметра.
-     *
      * @param epic новая версия объекта с верным идентификатором
+     * @return обновленный эпик
      */
     Epic updateEpic(Epic epic);
 
     ///////////////////////////////////////////////
     /**
      * Удалить задачу {@link Task} по id
-     *
      * @param id идентификатор задачи
+     * @return - удаленная задача
      */
-    boolean deleteTaskById(int id);
+    Task deleteTaskById(int id);
 
     /**
      * Удалить подзадачу {@link SubTask} по id
-     *
      * @param id - идентификатор задачи
+     * @return - удаленная подзадача
      */
-    boolean deleteSubTaskById(int id);
+    SubTask deleteSubTaskById(int id);
 
     /**
      * Удалить эпик {@link SubTask} по id
-     *
      * @param id - идентификатор задачи
+     * @return - удаленный эпик
      */
-    boolean deleteEpicById(int id);
+    Epic deleteEpicById(int id);
 
     ///////////////////////////////////////////////
     /**
@@ -103,7 +103,6 @@ public interface TaskManager {
     ///////////////////////////////////////////////
     /**
      * Получить задачу {@link Task} по id. Может вернуть null.
-     *
      * @param id - идентификатор задачи
      * @return задача типа {@link Task}. Если задача не найдена, то null
      */
@@ -111,7 +110,6 @@ public interface TaskManager {
 
     /**
      * Получить подзадачу {@link SubTask} по id. Может вернуть null.
-     *
      * @param id - идентификатор задачи
      * @return задача типа {@link SubTask}. Если задача не найдена, то null
      */
@@ -119,7 +117,6 @@ public interface TaskManager {
 
     /**
      * Получить эпик {@link Epic} по id. Может вернуть null.
-     *
      * @param id - идентификатор задачи
      * @return задача типа {@link Epic}. Если задача не найдена, то null
      */
@@ -128,21 +125,18 @@ public interface TaskManager {
     ///////////////////////////////////////////////
     /**
      * Получить список всех задач менеджера.
-     *
      * @return список задач {@link Task}
      */
     List<Task> getAllTasks();
 
     /**
      * Получить список всех подзадач менеджера.
-     *
      * @return список подзадач {@link SubTask}
      */
     List<SubTask> getAllSubTasks();
 
     /**
      * Получить список всех эпиков менеджера.
-     *
      * @return список эпиков {@link Epic}
      */
     List<Epic> getAllEpics();
@@ -150,7 +144,6 @@ public interface TaskManager {
     ///////////////////////////////////////////////
     /**
      * <b>Получить список всех подзадач для эпика.</b>
-     *
      * @param id  идентификатор эпика, по которому нужно получить список детей
      * @return список подзадач эпика
      */
@@ -159,7 +152,6 @@ public interface TaskManager {
     ///////////////////////////////////////////////
     /**
      * Получить историю просмотров задач.
-     *
      * @return список просмотренных задач = {Task, SubTask, Epic}
      */
     List<Issue> getHistory();

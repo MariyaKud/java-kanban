@@ -326,7 +326,7 @@ public class TestTaskManager {
         //Выполнить тест
         resultMessage.append("\t").append("Попытка удаления задачи с Id = ").append(id).append("\n");
 
-        goalAchieved = tracker.deleteTaskById(id);
+        goalAchieved = tracker.deleteTaskById(id) != null;
         resultMessage.append("\t").append("Поиск задачи с Id = ").append(id);
         registerResultTest(test,goalAchieved, resultMessage.toString());
 
@@ -350,7 +350,7 @@ public class TestTaskManager {
         //Выполнить тест
         resultMessage.append("\t").append("Попытка удаления подзадачи с Id = ").append(id).append("\n");
 
-        goalAchieved = tracker.deleteSubTaskById(id);
+        goalAchieved = tracker.deleteSubTaskById(id) != null;
         resultMessage.append("\t").append("Поиск подзадачи с Id = ").append(id);
         registerResultTest(test,goalAchieved, resultMessage.toString());
 
@@ -383,7 +383,7 @@ public class TestTaskManager {
         //Выполнить тест
         resultMessage.append("\t").append("Попытка удаления эпика с Id = ").append(id).append("\n");
 
-        goalAchieved = tracker.deleteEpicById(id);
+        goalAchieved = tracker.deleteEpicById(id) != null;
         resultMessage.append("\t").append("Поиск эпика с Id = ").append(id);
         registerResultTest(test,goalAchieved, resultMessage.toString());
 

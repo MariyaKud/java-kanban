@@ -14,16 +14,19 @@ public interface HistoryManager {
 
     /**
      * Добавить задачу в конец очереди
+     * @param issue - добавляемая задача
      */
     void add(Issue issue);
 
     /**
      * Удалить задачу в очереди по id
+     * @param id - идентификатор удаляемой задачи
      */
     void remove(int id);
 
     /**
-     * Получить список задач в очереди
+     * Получить историю просмотров задач
+     * @return - список просмотренных задач
      */
     List<Issue> getHistory();
 }

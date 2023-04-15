@@ -56,6 +56,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (task != null) {
             task.setId(getId());
             tasks.put(task.getId(), task);
+
         } else {
             System.out.println(MSG_ERROR_NULL);
         }
@@ -221,14 +222,13 @@ public class InMemoryTaskManager implements TaskManager {
      * @param id идентификатор задачи
      */
     @Override
-    public boolean deleteTaskById(int id) {
+    public Task deleteTaskById(int id) {
         if (tasks.containsKey(id)) {
-            tasks.remove(id);
             historyManager.remove(id);
-            return true;
+            return tasks.remove(id);
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
-            return false;
+            return null;
         }
     }
 
@@ -238,7 +238,7 @@ public class InMemoryTaskManager implements TaskManager {
      * @param id - идентификатор задачи
      */
     @Override
-    public boolean deleteSubTaskById(int id) {
+    public SubTask deleteSubTaskById(int id) {
         if (subTasks.containsKey(id)) {
             SubTask delSubTask = subTasks.remove(id);
             //Обработать родителя удаляемой подзадачи
@@ -249,10 +249,10 @@ public class InMemoryTaskManager implements TaskManager {
             updateStatusEpic(parent);
             //Удаляем подзадачу из истории просмотров
             historyManager.remove(id);
-            return true;
+            return delSubTask;
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
-            return false;
+            return null;
         }
     }
 
@@ -262,21 +262,20 @@ public class InMemoryTaskManager implements TaskManager {
      * @param id - идентификатор задачи
      */
     @Override
-    public boolean deleteEpicById(int id) {
+    public Epic deleteEpicById(int id) {
         if (epics.containsKey(id)) {
             //Удалить подзадачи эпика в хранилище менеджера
             for (SubTask child : epics.get(id).getChildren()) {
                subTasks.remove(child.getId());
                historyManager.remove(child.getId());
             }
-            //Удалить эпик из хранилища менеджера
-            epics.remove(id);
             //Удалить эпик из истории просмотров
             historyManager.remove(id);
-            return true;
+            //Удалить эпик из хранилища менеджера
+            return epics.remove(id);
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
-            return false;
+            return null;
         }
     }
 
