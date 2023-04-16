@@ -11,8 +11,14 @@ public class SubTask extends Issue {
      */
     private Epic parent;
 
+    public SubTask(int id, String title, String description, Epic parent) {
+        super(IssueType.SUBTASK,id,title,description);
+        this.parent = parent;
+        this.setStatus(IssueStatus.NEW);
+    }
+
     public SubTask(int id, String title, String description, Epic parent, IssueStatus status) {
-        super(id,title,description);
+        super(IssueType.SUBTASK,id,title,description);
         this.parent = parent;
         this.setStatus(status);
     }

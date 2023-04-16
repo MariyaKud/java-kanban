@@ -7,11 +7,13 @@ package model;
 public abstract class Issue {
 
     private int id;             // Идентификатор
-    private String title; // Название
+    private String title;       // Название
     private String description; // Описание
     private IssueStatus status; // Статус
+    private IssueType type;     // Тип: задача, подзадача, эпик
 
-    public Issue(int id, String title, String description) {
+    public Issue(IssueType type,int id, String title, String description) {
+        this.type = type;
         this.id = id;
         this.title = title;
         this.description = description;
@@ -20,10 +22,13 @@ public abstract class Issue {
 
     // конструктор копии
     public Issue(Issue other) {
-        this(other.getId(), other.getTitle(), other.getDescription());
+        this(other.getType(), other.getId(), other.getTitle(), other.getDescription());
         this.status = other.getStatus();
     }
 
+    public IssueType getType() {
+        return type;
+    }
     public int getId() {
         return id;
     }
@@ -55,4 +60,5 @@ public abstract class Issue {
     public void setTitle(String title) {
         this.title = title;
     }
+
 }
