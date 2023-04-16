@@ -30,11 +30,11 @@ import java.util.Map;
  */
 public class InMemoryTaskManager implements TaskManager {
 
-    private int id = 1; // идентификатор менеджера
-    private final Map<Integer, Task> tasks = new HashMap<>();
-    private final Map<Integer, Epic> epics = new HashMap<>();
-    private final Map<Integer, SubTask> subTasks = new HashMap<>();
-    private final HistoryManager historyManager = Managers.getDefaultHistory();
+    protected int id = 1; // идентификатор менеджера
+    protected final Map<Integer, Task> tasks = new HashMap<>();
+    protected final Map<Integer, Epic> epics = new HashMap<>();
+    protected final Map<Integer, SubTask> subTasks = new HashMap<>();
+    protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
     /**
      * Метод выдает очередной идентификатор для новой задачи,

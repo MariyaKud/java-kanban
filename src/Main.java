@@ -2,15 +2,21 @@
 import model.Issue;
 import model.IssueStatus;
 import model.Task;
+import service.FileBackedTasksManager;
 import service.Managers;
 import service.TaskManager;
 import service.TestTaskManager;
+
+import java.io.File;
 import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
 
+        FileBackedTasksManager.main(args);
+
+        /*
         //Создаем экземпляр тестировщика
         TestTaskManager test = new TestTaskManager();
         //Создаем объект сканера
@@ -136,6 +142,7 @@ public class Main {
                     System.out.println("Такой функционал не предусмотрен.");
             }
         }
+         */
     }
 
     private static void  printMenu() {
