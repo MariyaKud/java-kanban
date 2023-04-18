@@ -6,7 +6,7 @@ package model;
 public class Task extends Issue {
 
     public Task(int id, String title, String description, IssueStatus status) {
-        super(IssueType.TASK,id,title,description);
+        super(id,title,description);
         this.setStatus(status);
     }
 

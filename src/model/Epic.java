@@ -16,7 +16,7 @@ public class Epic extends Issue {
     private final List<SubTask> childrenList = new ArrayList<>();
 
     public Epic(int id, String title, String description) {
-        super(IssueType.EPIC, id, title, description);
+        super(id, title, description);
     }
 
     public Epic(Epic other) {
@@ -30,6 +30,11 @@ public class Epic extends Issue {
      */
     public List<SubTask> getChildren() {
         return childrenList;
+    }
+
+    @Override
+    public IssueType getType() {
+        return IssueType.EPIC;
     }
 
     @Override
