@@ -7,45 +7,43 @@ package model;
 public class SubTask extends Issue {
 
     /**
-     * Родитель экземпляр класса {@link Epic}, владелец текущего экземпляра класса {@code SubTask}
+     * Идентификатор родителя экземпляр класса {@link Epic}, владелец текущего экземпляра класса {@code SubTask}
      */
-    private Epic parent;
+    private int parentID;
 
-    public SubTask(int id, String title, String description, Epic parent) {
-        super(IssueType.SUBTASK,id,title,description);
-        this.parent = parent;
-        this.setStatus(IssueStatus.NEW);
-    }
-
-    public SubTask(int id, String title, String description, Epic parent, IssueStatus status) {
-        super(IssueType.SUBTASK,id,title,description);
-        this.parent = parent;
+    public SubTask(int id, String title, String description, int parentID, IssueStatus status) {
+        super(id,title,description);
+        this.parentID = parentID;
         this.setStatus(status);
     }
 
     public SubTask(SubTask other) {
         super(other);
-        this.parent = other.getParent();
+        this.parentID = other.getParentID();
     }
 
-    public Epic getParent() {
-        return parent;
+    public int getParentID() {
+        return parentID;
     }
 
-    public void setParent(Epic parent) {
-        this.parent = parent;
+    public void setParentID(int parentID) {
+        this.parentID = parentID;
+    }
+
+    @Override
+    public IssueType getType() {
+        return IssueType.SUBTASK;
     }
 
     @Override
     public String toString() {
         return "SubTask{"  +
                 "id=" + getId() +
-                ", parentId=" + parent.getId() +
+                ", parentId=" + parentID +
                 ", status="   + getStatus() +
                 ", title='"   + getTitle() + '\'' +
                 ", description='"   + getDescription() + '\'' +
                 ", hash='"    + hashCode() + '\'' +
-                ", parent.hash='" + parent.hashCode() + '\'' +
                 '}';
     }
 }
