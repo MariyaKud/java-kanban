@@ -47,19 +47,40 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
+     * Синхронизировать id менеджера и id задачи
+     * <p> Если задача передана с id=0, то берем следующий свободный идентификатор менеджера.
+     * В противном случае берем максимальное значение id
+     * @param issue - задача, добавляемая в хранилище менеджера
+     * @return возвращает текущее значение идентификатора менеджера
+     */
+    private int setId(Issue issue) {
+
+        if (issue.getId() == 0) {
+            issue.setId(getId());
+        } else {
+            id = Math.max(issue.getId(), id);
+            getId();
+        }
+
+        return id - 1;
+    }
+
+    /**
      * Добавить задачу менеджеру. Сам объект передается в качестве параметра.
      *
      * @param task экземпляр класса {@link Task}
+     * @return новая задача типа {@link Task}. Если задача не найдена, то null
      */
     @Override
     public Task addTask(Task task) {
-        if (task != null) {
-            task.setId(getId());
-            tasks.put(task.getId(), task);
 
+        if (task != null) {
+            int idTask = setId(task);
+            tasks.put(idTask, task);
         } else {
             System.out.println(MSG_ERROR_NULL);
         }
+
         return task;
     }
 
@@ -67,23 +88,20 @@ public class InMemoryTaskManager implements TaskManager {
      * Добавить подзадачу менеджеру. Сам объект передается в качестве параметра.
      *
      * @param subTask экземпляр класса {@link SubTask}
+     * @return новая задача типа {@link SubTask}. Если задача не найдена, то null
      */
     @Override
     public SubTask addSubTask(SubTask subTask) {
         if (subTask != null) {
-            Epic parent = epics.get(subTask.getParent().getId());
+            Epic parent = epics.get(subTask.getParentID());
             if (parent != null) {
                 List<SubTask> children = parent.getChildren();
 
                 //Устанавливаем новый свободный id
-                subTask.setId(getId());
+                int idSubTask= setId(subTask);
 
-                //Устанавливаем подзадаче родителя из хранилища менеджера
-                if (parent != subTask.getParent()) {
-                    subTask.setParent(parent);
-                }
                 //Помещаем подзадачу с корректным родителем в хранилище менеджера
-                subTasks.put(subTask.getId(), subTask);
+                subTasks.put(idSubTask, subTask);
 
                 //Добавляем родителю ребенка, если нужно
                 if (!children.contains(subTask)) {
@@ -104,14 +122,17 @@ public class InMemoryTaskManager implements TaskManager {
      * Добавить эпик менеджеру. Сам объект передается в качестве параметра.
      *
      * @param epic экземпляр класса {@link Epic}
+     * @return новая задача типа {@link Epic}. Если задача не найдена, то null
      */
     @Override
     public Epic addEpic(Epic epic) {
         if (epic != null) {
             List<SubTask> children = epic.getChildren();
 
-            epic.setId(getId());
-            epics.put(epic.getId(), epic);
+            //Устанавливаем новый свободный id
+            int idEpic = setId(epic);
+
+            epics.put(idEpic, epic);
 
             //Проверяем наличие подзадач в хранилище менеджера, если не находим, то добавляем
             for (SubTask child : children) {
@@ -130,6 +151,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Обновить задачу. Новая версия объекта передается в качестве параметра.
      *
      * @param task новая версия задачи с верным идентификатором, включая обновленный статус
+     * @return Обновленная задача типа {@link Task}. Если задача не найдена, то null
      */
     @Override
     public Task updateTask(Task task) {
@@ -149,23 +171,23 @@ public class InMemoryTaskManager implements TaskManager {
      * Обновить подзадачу. Новая версия объекта передается в качестве параметра.
      *
      * @param subTask новая версия объекта с верным идентификатором, включая обновленный статус
+     * @return Обновленная задача типа {@link SubTask}. Если задача не найдена, то null
      */
     @Override
     public SubTask updateSubTask(SubTask subTask) {
         SubTask oldSubTask = subTasks.get(subTask.getId());
         if (oldSubTask != null) {
-            Epic newParent = epics.get(subTask.getParent().getId());
+            Epic newParent = epics.get(subTask.getParentID());
+            Epic oldParent = epics.get(oldSubTask.getParentID());
             if (newParent != null) {
                 // обновляем подзадачу
                 subTasks.put(subTask.getId(), subTask);
 
-                if (newParent != oldSubTask.getParent()) {
-                    //Установить корректного родителя из хранилища менеджера по id
-                    subTask.setParent(newParent);
+                if (subTask.getParentID() != oldSubTask.getParentID()) {
                     //Удалить старую подзадачу у старого эпика родителя
-                    oldSubTask.getParent().getChildren().remove(oldSubTask);
+                    oldParent.getChildren().remove(oldSubTask);
                     //Обновляем статус старого родителя
-                    updateStatusEpic(oldSubTask.getParent());
+                    updateStatusEpic(oldParent);
                 } else {
                     //Удаляем ссылку на старую задачу
                     newParent.getChildren().remove(oldSubTask);
@@ -189,21 +211,16 @@ public class InMemoryTaskManager implements TaskManager {
      * Обновить эпик. Новая версия объекта передается в качестве параметра.
      *
      * @param epic новая версия объекта с верным идентификатором
+     * @return Обновленная задача типа {@link Epic}. Если задача не найдена, то null
      */
     @Override
     public Epic updateEpic(Epic epic) {
         Epic oldEpic = epics.get(epic.getId());
 
         if (oldEpic != null) {
-            //при обновлении эпика его дети не меняются
             if (oldEpic.getChildren().equals((epic.getChildren()))) {
                 // обновляем эпик
                 epics.put(oldEpic.getId(), epic);
-
-                //меняем родителя у детей
-                for (SubTask subTask : oldEpic.getChildren()) {
-                    subTask.setParent(epic);
-                }
                 //Контроль статуса
                 updateStatusEpic(epic);
             } else {
@@ -220,6 +237,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Удалить задачу {@link Task} по id
      *
      * @param id идентификатор задачи
+     * @return удаленная задача типа {@link Task}. Если задача не найдена, то null
      */
     @Override
     public Task deleteTaskById(int id) {
@@ -236,17 +254,20 @@ public class InMemoryTaskManager implements TaskManager {
      * Удалить подзадачу {@link SubTask} по id
      *
      * @param id - идентификатор задачи
+     * @return удаленная задача типа {@link SubTask}. Если задача не найдена, то null
      */
     @Override
     public SubTask deleteSubTaskById(int id) {
         if (subTasks.containsKey(id)) {
             SubTask delSubTask = subTasks.remove(id);
             //Обработать родителя удаляемой подзадачи
-            Epic parent = delSubTask.getParent();
-            //Удаляем эту подзадачу в эпике
-            parent.getChildren().remove(delSubTask);
-            //Обновляем статус родителя
-            updateStatusEpic(parent);
+            Epic parent = getEpicById(delSubTask.getParentID());
+            if (parent != null) {
+                //Удаляем эту подзадачу в эпике
+                parent.getChildren().remove(delSubTask);
+                //Обновляем статус родителя
+                updateStatusEpic(parent);
+            }
             //Удаляем подзадачу из истории просмотров
             historyManager.remove(id);
             return delSubTask;
@@ -260,6 +281,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Удалить эпик {@link SubTask} по id
      *
      * @param id - идентификатор задачи
+     * @return удаленная задача типа {@link Epic}. Если задача не найдена, то null
      */
     @Override
     public Epic deleteEpicById(int id) {
@@ -413,7 +435,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * <b>Получить список всех подзадач для эпика.</b>
-     *
      * @param id  идентификатор эпика, по которому нужно получить список детей
      * @return список подзадач эпика
      */
@@ -435,6 +456,8 @@ public class InMemoryTaskManager implements TaskManager {
      * Если у эпика нет подзадач или все они имеют статус NEW, то статус должен быть NEW.
      * Если все подзадачи имеют статус DONE, то и эпик считается завершённым со статусом DONE.
      * Во всех остальных случаях статус должен быть IN_PROGRESS.
+     *
+     * @param epic - эпик с обновленным статусом
      */
     private void updateStatusEpic(Epic epic) {
         if (epic.getChildren().isEmpty()) {

@@ -98,7 +98,7 @@ public class TestTaskManager {
             //Вызов тестируемого метода
             SubTask newSubTask = tracker.addSubTask(subTask);
             resultMessage.append("Создана подзадача с id = ").append(subTask.getId()).append(" для эпика с id = ");
-            resultMessage.append(subTask.getParent().getId()).append("\n");
+            resultMessage.append(subTask.getParentID()).append("\n");
 
             //Проверка достижения цели - задача найдена в HashMap менеджера
             SubTask subTaskMustToBe = tracker.getSubTaskById(subTask.getId());
@@ -211,9 +211,8 @@ public class TestTaskManager {
                 resultMessage.append("Найдена подзадача по id = ").append(subTaskToUpdate.getId()).append(" : ");
                 resultMessage.append(subTaskToUpdate).append("\n");
                 // Дополнительная информация
-                Epic parent = subTaskToUpdate.getParent();
-                resultMessage.append("Родитель подзадачи эпик с id = ").append(parent.getId()).append(" : ");
-                resultMessage.append(parent).append("\n");
+                resultMessage.append("Родитель подзадачи эпик с id = ").append(subTaskToUpdate.getParentID());
+                resultMessage.append("\n");
 
                 //Обновляем подзадачу
                 subTask = tracker.updateSubTask(subTask);
@@ -221,16 +220,14 @@ public class TestTaskManager {
                 //Выводим данные по новой подзадаче
                 resultMessage.append("\nОбновленная подзадача с id = ").append(subTask.getId()).append(" : ").append(subTask);
                 // Дополнительная информация
-                Epic newParent = subTask.getParent();
-                resultMessage.append("\nРодитель подзадачи эпик с id = ").append(newParent.getId()).append(" : ");
-                resultMessage.append(newParent);
+                resultMessage.append("\nРодитель подзадачи эпик с id = ").append(subTask.getParentID());
 
                 //Проверка достижения цели
                 SubTask updateSubTask = tracker.getSubTaskById(subTask.getId());
                 if (!subTask.getTitle().equals(updateSubTask.getTitle()) ||
                         !subTask.getStatus().equals(updateSubTask.getStatus()) ||
                         !subTask.getDescription().equals(updateSubTask.getDescription()) ||
-                        !subTask.getParent().equals(updateSubTask.getParent())) {
+                        subTask.getParentID() != updateSubTask.getParentID()) {
                     goalAchieved = false;
                 }
             } else {
@@ -392,7 +389,7 @@ public class TestTaskManager {
         }
         //Для эпика необходимо проверить, что нет подзадач с таким родителем
         for (SubTask subTask : tracker.getAllSubTasks()) {
-            if (subTask.getParent().getId() == id) {
+            if (subTask.getParentID() == id) {
                 test.setResultTest(false);
                 break;
             }
@@ -750,7 +747,7 @@ public class TestTaskManager {
         if (parent == null) {
             parent = addEpic("Родитель для подзадачи: " + title, "");
         }
-        SubTask newSubTask = new SubTask(0, title, description, parent, IssueStatus.NEW);
+        SubTask newSubTask = new SubTask(0, title, description, parent.getId(), IssueStatus.NEW);
         if (!parent.getChildren().contains(newSubTask)) {
             parent.getChildren().add(newSubTask);
         }
@@ -870,9 +867,9 @@ public class TestTaskManager {
                 SubTask lastSubTask = tracker.getSubTaskById(id);
                 Epic firstEpic = tracker.getEpicById(idNewParent);
                 if (lastSubTask != null && firstEpic != null) {
-                    if (lastSubTask.getParent() != firstEpic) {
+                    if (lastSubTask.getParentID() != firstEpic.getId()) {
                         SubTask newSubTask = new SubTask(lastSubTask);
-                        newSubTask.setParent(firstEpic);
+                        newSubTask.setParentID(firstEpic.getId());
                         testUpdateSubTask(newSubTask);
                     } else {
                         printLine();
