@@ -55,14 +55,18 @@ public class InMemoryTaskManager implements TaskManager {
      */
     private int setId(Issue issue) {
 
-        if (issue.getId() == 0) {
-            issue.setId(getId());
+        if (issue == null) {
+            return id;
         } else {
-            id = Math.max(issue.getId(), id);
-            getId();
+            if (issue.getId() == 0) {
+                issue.setId(getId());
+            }
+            if (issue.getId()>=id) {
+                id = issue.getId();
+                getId();
+            }
         }
-
-        return id - 1;
+        return issue.getId();
     }
 
     /**
@@ -75,8 +79,7 @@ public class InMemoryTaskManager implements TaskManager {
     public Task addTask(Task task) {
 
         if (task != null) {
-            int idTask = setId(task);
-            tasks.put(idTask, task);
+            tasks.put(setId(task), task);
         } else {
             System.out.println(MSG_ERROR_NULL);
         }
@@ -92,16 +95,14 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public SubTask addSubTask(SubTask subTask) {
+
         if (subTask != null) {
             Epic parent = epics.get(subTask.getParentID());
             if (parent != null) {
                 List<SubTask> children = parent.getChildren();
 
-                //Устанавливаем новый свободный id
-                int idSubTask= setId(subTask);
-
                 //Помещаем подзадачу с корректным родителем в хранилище менеджера
-                subTasks.put(idSubTask, subTask);
+                subTasks.put(setId(subTask), subTask);
 
                 //Добавляем родителю ребенка, если нужно
                 if (!children.contains(subTask)) {
@@ -129,10 +130,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic != null) {
             List<SubTask> children = epic.getChildren();
 
-            //Устанавливаем новый свободный id
-            int idEpic = setId(epic);
-
-            epics.put(idEpic, epic);
+            epics.put(setId(epic), epic);
 
             //Проверяем наличие подзадач в хранилище менеджера, если не находим, то добавляем
             for (SubTask child : children) {
@@ -359,7 +357,6 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.add(task);
             return task;
         } else {
-            System.out.println(MSG_ERROR_ID_NOT_FOUND + " в хранилище задач.");
             return null;
         }
     }
@@ -377,7 +374,6 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.add(subTask);
             return subTask;
         } else {
-            System.out.println(MSG_ERROR_ID_NOT_FOUND + " в хранилище подзадач.");
             return null;
         }
     }
@@ -395,7 +391,6 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.add(epic);
             return epic;
         } else {
-            System.out.println(MSG_ERROR_ID_NOT_FOUND + " в хранилище эпиков.");
             return null;
         }
     }

@@ -17,6 +17,12 @@ public class SubTask extends Issue {
         this.setStatus(status);
     }
 
+    public SubTask(int id, String title, String description, int parentID) {
+        super(id,title,description);
+        this.parentID = parentID;
+        this.setStatus(IssueStatus.NEW);
+    }
+
     public SubTask(SubTask other) {
         super(other);
         this.parentID = other.getParentID();
