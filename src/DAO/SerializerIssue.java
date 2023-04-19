@@ -7,8 +7,6 @@ import model.IssueType;
 import model.SubTask;
 import model.Task;
 
-import service.HistoryManager;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +18,11 @@ public class SerializerIssue {
     private SerializerIssue() {
     }
 
+    /**
+     * Сериализует задачу в строку, для выгрузки в файл.
+     * @param issue - задача для сериализации
+     * @return строка, созданная по правилу id,type,name,status,description,epic
+     */
     public static String issueToString(Issue issue) {
 
         //id,type,name,status,description,epic
@@ -36,6 +39,12 @@ public class SerializerIssue {
         return result.toString();
     }
 
+    /**
+     * Создает задачу по строковому представлению задачи.
+     * Правило представления задачи:id,type,name,status,description,epic
+     * @param value строковое представление задачи
+     * @return задача, собранная по строке
+     */
     public static Issue issueFromString(String value) {
         String[] split = value.trim().split(",");
 
@@ -92,6 +101,11 @@ public class SerializerIssue {
         }
     }
 
+    /**
+     * Сериализация истории просмотров задач
+     * @param history - список просмотренных задач
+     * @return строковое представление списка - идентификаторы задач, разделенные запятой
+     */
     public static String historyToString(List<Issue> history) {
         //id задач в порядке просмотра
         StringBuilder result = new StringBuilder();
@@ -103,6 +117,11 @@ public class SerializerIssue {
         return result.toString();
     }
 
+    /**
+     * Разбор сериализованной истории задач в список идентификаторов просмотренных задач
+     * @param value - сериализованная строка истории просмотров, идентификаторы задач, разделенные запятой
+     * @return список идентификаторов просмотренных задач
+     */
     public static List<Integer> historyFromString(String value) {
         List<Integer> history = new ArrayList<>();
         String[] split = value.trim().split(",");

@@ -16,6 +16,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+/**
+ * Универсальный класс сохранения/загрузки данных менеджера задач, поддерживающих контракт {@link TaskManager}
+ * в CSV файл
+ *
+ * <p> В файл записываются задачи, эпики, подзадачи:
+ * id,type,name,status,description,epic
+ * <p> Пустая строка
+ * <p> Идентификаторы просмотренных задач через ","
+ */
 public class CSVMakeRepository implements IssueRepository {
 
     final static String MSG_ENUM = "Не корректное имя для перечисления";
@@ -26,6 +35,11 @@ public class CSVMakeRepository implements IssueRepository {
         this.file = file;
     }
 
+    /**
+     * Загрузить задачи и историю просмотров из файла в менеджер
+     * @param tracker - менеджер, работающий с файлами, в который нужно загрузить данные из файла
+     * @return менеджер с загруженными данными из файла
+     */
     @Override
     public TaskManager load(TaskManager tracker) {
 
@@ -85,6 +99,11 @@ public class CSVMakeRepository implements IssueRepository {
         return tracker;
     }
 
+    /**
+     * Сохранить задачи историю просмотров задач в файл
+     * @param tracker - менеджер задач, поддерживающий контракт {@link TaskManager}
+     * @throws ManagerSaveException
+     */
     @Override
     public void save(TaskManager tracker) throws ManagerSaveException {
         //Проверяем наличие файла менеджера задач. Если его нет, то пытаемся создать

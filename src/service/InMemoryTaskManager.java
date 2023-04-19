@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Основной класс управления сущностями: {@code Task}, {@code SubTask}, {@code Epic} наследники класса {@code Issue}
+ * Менеджер задач управления сущностями: {@code Task}, {@code SubTask}, {@code Epic} наследники класса {@code Issue}
+ * Хранит свои задачи в оперативной памяти, наследник класса {@code InMemoryTasksManager}
+ * Поддерживает контракт {@code TasksManager}
  *
  * <p><b>Функции объекта-менеджера:</b>
  * <p>  - Возможность хранить задачи всех типов.

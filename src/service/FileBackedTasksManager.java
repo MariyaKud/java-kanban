@@ -10,6 +10,11 @@ import model.IssueStatus;
 
 import java.io.File;
 
+/**
+ * Менеджер задач управления сущностями: {@code Task}, {@code SubTask}, {@code Epic} наследники класса {@code Issue}
+ * Хранит свои задачи в файле на диске, наследник класса {@code InMemoryTasksManager}
+ * Поддерживает контракт {@code TasksManager}
+ */
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
 
     private static final String HOME = System.getProperty("user.home");
@@ -79,7 +84,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     /**
      * Восстанавливает данные менеджера из файла при запуске программы
-     * @param file - с данными менеджера
+     * @param file с данными менеджера
+     * @return менеджер задач, работающий с файлом
      */
     public static FileBackedTasksManager loadFromFile(File file) {
 
