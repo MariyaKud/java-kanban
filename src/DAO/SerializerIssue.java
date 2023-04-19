@@ -25,7 +25,6 @@ public class SerializerIssue {
      */
     public static String issueToString(Issue issue) {
 
-        //id,type,name,status,description,epic
         StringBuilder result = new StringBuilder();
         result.append(issue.getId()).append(",").append(issue.getType()).append(",");
         result.append(issue.getTitle()).append(",").append(issue.getStatus()).append(",");
@@ -43,7 +42,7 @@ public class SerializerIssue {
      * Создает задачу по строковому представлению задачи.
      * Правило представления задачи:id,type,name,status,description,epic
      * @param value строковое представление задачи
-     * @return задача, собранная по строке
+     * @return экземпляр классов {@code Task},{@code SubTask},{@code Epic}, собранная по строке
      */
     public static Issue issueFromString(String value) {
         String[] split = value.trim().split(",");
@@ -103,7 +102,7 @@ public class SerializerIssue {
 
     /**
      * Сериализация истории просмотров задач
-     * @param history - список просмотренных задач
+     * @param history - список просмотренных задач, экземпляры классов {@code Task},{@code SubTask},{@code Epic}
      * @return строковое представление списка - идентификаторы задач, разделенные запятой
      */
     public static String historyToString(List<Issue> history) {
