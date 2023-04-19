@@ -4,12 +4,12 @@ import model.Epic;
 import model.Issue;
 import model.SubTask;
 import model.Task;
+
 import service.TaskManager;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -70,7 +70,8 @@ public class CSVMakeRepository implements IssueRepository {
                         }
                     }
                 } else {
-                    break; // пустая строка означает, что задачи закончились
+                    // пустая строка означает, что задачи закончились
+                    break;
                 }
             }
 
@@ -89,34 +90,25 @@ public class CSVMakeRepository implements IssueRepository {
                 }
             }
 
-        } catch (FileNotFoundException e) {
-            System.out.println("Файл с данными не найден, запущен новый менеджер без истории.");
+        } catch (IOException  e) {
+
+            System.out.println("Произошла ошибка во время чтения файла:");
+            System.out.println(e.getMessage());
+            System.out.println("Запущен новый менеджер без истории.");
             return tracker;
-        } catch (IOException e) {
-            System.out.println("Произошла ошибка во время чтения файла, запущен новый менеджер без истории.");
-            return tracker;
+
         }
+
         return tracker;
     }
 
     /**
      * Сохранить задачи историю просмотров задач в файл
      * @param tracker - менеджер задач, поддерживающий контракт {@link TaskManager}
-     * @throws ManagerSaveException
+     * @throws ManagerSaveException при ошибке записи данных в csv-файл
      */
     @Override
     public void save(TaskManager tracker) throws ManagerSaveException {
-        //Проверяем наличие файла менеджера задач. Если его нет, то пытаемся создать
-        if (!file.exists()) {
-            try {
-                boolean fileExists = file.createNewFile();
-                if (!fileExists) {
-                    throw new ManagerSaveException("fileNotExists");
-                }
-            } catch (IOException exception) {
-                throw new ManagerSaveException("IOException");
-            }
-        }
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file.getName(), StandardCharsets.UTF_8))) {
 
@@ -133,7 +125,7 @@ public class CSVMakeRepository implements IssueRepository {
             writer.write(SerializerIssue.historyToString(tracker.getHistory()));
 
         } catch (IOException e) {
-            throw new ManagerSaveException("IOException");
+            throw new ManagerSaveException(e.getMessage());
         }
     }
 }

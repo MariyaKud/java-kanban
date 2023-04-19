@@ -2,6 +2,7 @@ package service;
 
 import DAO.CSVMakeRepository;
 import DAO.ManagerSaveException;
+
 import model.Epic;
 import model.Issue;
 import model.SubTask;
@@ -9,26 +10,34 @@ import model.Task;
 import model.IssueStatus;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Менеджер задач управления сущностями: {@code Task}, {@code SubTask}, {@code Epic} наследники класса {@code Issue}
  * Хранит свои задачи в файле на диске, наследник класса {@code InMemoryTasksManager}
  * Поддерживает контракт {@code TasksManager}
  */
-public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
+public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private static final String HOME = System.getProperty("user.home");
     private static final String NAME_FILE = "taskManager.csv";
     private final File fileTaskManager;
+    private final CSVMakeRepository csvMakeRepository;
 
     public FileBackedTasksManager(File fileTaskManager) {
         this.fileTaskManager = fileTaskManager;
+        this.csvMakeRepository = new CSVMakeRepository(fileTaskManager);
     }
 
     public static void main(String[] args) {
 
         File newTaskManagerFile = new File(HOME,NAME_FILE);
         FileBackedTasksManager tracker = loadFromFile(newTaskManagerFile);
+
+        if (tracker == null) {
+            System.out.println("Не получилось инициализировать менеджер задач, программа не запущена.");
+            return;
+        }
 
         System.out.println("Загружены данные:");
         System.out.println("ТАSK:");
@@ -48,7 +57,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             System.out.println(issue);
         }
 
-        System.out.println("\nЗапускаем автотест менеджера задач, хранящего данные в файле..");
+        System.out.println("\nЗапускаем авто тест менеджера задач, хранящего данные в файле..");
         Task newTask1 = new Task(0, "Task1", "Description");
         tracker.addTask(newTask1);
         System.out.println("Добавлена задача: " + newTask1);
@@ -84,28 +93,46 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     /**
      * Восстанавливает данные менеджера из файла при запуске программы
-     * @param file с данными менеджера
-     * @return менеджер задач, работающий с файлом
+     * @param file csv-файл для хранения данных менеджера задач
+     * @return Экземпляр класса {@link FileBackedTasksManager}. Может вернуть null, если не сможет
+     * проинициализировать csv-файл
      */
-    public static FileBackedTasksManager loadFromFile(File file) {
+    static FileBackedTasksManager loadFromFile(File file) {
 
         FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
-        System.out.println("Выполняется загрузка данных из файла ..");
-        return (FileBackedTasksManager) new CSVMakeRepository(file).load(fileBackedTasksManager);
 
+        boolean fileExist = file.exists();
+        //Проверяем наличие файла менеджера задач. Если его нет, то пытаемся создать
+        if (!fileExist) {
+            try {
+                fileExist = file.createNewFile();
+            } catch (IOException | SecurityException  e) {
+                System.out.println("Возникли проблемы при создании файла, работа менеджера невозможна!");
+                System.out.println(e.getMessage());
+                return null;
+            }
+        }
+
+        if (fileExist) {
+            System.out.println("Выполняется загрузка данных из файла ..");
+            return (FileBackedTasksManager) fileBackedTasksManager.csvMakeRepository.load(fileBackedTasksManager);
+        }
+
+        return fileBackedTasksManager;
     }
 
     /**
      * Сохранить текущее состояние менеджера задач в файл
      */
-    public void save() {
-
+    void save() {
         try {
-            new CSVMakeRepository(fileTaskManager).save(this);
+            csvMakeRepository.save(this);
         }
         catch (ManagerSaveException e) {
-            //настроили обработку исключения, сгенерированного в try
-            System.out.println("Сохранить данные в файл не вышло!");
+            System.out.println(e.getMessage());
+            for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+                System.out.println(stackTraceElement);
+            }
         }
     }
 
