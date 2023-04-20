@@ -1,7 +1,7 @@
 package service;
 
-import DAO.CSVMakeRepository;
-import DAO.ManagerSaveException;
+import dao.IssueRepository;
+import dao.ManagerSaveException;
 
 import model.Epic;
 import model.Issue;
@@ -10,7 +10,6 @@ import model.Task;
 import model.IssueStatus;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Менеджер задач управления сущностями: {@code Task}, {@code SubTask}, {@code Epic} наследники класса {@code Issue}
@@ -19,74 +18,64 @@ import java.io.IOException;
  */
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    private static final String HOME = System.getProperty("user.home");
-    private static final String NAME_FILE = "taskManager.csv";
     private final File fileTaskManager;
-    private final CSVMakeRepository csvMakeRepository;
+    private final IssueRepository csvMakeRepository;
 
     public FileBackedTasksManager(File fileTaskManager) {
         this.fileTaskManager = fileTaskManager;
-        this.csvMakeRepository = new CSVMakeRepository(fileTaskManager);
+        this.csvMakeRepository = Managers.getDefaultIssueRepository();
     }
 
     public static void main(String[] args) {
 
-        File newTaskManagerFile = new File(HOME,NAME_FILE);
-        FileBackedTasksManager tracker = loadFromFile(newTaskManagerFile);
+        final String DIR_HOME = System.getProperty("user.home");
+        final String CSV_FILE_REPOSITORY = "taskManager.csv";
 
-        if (tracker == null) {
-            System.out.println("Не получилось инициализировать менеджер задач, программа не запущена.");
-            return;
-        }
+        File csvFileRepository = new File(DIR_HOME,CSV_FILE_REPOSITORY);
+        FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(csvFileRepository);
 
-        System.out.println("Загружены данные:");
-        System.out.println("ТАSK:");
-        for (Issue issue : tracker.getAllTasks()) {
-            System.out.println(issue);
-        }
-        System.out.println("SUBТАSK:");
-        for (Issue issue : tracker.getAllSubTasks()) {
-            System.out.println(issue);
-        }
-        System.out.println("EPICS:");
-        for (Issue issue : tracker.getAllEpics()) {
-            System.out.println(issue);
-        }
-        System.out.println("ИСТОРИЯ:");
-        for (Issue issue : tracker.getHistory()) {
-            System.out.println(issue);
-        }
-
-        System.out.println("\nЗапускаем авто тест менеджера задач, хранящего данные в файле..");
+        System.out.println("\nЗапущен авто тест.");
+        System.out.println("Заполнение объекта менеджера данными....");
         Task newTask1 = new Task(0, "Task1", "Description");
-        tracker.addTask(newTask1);
+        fileBackedManager.addTask(newTask1);
         System.out.println("Добавлена задача: " + newTask1);
         Task newTask2 = new Task(0, "Task2", "Description");
-        tracker.addTask(newTask2);
+        fileBackedManager.addTask(newTask2);
         System.out.println("Добавлена задача: " + newTask2);
         newTask2.setStatus(IssueStatus.DONE);
-        tracker.updateTask(newTask2);
+        fileBackedManager.updateTask(newTask2);
         System.out.println("Установлен статус DONE для задачи: " + newTask2);
         System.out.println("Добавили в историю задачу: " + newTask2);
 
         Epic newEpic = new Epic(0, "Epic1", "Description");
-        tracker.addEpic(newEpic);
+        fileBackedManager.addEpic(newEpic);
         System.out.println("Добавлен эпик: " + newEpic);
 
         SubTask newSubTask1 = new SubTask(0, "SubTask1", "Description", newEpic.getId());
-        tracker.addSubTask(newSubTask1);
+        fileBackedManager.addSubTask(newSubTask1);
         System.out.println("Добавлена подзадача: " + newSubTask1);
 
         newSubTask1.setStatus(IssueStatus.DONE);
-        tracker.updateSubTask(newSubTask1);
+        fileBackedManager.updateSubTask(newSubTask1);
         System.out.println("Установлен статус DONE для подзадачи: " + newSubTask1);
         System.out.println("Добавили в историю подзадачу: " + newSubTask1);
 
         SubTask newSubTask2 = new SubTask(0, "SubTask2", "Description", newEpic.getId());
-        tracker.addSubTask(newSubTask2);
+        fileBackedManager.addSubTask(newSubTask2);
         System.out.println("Добавлена подзадача: " + newSubTask2);
-        tracker.getSubTaskById(newSubTask2.getId());
-        System.out.println("Добавили в историю подзадачу: " + newSubTask2);
+        fileBackedManager.getSubTaskById(newSubTask2.getId());
+        System.out.println("Добавили в историю подзадачу: " + newSubTask2 + "\n");
+
+        FileBackedTasksManager loadFromFileTracker = loadFromFile(csvFileRepository);
+
+        System.out.println("Результат сравнения задач менеджера и задач загруженных из csv файла: " +
+                loadFromFileTracker.tasks.equals(fileBackedManager.tasks));
+        System.out.println("Результат сравнения подзадач менеджера и подзадач загруженных из csv файла: " +
+                loadFromFileTracker.subTasks.equals(fileBackedManager.subTasks));
+        System.out.println("Результат сравнения эпиков менеджера и эпиков загруженных из csv файла: " +
+                loadFromFileTracker.epics.equals(fileBackedManager.epics));
+        System.out.println("Результат сравнения истории просмотров менеджера и истории восстановленной из csv файла: " +
+                loadFromFileTracker.getHistory().equals(fileBackedManager.getHistory()));
 
         System.out.println("\nАвто тест завершен.");
     }
@@ -100,23 +89,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     static FileBackedTasksManager loadFromFile(File file) {
 
         FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
-
-        boolean fileExist = file.exists();
-        //Проверяем наличие файла менеджера задач. Если его нет, то пытаемся создать
-        if (!fileExist) {
-            try {
-                fileExist = file.createNewFile();
-            } catch (IOException | SecurityException  e) {
-                System.out.println("Возникли проблемы при создании файла, работа менеджера невозможна!");
-                System.out.println(e.getMessage());
-                return null;
-            }
-        }
-
-        if (fileExist) {
-            System.out.println("Выполняется загрузка данных из файла ..");
-            return (FileBackedTasksManager) fileBackedTasksManager.csvMakeRepository.load(fileBackedTasksManager);
-        }
+        System.out.println("Выполняется загрузка данных из файла csv ..");
+        fileBackedTasksManager.csvMakeRepository.load(fileBackedTasksManager);
 
         return fileBackedTasksManager;
     }
@@ -129,14 +103,28 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             csvMakeRepository.save(this);
         }
         catch (ManagerSaveException e) {
-            System.out.println(e.getMessage());
-            for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-                System.out.println(stackTraceElement);
-            }
+            throw new ManagerSaveException(e.getMessage());
         }
     }
 
- ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public Task addTaskWithID(Task task) {
+        return super.addTaskWithID(task);
+    }
+
+    @Override
+    public SubTask addSubTaskWithID(SubTask subTask) {
+        return super.addSubTaskWithID(subTask);
+    }
+
+    @Override
+    public Epic addEpicWithID(Epic epic) {
+        return super.addEpicWithID(epic);
+    }
+
     @Override
     public Task addTask(Task task) {
         super.addTask(task);
