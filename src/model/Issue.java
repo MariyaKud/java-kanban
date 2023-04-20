@@ -18,7 +18,6 @@ public abstract class Issue {
         this.status = IssueStatus.NEW;
     }
 
-    // конструктор копии
     public Issue(Issue other) {
         this(other.getId(), other.getTitle(), other.getDescription());
         this.status = other.getStatus();
@@ -53,5 +52,27 @@ public abstract class Issue {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public int hashCode() {
+        return getId();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Issue task = (Issue) o;
+        return getId() == task.getId() &&
+                getStatus() == task.getStatus() &&
+                getTitle().equals(task.getTitle()) &&
+                getDescription().equals(task.getDescription());
     }
 }

@@ -1,5 +1,7 @@
 package model;
 
+import service.TestTaskManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +37,12 @@ public class Epic extends Issue {
     @Override
     public IssueType getType() {
         return IssueType.EPIC;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        Epic epic = (Epic) o;
+        return super.equals(o) && getChildren().equals(epic.getChildren());
     }
 
     @Override

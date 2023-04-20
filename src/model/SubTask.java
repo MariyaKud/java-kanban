@@ -52,4 +52,10 @@ public class SubTask extends Issue {
                 ", hash='"    + hashCode() + '\'' +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        SubTask subTask = (SubTask) o;
+        return super.equals(o) && getParentID() == subTask.getParentID();
+    }
 }
