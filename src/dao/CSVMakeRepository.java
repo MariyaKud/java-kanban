@@ -1,10 +1,11 @@
-package DAO;
+package dao;
 
 import model.Epic;
 import model.Issue;
 import model.SubTask;
 import model.Task;
 
+import service.FileBackedTasksManager;
 import service.TaskManager;
 
 import java.io.BufferedReader;
@@ -41,10 +42,9 @@ public class CSVMakeRepository implements IssueRepository {
      * @return менеджер с загруженными данными из файла
      */
     @Override
-    public TaskManager load(TaskManager tracker) {
+    public void load(TaskManager tracker) {
 
-        try (BufferedReader fileReader = new BufferedReader(new FileReader(file.getName(),
-                StandardCharsets.UTF_8))) {
+        try (BufferedReader fileReader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
 
             //Читаем задачи
             while (fileReader.ready()) {
@@ -54,15 +54,15 @@ public class CSVMakeRepository implements IssueRepository {
                     if (issue != null) {
                         switch(issue.getType()){
                             case TASK:
-                                tracker.addTask((Task) issue);
+                                ((FileBackedTasksManager) tracker).addTaskWithID((Task) issue);
                                 break;
 
                             case EPIC:
-                                tracker.addEpic((Epic) issue);
+                                ((FileBackedTasksManager) tracker).addEpicWithID((Epic) issue);
                                 break;
 
                             case SUBTASK:
-                                tracker.addSubTask((SubTask) issue);
+                                ((FileBackedTasksManager) tracker).addSubTaskWithID((SubTask) issue);
                                 break;
 
                             default:
@@ -91,15 +91,10 @@ public class CSVMakeRepository implements IssueRepository {
             }
 
         } catch (IOException  e) {
-
             System.out.println("Произошла ошибка во время чтения файла:");
             System.out.println(e.getMessage());
             System.out.println("Запущен новый менеджер без истории.");
-            return tracker;
-
         }
-
-        return tracker;
     }
 
     /**
@@ -110,7 +105,9 @@ public class CSVMakeRepository implements IssueRepository {
     @Override
     public void save(TaskManager tracker) throws ManagerSaveException {
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file.getName(), StandardCharsets.UTF_8))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
+
+            writer.write("id,type,name,status,description,epic\n");
 
             for (Task value : tracker.getAllTasks()) {
                 writer.write(SerializerIssue.issueToString(value));
@@ -121,6 +118,7 @@ public class CSVMakeRepository implements IssueRepository {
             for (SubTask value : tracker.getAllSubTasks()) {
                 writer.write(SerializerIssue.issueToString(value));
             }
+
             writer.newLine();
             writer.write(SerializerIssue.historyToString(tracker.getHistory()));
 
