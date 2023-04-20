@@ -569,17 +569,15 @@ public class TestTaskManager {
 
         @Override
         public boolean equals(Object o) {
-            // 1
+
             if (this == o) {
                 return true;
             }
 
-            // 2
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
 
-            // 3
             Test test = (Test) o;
             return method.equals(test.method);
         }

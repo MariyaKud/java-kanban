@@ -50,53 +50,62 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Синхронизировать id менеджера и id задачи
-     * <p> Если задача передана с id=0, то берем следующий свободный идентификатор менеджера.
-     * В противном случае берем максимальное значение id
      * @param issue - задача, добавляемая в хранилище менеджера
-     * @return возвращает текущее значение идентификатора менеджера
      */
-    private int setId(Issue issue) {
-
-        if (issue == null) {
-            return id;
-        } else {
-            if (issue.getId() == 0) {
-                issue.setId(getId());
-            }
-            if (issue.getId()>=id) {
-                id = issue.getId();
-                getId();
-            }
+    private void checkIDManagerWithLastIssue(Issue issue) {
+        if (issue != null && issue.getId()>=id) {
+            id = issue.getId();
+            getId();
         }
-        return issue.getId();
     }
 
     /**
-     * Добавить задачу менеджеру. Сам объект передается в качестве параметра.
-     *
+     * Добавить задачу менеджеру, принудительно назначив ему следующий свободный id менеджера.
+     * Сам объект передается в качестве параметра.
      * @param task экземпляр класса {@link Task}
      * @return новая задача типа {@link Task}. Если задача не найдена, то null
      */
     @Override
     public Task addTask(Task task) {
+        task.setId(getId());
+        return addTaskWithID(task) ;
+    }
 
+    /**
+     * Добавить задачу менеджеру, без изменения id.
+     * Сам объект передается в качестве параметра.
+     * @param task экземпляр класса {@link Task}
+     * @return новая задача типа {@link Task}. Если задача не найдена, то null
+     */
+    public Task addTaskWithID(Task task) {
         if (task != null) {
-            tasks.put(setId(task), task);
+            tasks.put(task.getId(), task);
         } else {
             System.out.println(MSG_ERROR_NULL);
         }
-
+        checkIDManagerWithLastIssue(task);
         return task;
     }
 
     /**
-     * Добавить подзадачу менеджеру. Сам объект передается в качестве параметра.
-     *
+     * Добавить подзадачу менеджеру, принудительно назначив ему следующий свободный id менеджера.
+     * Сам объект передается в качестве параметра.
      * @param subTask экземпляр класса {@link SubTask}
      * @return новая задача типа {@link SubTask}. Если задача не найдена, то null
      */
     @Override
     public SubTask addSubTask(SubTask subTask) {
+        subTask.setId(getId());
+        return addSubTaskWithID(subTask);
+    }
+
+    /**
+     * Добавить подзадачу менеджеру, без изменения id.
+     * Сам объект передается в качестве параметра.
+     * @param subTask экземпляр класса {@link SubTask}
+     * @return новая задача типа {@link SubTask}. Если задача не найдена, то null
+     */
+    public SubTask addSubTaskWithID(SubTask subTask) {
 
         if (subTask != null) {
             Epic parent = epics.get(subTask.getParentID());
@@ -104,7 +113,7 @@ public class InMemoryTaskManager implements TaskManager {
                 List<SubTask> children = parent.getChildren();
 
                 //Помещаем подзадачу с корректным родителем в хранилище менеджера
-                subTasks.put(setId(subTask), subTask);
+                subTasks.put(subTask.getId(), subTask);
 
                 //Добавляем родителю ребенка, если нужно
                 if (!children.contains(subTask)) {
@@ -118,21 +127,33 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             System.out.println(MSG_ERROR_NULL);
         }
+        checkIDManagerWithLastIssue(subTask);
         return subTask;
     }
 
     /**
-     * Добавить эпик менеджеру. Сам объект передается в качестве параметра.
-     *
+     * Добавить эпик менеджеру, принудительно назначив ему следующий свободный id менеджера
+     * Сам объект передается в качестве параметра.
      * @param epic экземпляр класса {@link Epic}
      * @return новая задача типа {@link Epic}. Если задача не найдена, то null
      */
     @Override
     public Epic addEpic(Epic epic) {
+        epic.setId(getId());
+        return addEpicWithID(epic);
+    }
+
+    /**
+     * Добавить эпик менеджеру как есть, без изменения id.
+     * Сам объект передается в качестве параметра.
+     * @param epic экземпляр класса {@link Epic}
+     * @return новая задача типа {@link Epic}. Если задача не найдена, то null
+     */
+    public Epic addEpicWithID(Epic epic) {
         if (epic != null) {
             List<SubTask> children = epic.getChildren();
 
-            epics.put(setId(epic), epic);
+            epics.put(epic.getId(), epic);
 
             //Проверяем наличие подзадач в хранилище менеджера, если не находим, то добавляем
             for (SubTask child : children) {
