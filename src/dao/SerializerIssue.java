@@ -1,4 +1,4 @@
-package DAO;
+package dao;
 
 import model.Epic;
 import model.Issue;
@@ -52,8 +52,11 @@ public class SerializerIssue {
         //Критично
         try {
             id = Integer.parseInt(split[0]);
-        } catch (NumberFormatException exception) {
-            System.out.println(MSG_ID);
+        } catch (NumberFormatException e) {
+            if (!"id".equals(split[0])) {
+                System.out.println(e.getMessage());
+                System.out.println("Задача с id = " + split[0] + " не загружена!");
+            }
             return null;
         }
 
@@ -61,8 +64,10 @@ public class SerializerIssue {
         if (split.length > 5) {
             try {
                 idParent = Integer.parseInt(split[5].trim());
-            } catch (NumberFormatException exception) {
-                System.out.println(String.join(" ", MSG_ID, "для родителя"));
+            } catch (NumberFormatException e) {
+                System.out.println(e.getMessage());
+                System.out.println("Задача с id = " + split[0] + "не загружена!");
+                System.out.println("Не корректны id родителя = " + split[0]);
                 return null;
             }
         }
@@ -70,15 +75,15 @@ public class SerializerIssue {
         IssueStatus status = IssueStatus.NEW;
         try {
             status = IssueStatus.valueOf(split[3]);
-        } catch (IllegalArgumentException exception) {
-            System.out.println(String.join(" - ", MSG_ENUM, "IssueStatus"));
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
         }
 
         IssueType type = IssueType.TASK;
         try {
             type = IssueType.valueOf(split[1]);
-        } catch (IllegalArgumentException exception) {
-            System.out.println(String.join(" - ", MSG_ENUM, "IssueType"));
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
         }
 
         String name = split[2].trim();
@@ -108,9 +113,13 @@ public class SerializerIssue {
     public static String historyToString(List<Issue> history) {
         //id задач в порядке просмотра
         StringBuilder result = new StringBuilder();
+        int counter = 1;
 
         for (Issue issue : history) {
-            result.append(issue.getId()).append(",");
+            result.append(issue.getId());
+            if (counter++ < history.size()) {
+                result.append(",");
+            }
         }
 
         return result.toString();
@@ -130,7 +139,8 @@ public class SerializerIssue {
             try {
                 id = Integer.parseInt(s);
                 history.add(id);
-            }  catch (NumberFormatException exception) {
+            }  catch (NumberFormatException e) {
+                System.out.println(e.getMessage());
                 System.out.println("Не получилось восстановить историю по id = " + s);
             }
         }
