@@ -23,7 +23,7 @@ public class SerializerIssue {
      * @param issue - задача для сериализации
      * @return строка, созданная по правилу id,type,name,status,description,epic
      */
-    public static String issueToString(Issue issue) {
+    static String issueToString(Issue issue) {
 
         StringBuilder result = new StringBuilder();
         result.append(issue.getId()).append(",").append(issue.getType()).append(",");
@@ -44,7 +44,7 @@ public class SerializerIssue {
      * @param value строковое представление задачи
      * @return экземпляр классов {@code Task},{@code SubTask},{@code Epic}, собранная по строке
      */
-    public static Issue issueFromString(String value) {
+    static Issue issueFromString(String value) {
         String[] split = value.trim().split(",");
 
         //Разбираем строку: id,type,name,status,description,epic
@@ -67,7 +67,7 @@ public class SerializerIssue {
             } catch (NumberFormatException e) {
                 System.out.println(e.getMessage());
                 System.out.println("Задача с id = " + split[0] + "не загружена!");
-                System.out.println("Не корректны id родителя = " + split[0]);
+                System.out.println("Некорректный id родителя = " + split[0]);
                 return null;
             }
         }
@@ -110,7 +110,7 @@ public class SerializerIssue {
      * @param history - список просмотренных задач, экземпляры классов {@code Task},{@code SubTask},{@code Epic}
      * @return строковое представление списка - идентификаторы задач, разделенные запятой
      */
-    public static String historyToString(List<Issue> history) {
+    static String historyToString(List<Issue> history) {
         //id задач в порядке просмотра
         StringBuilder result = new StringBuilder();
         int counter = 1;
@@ -130,7 +130,7 @@ public class SerializerIssue {
      * @param value - сериализованная строка истории просмотров, идентификаторы задач, разделенные запятой
      * @return список идентификаторов просмотренных задач
      */
-    public static List<Integer> historyFromString(String value) {
+    static List<Integer> historyFromString(String value) {
         List<Integer> history = new ArrayList<>();
         String[] split = value.trim().split(",");
         int id;
