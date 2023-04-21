@@ -3,8 +3,6 @@ package service;
 import dao.CSVMakeRepository;
 import dao.IssueRepository;
 
-import java.io.File;
-
 /**
  * Утилитарный класс <b>{@code Managers}</b> ответственный за получение дефолтных значений
  *
@@ -13,6 +11,8 @@ import java.io.File;
  * <p> - объекта-история просмотров {@code HistoryManager}
  */
 public class Managers {
+
+    private static final IssueRepository ISSUE_REPOSITORY = new CSVMakeRepository();
 
     /**
      * Приватный конструктор для закрытия возможности создать объект.
@@ -43,10 +43,6 @@ public class Managers {
      * @return  объект-экземпляр поддерживающий контрактом {@code IssueRepository} для записи и чтения данных в файл csv
      */
     public static IssueRepository getDefaultIssueRepository() {
-        final String DIR_HOME = System.getProperty("user.home");
-        final String CSV_FILE_REPOSITORY = "taskManager.csv";
-        File csvFileRepository = new File(DIR_HOME,CSV_FILE_REPOSITORY);
-
-        return new CSVMakeRepository(csvFileRepository);
+        return ISSUE_REPOSITORY;
     }
 }
