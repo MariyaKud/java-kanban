@@ -12,8 +12,8 @@ import java.util.List;
 
 public class SerializerIssue {
 
-    final static String MSG_ID = "Не корректный id";
-    final static String MSG_ENUM = "Не корректное имя для перечисления";
+    private final static String MSG_ID = "Не корректный id";
+    private final static String MSG_ENUM = "Не корректное имя для перечисления";
 
     private SerializerIssue() {
     }
@@ -53,10 +53,8 @@ public class SerializerIssue {
         try {
             id = Integer.parseInt(split[0]);
         } catch (NumberFormatException e) {
-            if (!"id".equals(split[0])) {
-                System.out.println(e.getMessage());
-                System.out.println("Задача с id = " + split[0] + " не загружена!");
-            }
+            System.out.println(e.getMessage());
+            System.out.println("Задача с id = " + split[0] + " не загружена!");
             return null;
         }
 

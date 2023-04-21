@@ -1,10 +1,9 @@
 package service;
 
+import dao.CSVMakeRepository;
 import dao.IssueRepository;
-import dao.ManagerSaveException;
 
 import model.Epic;
-import model.Issue;
 import model.SubTask;
 import model.Task;
 import model.IssueStatus;
@@ -18,21 +17,19 @@ import java.io.File;
  */
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    private final File fileTaskManager;
-    private final IssueRepository csvMakeRepository;
+    private final File file;
+    private final IssueRepository csvMakeRepository = Managers.getDefaultIssueRepository();
 
-    public FileBackedTasksManager(File fileTaskManager) {
-        this.fileTaskManager = fileTaskManager;
-        this.csvMakeRepository = Managers.getDefaultIssueRepository();
+    public FileBackedTasksManager(File file) {
+        this.file = file;
     }
 
     public static void main(String[] args) {
 
-        final String DIR_HOME = System.getProperty("user.home");
-        final String CSV_FILE_REPOSITORY = "taskManager.csv";
-
-        File csvFileRepository = new File(DIR_HOME,CSV_FILE_REPOSITORY);
-        FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(csvFileRepository);
+        final String dirHome = System.getProperty("user.home");
+        final String nameFileCSV = "taskManager.csv";
+        File file = new File(dirHome,nameFileCSV);
+        FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(file);
 
         System.out.println("\nЗапущен авто тест.");
         System.out.println("Заполнение объекта менеджера данными....");
@@ -66,7 +63,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         fileBackedManager.getSubTaskById(newSubTask2.getId());
         System.out.println("Добавили в историю подзадачу: " + newSubTask2 + "\n");
 
-        FileBackedTasksManager loadFromFileTracker = loadFromFile(csvFileRepository);
+        FileBackedTasksManager loadFromFileTracker = loadFromFile(file);
 
         System.out.println("Результат сравнения задач менеджера и задач загруженных из csv файла: " +
                 loadFromFileTracker.tasks.equals(fileBackedManager.tasks));
@@ -90,7 +87,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
         System.out.println("Выполняется загрузка данных из файла csv ..");
-        fileBackedTasksManager.csvMakeRepository.load(fileBackedTasksManager);
+        fileBackedTasksManager.csvMakeRepository.load(fileBackedTasksManager, fileBackedTasksManager.file);
 
         return fileBackedTasksManager;
     }
@@ -99,15 +96,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Сохранить текущее состояние менеджера задач в файл
      */
     void save() {
-        try {
-            csvMakeRepository.save(this);
-        }
-        catch (ManagerSaveException e) {
-            throw new ManagerSaveException(e.getMessage());
-        }
+        csvMakeRepository.save(this, file);
     }
-
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     @Override
