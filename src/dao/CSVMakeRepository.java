@@ -26,25 +26,24 @@ import java.util.List;
  * <p> Пустая строка
  * <p> Идентификаторы просмотренных задач через ","
  */
-public class CSVMakeRepository implements IssueRepository {
+public final class CSVMakeRepository implements IssueRepository {
 
-    final static String MSG_ENUM = "Не корректное имя для перечисления";
+    private final static String FILE_HEAD = "id,type,name,status,description,epic\n";
 
-    private final File file;
-
-    public CSVMakeRepository(File file) {
-        this.file = file;
-    }
+    private final static String MSG_ENUM = "Не корректное имя для перечисления";
 
     /**
      * Загрузить задачи и историю просмотров из файла в менеджер
      * @param tracker - менеджер, работающий с файлами, в который нужно загрузить данные из файла
+     * @param file файл, из которого загружаем данные
      * @return менеджер с загруженными данными из файла
      */
     @Override
-    public void load(TaskManager tracker) {
+    public void load(TaskManager tracker, File file) {
 
         try (BufferedReader fileReader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
+            //Пропускаем заголовок
+            fileReader.readLine();
 
             //Читаем задачи
             while (fileReader.ready()) {
@@ -100,14 +99,15 @@ public class CSVMakeRepository implements IssueRepository {
     /**
      * Сохранить задачи историю просмотров задач в файл
      * @param tracker - менеджер задач, поддерживающий контракт {@link TaskManager}
+     * @param file файл, в который сохраняем данные менеджера задач
      * @throws ManagerSaveException при ошибке записи данных в csv-файл
      */
     @Override
-    public void save(TaskManager tracker) throws ManagerSaveException {
+    public void save(TaskManager tracker, File file) throws ManagerSaveException {
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
 
-            writer.write("id,type,name,status,description,epic\n");
+            writer.write(FILE_HEAD);
 
             for (Task value : tracker.getAllTasks()) {
                 writer.write(SerializerIssue.issueToString(value));
