@@ -36,7 +36,6 @@ public final class CSVMakeRepository implements IssueRepository {
      * Загрузить задачи и историю просмотров из файла в менеджер
      * @param tracker - менеджер, работающий с файлами, в который нужно загрузить данные из файла
      * @param file файл, из которого загружаем данные
-     * @return менеджер с загруженными данными из файла
      */
     @Override
     public void load(TaskManager tracker, File file) {

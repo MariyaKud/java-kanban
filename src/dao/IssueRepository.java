@@ -18,11 +18,6 @@ public interface IssueRepository {
     void load(TaskManager tracker, File file);
 
     /**
-     * Сохранить задачи и историю просмотров задач в файл
-     * @param tracker - менеджер задач, поддерживающий контракт {@link TaskManager}
-     */
-
-    /**
      * Сохранить задачи и историю просмотров менеджера в файл
      * @param tracker менеджер задач, поддерживающий контракт {@link TaskManager}
      * @param file файл, в который сохраняем данные менеджера задач

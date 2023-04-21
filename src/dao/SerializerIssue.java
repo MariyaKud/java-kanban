@@ -12,9 +12,6 @@ import java.util.List;
 
 public class SerializerIssue {
 
-    private final static String MSG_ID = "Не корректный id";
-    private final static String MSG_ENUM = "Не корректное имя для перечисления";
-
     private SerializerIssue() {
     }
 
