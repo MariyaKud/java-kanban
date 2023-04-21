@@ -12,7 +12,7 @@ import dao.IssueRepository;
  */
 public class Managers {
 
-    private static final IssueRepository ISSUE_REPOSITORY = new CSVMakeRepository();
+    private static final IssueRepository issueRepository = new CSVMakeRepository(); // исключение логера
 
     /**
      * Приватный конструктор для закрытия возможности создать объект.
@@ -43,6 +43,6 @@ public class Managers {
      * @return  объект-экземпляр поддерживающий контрактом {@code IssueRepository} для записи и чтения данных в файл csv
      */
     public static IssueRepository getDefaultIssueRepository() {
-        return ISSUE_REPOSITORY;
+        return issueRepository;
     }
 }
