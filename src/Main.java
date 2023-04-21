@@ -36,7 +36,13 @@ public class Main {
                 case "2":
                     System.out.println("-------------------------------------------");
                     System.out.println("Запущено ручное тестирование менеджера, работающего с оперативной памятью.");
+                    boolean testFinish = false;
                     while (true) {
+
+                        if (testFinish) {
+                            //Возвращаемся в верхнее меню
+                            break;
+                        }
 
                         printSecondMenu();
                         testCommand = scanner.nextLine().trim();
@@ -45,8 +51,8 @@ public class Main {
                             case "0":// Закончить тест
                                 System.out.println("Ваш тест завершен.");
                                 test.printInfoAboutAllTests();
-                                scanner.close();
-                                return;
+                                testFinish = true;
+                                break;
                             case "1":// Вывести списки задач
                                 test.printTaskManager();
                                 break;
