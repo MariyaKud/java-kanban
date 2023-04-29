@@ -1,5 +1,8 @@
 package model;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
+
 /**
  * Подзадача - класс для разбиения масштабных задач
  * Для каждой подзадачи известно, в рамках какого эпика она выполняется.
@@ -11,16 +14,16 @@ public class SubTask extends Issue {
      */
     private int parentID;
 
-    public SubTask(int id, String title, String description, int parentID, IssueStatus status) {
-        super(id,title,description);
+    public SubTask(int id, String title, String description, Duration duration, ZonedDateTime startTime,
+                   int parentID, IssueStatus status) {
+        super(id, title, description, duration, startTime);
         this.parentID = parentID;
         this.setStatus(status);
     }
 
-    public SubTask(int id, String title, String description, int parentID) {
-        super(id,title,description);
-        this.parentID = parentID;
-        this.setStatus(IssueStatus.NEW);
+    public SubTask(int id, String title, String description, Duration duration, ZonedDateTime startTime,
+                   int parentID) {
+        this(id, title, description, duration, startTime, parentID, IssueStatus.NEW);
     }
 
     public SubTask(SubTask other) {
@@ -49,6 +52,8 @@ public class SubTask extends Issue {
                 ", status="   + getStatus() +
                 ", title='"   + getTitle() + '\'' +
                 ", description='"   + getDescription() + '\'' +
+                ", startTime='" + getStartTime() + '\'' +
+                ", duration='" + getDuration() + '\'' +
                 ", hash='"    + hashCode() + '\'' +
                 '}';
     }

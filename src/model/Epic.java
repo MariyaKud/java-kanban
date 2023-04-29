@@ -1,7 +1,7 @@
 package model;
 
-import service.TestTaskManager;
-
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,14 +16,23 @@ public class Epic extends Issue {
      * Содержит список элементов класса {@link SubTask}, содержащихся в экземпляре {@code Epic}
      */
     private final List<SubTask> childrenList = new ArrayList<>();
+    private ZonedDateTime endTime; //Время завершения
 
     public Epic(int id, String title, String description) {
         super(id, title, description);
+        //Продолжительность нулевая у нового эпика бех детей
+        this.setDuration(Duration.ZERO);
+        //Время старта текущая дата
+        this.setStartTime(ZonedDateTime.now());
+        this.countEndTime();
     }
 
     public Epic(Epic other) {
         super(other);
         this.childrenList.addAll(other.getChildren());
+        this.countDuration();
+        this.countStartTime();
+        this.countEndTime();
     }
 
     /**
@@ -32,6 +41,38 @@ public class Epic extends Issue {
      */
     public List<SubTask> getChildren() {
         return childrenList;
+    }
+
+    public void setEndTime(ZonedDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public void countEndTime() {
+        ZonedDateTime endTime = ZonedDateTime.now();
+        for (SubTask child : getChildren()) {
+            if (endTime.isBefore(child.getEndTime())) {
+                endTime = child.getStartTime();
+            }
+        }
+        this.setEndTime(endTime);
+    }
+
+    public void countDuration() {
+        Duration durationEpic = Duration.ZERO;
+        for (SubTask child : getChildren()) {
+            durationEpic = durationEpic.plus(child.getDuration());
+        }
+        this.setDuration(durationEpic);
+    }
+
+    public void countStartTime() {
+        ZonedDateTime startTime = ZonedDateTime.now();
+        for (SubTask child : getChildren()) {
+            if (startTime.isAfter(child.getStartTime())) {
+                startTime = child.getStartTime();
+            }
+        }
+        this.setStartTime(startTime);
     }
 
     @Override

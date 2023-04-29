@@ -28,7 +28,7 @@ import java.util.List;
  */
 public final class CSVMakeRepository implements IssueRepository {
 
-    private final static String FILE_HEAD = "id,type,name,status,description,epic\n";
+    private final static String FILE_HEAD = "id,type,name,status,description,duration,startTime,epic\n";
 
     private final static String MSG_ENUM = "Не корректное имя для перечисления";
 

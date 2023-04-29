@@ -7,6 +7,8 @@ import model.IssueType;
 import model.SubTask;
 import model.Task;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,11 +23,12 @@ public class SerializerIssue {
      * @return строка, созданная по правилу id,type,name,status,description,epic
      */
     static String issueToString(Issue issue) {
-
+        //"id,type,name,status,description,duration,startTime,epic";
         StringBuilder result = new StringBuilder();
         result.append(issue.getId()).append(",").append(issue.getType()).append(",");
         result.append(issue.getTitle()).append(",").append(issue.getStatus()).append(",");
         result.append(issue.getDescription()).append(",");
+        result.append(issue.getDuration()).append(",").append(issue.getStartTime()).append(",");
 
         if (issue.getType() == IssueType.SUBTASK) {
             result.append(((SubTask) issue).getParentID());
@@ -84,15 +87,18 @@ public class SerializerIssue {
         String name = split[2].trim();
         String description = split[4].trim();
 
+        Duration duration  = Duration.ZERO;
+        ZonedDateTime startTime = ZonedDateTime.now();
+
         switch (type) {
             case TASK:
-                return new Task(id, name, description, status);
+                return new Task(id, name, description, duration, startTime, status);
 
             case EPIC:
                 return new Epic(id, name, description);
 
             case SUBTASK:
-                return new SubTask(id, name, description, idParent, status);
+                return new SubTask(id, name, description, duration, startTime, idParent, status);
 
             default:
                 System.out.println("Переданы не корректные данные. По ним нельзя собрать задачу любого типа.");

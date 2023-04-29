@@ -8,6 +8,11 @@ import model.Task;
 import model.IssueStatus;
 
 import java.io.File;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 /**
  * Менеджер задач управления сущностями: {@code Task}, {@code SubTask}, {@code Epic} наследники класса {@code Issue}
@@ -27,15 +32,21 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         final String dirHome = System.getProperty("user.home");
         final String nameFileCSV = "taskManager.csv";
+        final ZoneId moscowZone = ZoneId.of("Europe/Moscow");
+        Instant startTime = Instant.now();
         File file = new File(dirHome,nameFileCSV);
         FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(file);
 
         System.out.println("\nЗапущен авто тест.");
         System.out.println("Заполнение объекта менеджера данными....");
-        Task newTask1 = new Task(0, "Task1", "Description");
+        Task newTask1 = new Task(0, "Task1", "Description", Duration.ofMinutes(15),
+                                    ZonedDateTime.ofInstant(startTime, moscowZone),IssueStatus.NEW);
+        startTime = startTime.plus(Duration.ofMinutes(15));
         fileBackedManager.addTask(newTask1);
         System.out.println("Добавлена задача: " + newTask1);
-        Task newTask2 = new Task(0, "Task2", "Description");
+        Task newTask2 = new Task(0, "Task2", "Description", Duration.ofMinutes(15),
+                ZonedDateTime.ofInstant(startTime, moscowZone).plusMinutes(15),IssueStatus.NEW);
+        startTime = startTime.plus(Duration.ofMinutes(15));
         fileBackedManager.addTask(newTask2);
         System.out.println("Добавлена задача: " + newTask2);
         newTask2.setStatus(IssueStatus.DONE);
@@ -47,7 +58,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         fileBackedManager.addEpic(newEpic);
         System.out.println("Добавлен эпик: " + newEpic);
 
-        SubTask newSubTask1 = new SubTask(0, "SubTask1", "Description", newEpic.getId());
+        SubTask newSubTask1 = new SubTask(0, "SubTask1", "Description", Duration.ofMinutes(15),
+                ZonedDateTime.ofInstant(startTime, moscowZone).plusMinutes(15), newEpic.getId());
+        startTime = startTime.plus(Duration.ofMinutes(15));
         fileBackedManager.addSubTask(newSubTask1);
         System.out.println("Добавлена подзадача: " + newSubTask1);
 
@@ -56,7 +69,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println("Установлен статус DONE для подзадачи: " + newSubTask1);
         System.out.println("Добавили в историю подзадачу: " + newSubTask1);
 
-        SubTask newSubTask2 = new SubTask(0, "SubTask2", "Description", newEpic.getId());
+        SubTask newSubTask2 = new SubTask(0, "SubTask2", "Description", Duration.ofMinutes(15),
+                ZonedDateTime.ofInstant(startTime, moscowZone).plusMinutes(15), newEpic.getId());
+        startTime = startTime.plus(Duration.ofMinutes(15));
         fileBackedManager.addSubTask(newSubTask2);
         System.out.println("Добавлена подзадача: " + newSubTask2);
         fileBackedManager.getSubTaskById(newSubTask2.getId());

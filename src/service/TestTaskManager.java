@@ -7,6 +7,10 @@ import model.IssueType;
 import model.SubTask;
 import model.Task;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +32,8 @@ public class TestTaskManager {
     final static String MSG_ERROR_FOR_METHOD = "При тестировании метода обнаружена ошибка.";
     final static String MSG_ERROR_TEST = "ТЕСТ метода не выполнен, входные данные заданы не корректно.";
     final static String MSG_ERROR_NOT_TEST = "Сценарий тестирования запустить не вышло:";
+    private Instant statTime = Instant.now();
+    ZoneId moscowZone = ZoneId.of("Europe/Moscow");
 
     /**
      * tracker тестируемый менеджер {@link TaskManager}
@@ -47,6 +53,16 @@ public class TestTaskManager {
     public TestTaskManager() {
         this.idTest = 1;
         this.tracker = (InMemoryTaskManager) Managers.getDefault();
+    }
+
+    public Instant getStatTime() {
+        Instant now = statTime;
+        statTime = statTime.plusSeconds(15*60);
+        return now;
+    }
+
+    public void setStatTime(Instant statTime) {
+        this.statTime = statTime;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -731,7 +747,8 @@ public class TestTaskManager {
      * @return новый экземпляр класса {@link Task} со статусом NEW
      */
     private Task addTask(String title, String description) {
-        return new Task(0, title, description);
+        return new Task(0, title, description, Duration.ofMinutes(15),
+                ZonedDateTime.ofInstant(getStatTime(), moscowZone), IssueStatus.NEW);
     }
 
     /**
@@ -745,7 +762,8 @@ public class TestTaskManager {
         if (parent == null) {
             parent = addEpic("Родитель для подзадачи: " + title, "");
         }
-        SubTask newSubTask = new SubTask(0, title, description, parent.getId(), IssueStatus.NEW);
+        SubTask newSubTask = new SubTask(0, title, description, Duration.ofMinutes(15),
+                ZonedDateTime.ofInstant(getStatTime(), moscowZone), parent.getId(), IssueStatus.NEW);
         if (!parent.getChildren().contains(newSubTask)) {
             parent.getChildren().add(newSubTask);
         }

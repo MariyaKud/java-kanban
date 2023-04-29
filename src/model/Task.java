@@ -1,21 +1,21 @@
 package model;
 
+import java.time.Duration;
+import java.time.ZonedDateTime;
+
 /**
  * Задача - класс для простых задач
  */
 public class Task extends Issue {
 
-    public Task(int id, String title, String description, IssueStatus status) {
-        super(id,title,description);
+    public Task(int id, String title, String description, Duration duration, ZonedDateTime startTime,
+                IssueStatus status) {
+        super(id, title, description, duration, startTime);
         this.setStatus(status);
     }
 
-    public Task(int id, String title, String description) {
-        this(id,title,description,IssueStatus.NEW);
-    }
-
-    public Task(Task other) {
-        super(other);
+    public Task(Task task) {
+        super(task);
     }
 
     @Override
@@ -25,6 +25,8 @@ public class Task extends Issue {
                 ", status=" + getStatus() +
                 ", title='" + getTitle() + '\'' +
                 ", description='" + getDescription() + '\'' +
+                ", startTime='" + getStartTime() + '\'' +
+                ", duration='" + getDuration() + '\'' +
                 ", hash='"  + hashCode() + '\'' +
                 '}';
     }
