@@ -22,7 +22,7 @@ import java.util.List;
  * в CSV файл
  *
  * <p> В файл записываются задачи, эпики, подзадачи:
- * id,type,name,status,description,epic
+ * id,type,name,status,description,duration,startTime,epic
  * <p> Пустая строка
  * <p> Идентификаторы просмотренных задач через ","
  */

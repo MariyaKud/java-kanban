@@ -6,6 +6,8 @@ import model.IssueStatus;
 import model.SubTask;
 import model.Task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -478,6 +480,9 @@ public class InMemoryTaskManager implements TaskManager {
      * @param epic - эпик с обновленным статусом
      */
     private void updateStatusEpic(Epic epic) {
+
+        updateDurationAndDateEpic(epic);
+
         if (epic.getChildren().isEmpty()) {
             epic.setStatus(IssueStatus.NEW);
         } else {
@@ -503,6 +508,32 @@ public class InMemoryTaskManager implements TaskManager {
             } else {
                 epic.setStatus(IssueStatus.IN_PROGRESS);
             }
+        }
+    }
+
+    /**
+     * Рассчитать продолжительность эпика — сумма продолжительности всех его подзадач.
+     * Рассчитать Время начала — дата старта самой ранней подзадачи.
+     * Рассчитать время завершения — время окончания самой поздней из задач.
+     * @param epic - эпик, для которого выполняется расчет временных характеристик
+     */
+    private void updateDurationAndDateEpic(Epic epic) {
+        Duration durationEpic = Duration.ZERO;
+        final LocalDateTime[] dateTime = {LocalDateTime.MAX,LocalDateTime.MIN};
+
+        if (!epic.getChildren().isEmpty()) {
+            for (SubTask child : epic.getChildren()) {
+                durationEpic = durationEpic.plus(child.getDuration());
+                if (dateTime[0].isAfter(child.getStartTime())) {
+                    dateTime[0] = child.getStartTime();
+                }
+                if (dateTime[1].isBefore(child.getStartTime())) {
+                    dateTime[1] = child.getStartTime();
+                }
+            }
+            epic.setDuration(durationEpic);
+            epic.setStartTime(dateTime[0]);
+            epic.setEndTime(dateTime[1]);
         }
     }
 

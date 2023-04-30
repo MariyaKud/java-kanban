@@ -1,28 +1,35 @@
 package model;
 
 import java.time.Duration;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 /**
  * Универсальный класс задач, родитель любой сущности, управляемой менеджером.
- *
+ * <p>Минимально-обязательный набор полей любой задачи менеджера:
+ * <p>id - идентификатор
+ * <p>title - имя задачи
+ * <p>description - описание задачи
+ * <p>duration - продолжительность задачи, оценка того, сколько времени она займёт в минутах (число);
+ * <p>startTime - дата/время, когда предполагается приступить к выполнению задачи.
+ * <p>status - статус задачи.
  */
+
 public abstract class Issue {
 
     private int id;                   // Идентификатор
     private String title;             // Название
     private String description;       // Описание
     private Duration duration;        //Продолжительность в минутах
-    private  ZonedDateTime startTime; //Время запуска
+    private LocalDateTime startTime;  //Время запуска
     private IssueStatus status;       // Статус
 
-    public Issue(int id, String title, String description, Duration duration, ZonedDateTime startTime) {
-        this.id = id;
-        this.title = title;
+    public Issue(int id, String title, String description, Duration duration, LocalDateTime startTime) {
+        this.id          = id;
+        this.title       = title;
         this.description = description;
-        this.duration = duration;
-        this.startTime = startTime;
-        this.status = IssueStatus.NEW;
+        this.duration    = duration;
+        this.startTime   = startTime;
+        this.status      = IssueStatus.NEW;
     }
 
     public Issue(int id, String title, String description) {
@@ -30,7 +37,7 @@ public abstract class Issue {
         this.title = title;
         this.description = description;
         this.duration = Duration.ZERO;
-        this.startTime = ZonedDateTime.now();
+        this.startTime = LocalDateTime.now();
         this.status = IssueStatus.NEW;
     }
 
@@ -63,11 +70,11 @@ public abstract class Issue {
         return duration;
     }
 
-    public ZonedDateTime getStartTime() {
+    public LocalDateTime getStartTime() {
         return startTime;
     }
 
-    public ZonedDateTime getEndTime() {
+    public LocalDateTime getEndTime() {
         return startTime.plusMinutes(duration.toMinutes());
     }
 
@@ -91,7 +98,7 @@ public abstract class Issue {
         this.duration = duration;
     }
 
-    public void setStartTime(ZonedDateTime startTime) {
+    public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
 
@@ -114,7 +121,9 @@ public abstract class Issue {
         return getId() == task.getId() &&
                 getStatus() == task.getStatus() &&
                 getDuration().equals(task.getDuration()) &&
-                getStartTime().equals(task.getStartTime()) &&
+                getStartTime().toLocalDate().equals(task.getStartTime().toLocalDate()) &&
+                getStartTime().getHour() == task.getStartTime().getHour() &&
+                getStartTime().getMinute() == task.getStartTime().getMinute() &&
                 getTitle().equals(task.getTitle()) &&
                 getDescription().equals(task.getDescription());
     }

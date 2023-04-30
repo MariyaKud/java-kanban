@@ -1,6 +1,9 @@
 package model;
 
+import service.Managers;
+
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 /**
@@ -14,14 +17,14 @@ public class SubTask extends Issue {
      */
     private int parentID;
 
-    public SubTask(int id, String title, String description, Duration duration, ZonedDateTime startTime,
+    public SubTask(int id, String title, String description, Duration duration, LocalDateTime startTime,
                    int parentID, IssueStatus status) {
         super(id, title, description, duration, startTime);
         this.parentID = parentID;
         this.setStatus(status);
     }
 
-    public SubTask(int id, String title, String description, Duration duration, ZonedDateTime startTime,
+    public SubTask(int id, String title, String description, Duration duration, LocalDateTime startTime,
                    int parentID) {
         this(id, title, description, duration, startTime, parentID, IssueStatus.NEW);
     }
@@ -52,9 +55,9 @@ public class SubTask extends Issue {
                 ", status="   + getStatus() +
                 ", title='"   + getTitle() + '\'' +
                 ", description='"   + getDescription() + '\'' +
-                ", startTime='" + getStartTime() + '\'' +
-                ", duration='" + getDuration() + '\'' +
-                ", hash='"    + hashCode() + '\'' +
+                ", startTime='" + getStartTime().format(Managers.getFormatter()) + '\'' +
+                ", endTime='" + getEndTime().format(Managers.getFormatter()) + '\'' +
+                ", duration='" + getDuration().toMinutes() + "мин." + '\'' +
                 '}';
     }
 

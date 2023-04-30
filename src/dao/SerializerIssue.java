@@ -6,9 +6,13 @@ import model.IssueStatus;
 import model.IssueType;
 import model.SubTask;
 import model.Task;
+import service.FileBackedTasksManager;
+import service.Managers;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +32,8 @@ public class SerializerIssue {
         result.append(issue.getId()).append(",").append(issue.getType()).append(",");
         result.append(issue.getTitle()).append(",").append(issue.getStatus()).append(",");
         result.append(issue.getDescription()).append(",");
-        result.append(issue.getDuration()).append(",").append(issue.getStartTime()).append(",");
+        result.append(issue.getDuration().toMinutes()).append(",");
+        result.append(issue.getStartTime().format(Managers.getFormatter())).append(",");
 
         if (issue.getType() == IssueType.SUBTASK) {
             result.append(((SubTask) issue).getParentID());
@@ -47,8 +52,8 @@ public class SerializerIssue {
     static Issue issueFromString(String value) {
         String[] split = value.trim().split(",");
 
-        //Разбираем строку: id,type,name,status,description,epic
-        int id;
+        //Разбираем строку: id,type,name,status,description,duration,startTime,epic
+        final int id;
         //Критично
         try {
             id = Integer.parseInt(split[0]);
@@ -59,9 +64,9 @@ public class SerializerIssue {
         }
 
         int idParent = 0;
-        if (split.length > 5) {
+        if (split.length > 7) {
             try {
-                idParent = Integer.parseInt(split[5].trim());
+                idParent = Integer.parseInt(split[7].trim());
             } catch (NumberFormatException e) {
                 System.out.println(e.getMessage());
                 System.out.println("Задача с id = " + split[0] + "не загружена!");
@@ -69,6 +74,7 @@ public class SerializerIssue {
                 return null;
             }
         }
+
         //Не критично
         IssueStatus status = IssueStatus.NEW;
         try {
@@ -87,8 +93,16 @@ public class SerializerIssue {
         String name = split[2].trim();
         String description = split[4].trim();
 
-        Duration duration  = Duration.ZERO;
-        ZonedDateTime startTime = ZonedDateTime.now();
+        LocalDateTime startTime = LocalDateTime.parse(split[6].trim(),Managers.getFormatter());
+        Duration duration = Duration.ZERO;
+        final long minutes;
+        try {
+            minutes = Long.parseLong(split[5].trim());
+            duration = Duration.ofMinutes(minutes);
+        } catch (NumberFormatException e) {
+            System.out.println(e.getMessage());
+            System.out.println("Продолжительность задачи с id = " + split[0] + " не загружена!");
+        }
 
         switch (type) {
             case TASK:

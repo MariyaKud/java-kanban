@@ -3,6 +3,8 @@ package service;
 import dao.CSVMakeRepository;
 import dao.IssueRepository;
 
+import java.time.format.DateTimeFormatter;
+
 /**
  * Утилитарный класс <b>{@code Managers}</b> ответственный за получение дефолтных значений
  *
@@ -12,7 +14,8 @@ import dao.IssueRepository;
  */
 public class Managers {
 
-    private static final IssueRepository issueRepository = new CSVMakeRepository(); // исключение логера
+    private static final IssueRepository issueRepository = new CSVMakeRepository();
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     /**
      * Приватный конструктор для закрытия возможности создать объект.
@@ -44,5 +47,13 @@ public class Managers {
      */
     public static IssueRepository getDefaultIssueRepository() {
         return issueRepository;
+    }
+
+    /**
+     * Получить дефолтный формат дат, для менеджера задач
+     * @return формат хранения и представления дат
+     */
+    public static DateTimeFormatter getFormatter() {
+        return formatter;
     }
 }

@@ -1,6 +1,9 @@
 package model;
 
+import service.Managers;
+
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 /**
@@ -8,7 +11,7 @@ import java.time.ZonedDateTime;
  */
 public class Task extends Issue {
 
-    public Task(int id, String title, String description, Duration duration, ZonedDateTime startTime,
+    public Task(int id, String title, String description, Duration duration, LocalDateTime startTime,
                 IssueStatus status) {
         super(id, title, description, duration, startTime);
         this.setStatus(status);
@@ -25,9 +28,9 @@ public class Task extends Issue {
                 ", status=" + getStatus() +
                 ", title='" + getTitle() + '\'' +
                 ", description='" + getDescription() + '\'' +
-                ", startTime='" + getStartTime() + '\'' +
-                ", duration='" + getDuration() + '\'' +
-                ", hash='"  + hashCode() + '\'' +
+                ", startTime='" + getStartTime().format(Managers.getFormatter()) + '\'' +
+                ", endTime='" + getEndTime().format(Managers.getFormatter()) + '\'' +
+                ", duration='" + getDuration().toMinutes() + "мин." + '\'' +
                 '}';
     }
 }
