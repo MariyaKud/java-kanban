@@ -22,7 +22,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private final File file;
     private final IssueRepository csvMakeRepository = Managers.getDefaultIssueRepository();
 
-    public FileBackedTasksManager(File file) {
+    public FileBackedTasksManager(HistoryManager historyManager, File file) {
+        super(historyManager);
         this.file = file;
     }
 
@@ -33,7 +34,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         final String nameFileCSV = "taskManager.csv";
 
         final File file = new File(dirHome,nameFileCSV);
-        final FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(file);
+        final FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(Managers.getDefaultHistory(), file);
 
         //Считаем, что планирование задач идет в будущее
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -122,7 +123,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      */
     static FileBackedTasksManager loadFromFile(File file) {
 
-        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
+        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(Managers.getDefaultHistory(), file);
         System.out.println("Выполняется загрузка данных из файла csv ..");
         fileBackedTasksManager.csvMakeRepository.load(fileBackedTasksManager, fileBackedTasksManager.file);
 

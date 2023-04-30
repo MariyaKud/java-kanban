@@ -23,22 +23,18 @@ public abstract class Issue {
     private LocalDateTime startTime;  //Время запуска
     private IssueStatus status;       // Статус
 
-    public Issue(int id, String title, String description, Duration duration, LocalDateTime startTime) {
+    public Issue(int id, String title, String description, Duration duration) {
         this.id          = id;
         this.title       = title;
         this.description = description;
         this.duration    = duration;
-        this.startTime   = startTime;
+        this.startTime   = LocalDateTime.now();
         this.status      = IssueStatus.NEW;
     }
 
-    public Issue(int id, String title, String description) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.duration = Duration.ZERO;
-        this.startTime = LocalDateTime.now();
-        this.status = IssueStatus.NEW;
+    public Issue(int id, String title, String description, Duration duration, LocalDateTime startTime) {
+        this(id, title, description, duration);
+        this.setStartTime(startTime);
     }
 
     public Issue(Issue other) {

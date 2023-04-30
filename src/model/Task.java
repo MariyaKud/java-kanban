@@ -17,6 +17,10 @@ public class Task extends Issue {
         this.setStatus(status);
     }
 
+    public Task(int id, String title, String description, Duration duration) {
+        super(id, title, description, duration);
+    }
+
     public Task(Task task) {
         super(task);
     }

@@ -21,7 +21,7 @@ public class Epic extends Issue {
     private LocalDateTime endTime;
 
     public Epic(int id, String title, String description) {
-        super(id, title, description);
+        super(id, title, description, Duration.ZERO);
         //Продолжительность нулевая у нового эпика бех детей
         this.setDuration(Duration.ZERO);
         //Время старта/завершения текущая дата
