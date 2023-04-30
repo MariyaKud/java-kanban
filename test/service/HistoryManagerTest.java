@@ -2,7 +2,6 @@ package service;
 
 import model.Issue;
 import model.Task;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
