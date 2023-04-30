@@ -4,7 +4,6 @@ import service.Managers;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 
 /**
  * Подзадача - класс для разбиения масштабных задач
@@ -15,7 +14,7 @@ public class SubTask extends Issue {
     /**
      * Идентификатор родителя экземпляр класса {@link Epic}, владелец текущего экземпляра класса {@code SubTask}
      */
-    private int parentID;
+    private final int parentID;
 
     public SubTask(int id, String title, String description, Duration duration, LocalDateTime startTime,
                    int parentID, IssueStatus status) {
@@ -29,17 +28,8 @@ public class SubTask extends Issue {
         this(id, title, description, duration, startTime, parentID, IssueStatus.NEW);
     }
 
-    public SubTask(SubTask other) {
-        super(other);
-        this.parentID = other.getParentID();
-    }
-
     public int getParentID() {
         return parentID;
-    }
-
-    public void setParentID(int parentID) {
-        this.parentID = parentID;
     }
 
     @Override

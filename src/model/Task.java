@@ -4,7 +4,6 @@ import service.Managers;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 
 /**
  * Задача - класс для простых задач
@@ -19,10 +18,6 @@ public class Task extends Issue {
 
     public Task(int id, String title, String description, Duration duration) {
         super(id, title, description, duration);
-    }
-
-    public Task(Task task) {
-        super(task);
     }
 
     @Override

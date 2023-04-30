@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.util.List;
 
-import static model.IssueStatus.NEW;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TaskManagerTest {

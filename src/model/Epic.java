@@ -56,16 +56,13 @@ public class Epic extends Issue {
     public String toString() {
         //Идентификаторы детей эпика через ","
         StringBuilder idChildren = new StringBuilder();
-        StringBuilder hashChildren = new StringBuilder();
         StringBuilder result = new StringBuilder();
 
         for (SubTask child : children) {
             if (idChildren.length() == 0) {
                 idChildren.append(child.getId());
-                hashChildren.append(child.hashCode());
             } else {
                 idChildren.append(",").append(child.getId());
-                hashChildren.append(",").append(child.hashCode());
             }
         }
         result.append("Epic{").append("id=").append(getId()).append(", status=").append(getStatus());
