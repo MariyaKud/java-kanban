@@ -17,6 +17,7 @@ class HistoryManagerTest {
 
     @BeforeEach
     void beforeEach() {
+        //Перед каждым тестом создаем новый экземпляр, чтобы тесты не зависели друг от друга
         historyManager = new InMemoryHistoryManager();
     }
 
@@ -45,7 +46,8 @@ class HistoryManagerTest {
 
     @Test
     void addOneTaskTwiceCheckDoubleTest() {
-        //Проверяем наличие задачи в истории, после применения метода add()
+        //Проверяем наличие задачи в истории, после добавления одной и той же задачи в очереди
+        //Она не должна двоиться
         Task task = new Task(0, "Test addTask", "Description", Duration.ofMinutes(10));
 
         historyManager.add(task);
