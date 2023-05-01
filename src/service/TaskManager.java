@@ -17,6 +17,7 @@ public interface TaskManager {
     String MSG_ERROR_ID_NOT_FOUND = "Не найдена сущность с указанным id";
     String MSG_ERROR_NOT_NEW = "Метод не отработал. В метод передана сущность с не годным id";
     String MSG_ERROR_WRONG_EPIC = "Метод не отработал. При обновлении эпика дети не должны меняться";
+    String MSG_ERROR_VALIDATE = "Ошибка валидации";
 
     ///////////////////////////////////////////////
     /**
@@ -155,4 +156,10 @@ public interface TaskManager {
      * @return список просмотренных задач = {Task, SubTask, Epic}
      */
     List<Issue> getHistory();
+
+    /**
+     * Возвращающий список задач и подзадач отсортированных по приоритету, то есть по startTime.
+     * @return список задач и подзадач отсортированных по startTime
+     */
+    List<Issue> getPrioritizedTasks();
 }

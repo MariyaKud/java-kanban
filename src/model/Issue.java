@@ -1,6 +1,7 @@
 package model;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 /**
@@ -28,7 +29,7 @@ public abstract class Issue {
         this.title       = title;
         this.description = description;
         this.duration    = duration;
-        this.startTime   = LocalDateTime.now();
+        this.startTime   = LocalDateTime.MIN;
         this.status      = IssueStatus.NEW;
     }
 
