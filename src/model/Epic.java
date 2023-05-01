@@ -25,8 +25,8 @@ public class Epic extends Issue {
         //Продолжительность нулевая у нового эпика бех детей
         this.setDuration(Duration.ZERO);
         //Время старта/завершения текущая дата
-        this.setStartTime(LocalDateTime.now());
-        this.setEndTime(LocalDateTime.now());
+        this.setStartTime(LocalDateTime.MIN);
+        this.setEndTime(LocalDateTime.MIN);
     }
 
     public void setEndTime(LocalDateTime endTime) {
