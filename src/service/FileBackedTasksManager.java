@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
  */
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    private static final int ITEM_DURATION = 15;
     private final File file;
     private final IssueRepository csvMakeRepository = Managers.getDefaultIssueRepository();
 
@@ -97,22 +96,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 loadFromFileTracker.getHistory().equals(fileBackedManager.getHistory()));
 
         System.out.println("\nАВТО ТЕСТ завершен.");
-    }
-
-    /**
-     * Возвращает следующую свободную дату для планирования,
-     * под каждую задачу закладываем отрезки кратные отрезку в сетке
-     * @param startTime дата начала последней запланированной задачи
-     * @param duration продолжительность последней задачи
-     * @return подходящая дата для начала новой задачи
-     */
-    private static LocalDateTime shiftTheTimer(LocalDateTime startTime,Duration duration) {
-        //смещаем всегда на интервал, кратный минимальному отрезку
-        if (duration.toMinutes() % ITEM_DURATION == 0) {
-            return startTime.plusMinutes(duration.toMinutes());
-        } else {
-            return startTime.plusMinutes((duration.dividedBy(Duration.ofMinutes(ITEM_DURATION)) + 1) * ITEM_DURATION);
-        }
     }
 
     /**
