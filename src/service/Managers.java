@@ -2,7 +2,12 @@ package service;
 
 import dao.CSVMakeRepository;
 import dao.IssueRepository;
+import model.Epic;
+import model.IssueStatus;
+import model.SubTask;
+import model.Task;
 
+import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -55,5 +60,76 @@ public class Managers {
      */
     public static DateTimeFormatter getFormatter() {
         return formatter;
+    }
+
+    /**
+     * Выполняет набор базовых операций интерфейса, с выводом информации о результате на консоль
+     * @param taskManager наследник контракта {@code TaskManager}
+     */
+    public static void simpleTestForTaskManager(TaskManager taskManager) {
+
+        System.out.println("ЗАПУЩЕН АВТО ТЕСТ менеджера: " + taskManager.getClass());
+
+        Task newTask1 = new Task("Test", "Description", Duration.ofMinutes(10));
+        if (taskManager.addTask(newTask1) != null) {
+            System.out.println("✅" + "Добавлена задача: " + newTask1);
+        } else {
+            System.out.println("❌" + "Добавление задачи не состоялось");
+        }
+
+        Task newTask2 = new Task("Task2", "Description", Duration.ofMinutes(20));
+        if (taskManager.addTask(newTask2) != null) {
+            System.out.println("✅" + "Добавлена задача: " + newTask2);
+        } else {
+            System.out.println("❌" + "Добавление задачи не состоялось");
+        }
+
+        newTask2.setStatus(IssueStatus.DONE);
+        if (taskManager.updateTask(newTask2) != null) {
+            System.out.println("✅" + "Установлен статус 'DONE' для задачи: " + newTask2);
+            System.out.println("✅" + "Добавили в историю задачу: " + newTask2);
+        } else {
+            System.out.println("❌" + "Обновление статуса задачи не состоялось");
+        }
+
+        Epic newEpic = new Epic(0, "Epic1", "Description");
+        if (taskManager.addEpic(newEpic) != null) {
+            System.out.println("✅" + "Добавлен эпик: " + newEpic);
+        } else {
+            System.out.println("❌" + "Добавление эпика не состоялось");
+        }
+
+        SubTask newSubTask1 = new SubTask(0, "SubTask1", "Description", Duration.ofMinutes(15),
+                newEpic.getId());
+        if (taskManager.addSubTask(newSubTask1) != null) {
+            System.out.println("✅" + "Добавлена подзадача: " + newSubTask1);
+        }
+        newSubTask1.setStatus(IssueStatus.DONE);
+        if (taskManager.updateSubTask(newSubTask1) != null) {
+            System.out.println("✅" + "Установлен статус 'DONE' для подзадачи: " + newSubTask1);
+            System.out.println("✅" + "Добавили в историю подзадачу: " + newSubTask1);
+        } else {
+            System.out.println("❌" + "Обновление подзадачи не состоялось");
+        }
+
+        SubTask newSubTask2 = new SubTask(0, "SubTask2", "Description", Duration.ofMinutes(15),
+                                           newEpic.getId());
+        if (taskManager.addSubTask(newSubTask2) != null) {
+            System.out.println("✅" + "Добавлена подзадача: " + newSubTask2);
+        } else {
+            System.out.println("❌" + "Обновление подзадачи не состоялось");
+        }
+        if (taskManager.getSubTaskById(newSubTask2.getId()) != null) {
+            System.out.println("✅" + "Добавили в историю подзадачу: " + newSubTask2 + "\n");
+        } else {
+            System.out.println("❌" + "При поиске по id подзадача не записана в историю");
+        }
+
+        System.out.println("Состояние менеджера задач:");
+        taskManager.getAllTasks().forEach(System.out::println);
+        taskManager.getAllEpics().forEach(System.out::println);
+
+        System.out.println("\nОтсортированный список задач по дате старта:");
+        taskManager.getPrioritizedTasks().forEach(System.out::println);
     }
 }

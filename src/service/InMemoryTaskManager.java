@@ -51,7 +51,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final TreeSet<Issue> issuesByPriority = new TreeSet<>(Comparator.comparing(Issue::getStartTime));
 
     //Временная сетка, разбитая на интервалы с признаком занято/свободно
-    protected final Map<Instant,Boolean> grid = new HashMap<>();
+    protected final Map<Instant, Boolean> grid = new HashMap<>();
 
     //Момент запуска программы, планируем в будущее
     private static final LocalDateTime START_MOMENT = LocalDateTime.now();
@@ -64,12 +64,12 @@ public class InMemoryTaskManager implements TaskManager {
 
     //Заполняем сетку с начала текущего часа
     private static final LocalDateTime START_GRID_LOCAL = LocalDateTime.of(START_MOMENT.toLocalDate(),
-                                                          LocalTime.of(START_MOMENT.getHour(), 0));
+            LocalTime.of(START_MOMENT.getHour(), 0));
     //Первый интервал в сетке
     private static final Instant START_GRID = START_GRID_LOCAL.toInstant(ZoneOffset.UTC);
 
     public InMemoryTaskManager(HistoryManager historyManager) {
-        this.historyManager   = historyManager;
+        this.historyManager = historyManager;
         /*
         this.issuesByPriority = new TreeSet<>((o1, o2) -> {
             if (o1.getStartTime().isBefore(o2.getStartTime())) {
@@ -95,10 +95,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Синхронизировать id менеджера и id задачи
+     *
      * @param issue - задача, добавляемая в хранилище менеджера
      */
     private void synchronizeIDIssueANDManager(Issue issue) {
-        if (issue != null && issue.getId()>=id) {
+        if (issue != null && issue.getId() >= id) {
             id = issue.getId();
             getId();
         }
@@ -111,11 +112,11 @@ public class InMemoryTaskManager implements TaskManager {
      * Сетка заполняется на год вперед.
      */
     private void initGrid() {
-        Instant endGrid  = START_GRID.plus(SIZE_GRID);
+        Instant endGrid = START_GRID.plus(SIZE_GRID);
         Instant itemGrid = START_GRID;
 
         while (itemGrid.isBefore(endGrid)) {
-            grid.put(itemGrid,false);
+            grid.put(itemGrid, false);
             itemGrid = itemGrid.plus(Duration.ofMinutes(ITEM_GRID));
         }
     }
@@ -129,21 +130,22 @@ public class InMemoryTaskManager implements TaskManager {
             int minutesNearest;
             LocalTime localTime;
             if (inFuture) {
-                minutesNearest =  (int) ((minutes / ITEM_GRID + 1) * ITEM_GRID);
+                minutesNearest = (int) ((minutes / ITEM_GRID + 1) * ITEM_GRID);
             } else {
                 minutesNearest = (int) (minutes / ITEM_GRID * ITEM_GRID);
             }
             if (minutesNearest == 60) {
-                localTime =  LocalTime.of(localDateTime.getHour()+1, 0);
+                localTime = LocalTime.of(localDateTime.getHour() + 1, 0);
             } else {
-                localTime = LocalTime.of(localDateTime.getHour() , minutesNearest);
+                localTime = LocalTime.of(localDateTime.getHour(), minutesNearest);
             }
-            return LocalDateTime.of(localDateTime.toLocalDate(),localTime).toInstant(ZoneOffset.UTC);
+            return LocalDateTime.of(localDateTime.toLocalDate(), localTime).toInstant(ZoneOffset.UTC);
         }
     }
 
     /**
      * Если дата старта не задана, определяет задачу в конец списка задач, подзадач, отсортированных по startTime
+     *
      * @param issue - задача/подзадача для которой необходимо установить startTime
      */
     private void setStartTimeIFEmpty(Issue issue) {
@@ -151,10 +153,10 @@ public class InMemoryTaskManager implements TaskManager {
             if (issue.getStartTime().isEqual(LocalDateTime.MIN)) {
                 if (issuesByPriority.isEmpty()) {
                     Instant nearestFreeTime = findNearestBorderOfGrid(LocalDateTime.now(), true);
-                    issue.setStartTime( LocalDateTime.ofInstant(nearestFreeTime, ZoneId.systemDefault()));
+                    issue.setStartTime(LocalDateTime.ofInstant(nearestFreeTime, ZoneId.systemDefault()));
                 } else {
                     Issue lastIssue = issuesByPriority.last();
-                    issue.setStartTime(shiftTheTimer(lastIssue.getStartTime(),lastIssue.getDuration()));
+                    issue.setStartTime(shiftTheTimer(lastIssue.getStartTime(), lastIssue.getDuration()));
                 }
             }
         }
@@ -164,42 +166,46 @@ public class InMemoryTaskManager implements TaskManager {
 
         List<Instant> itemsValid = new ArrayList<>();
 
+        if (issue == null) {
+            return itemsValid;
+        }
+
         //Инициализируем сетку при первой проверке валидности отрезка
         if (grid.isEmpty()) {
             initGrid();
         }
 
-        if (issue != null) {
-            //Устанавливаем дату старта для задачи/подзадачи, если она пустая
-            setStartTimeIFEmpty(issue);
+        //Устанавливаем дату старта для задачи/подзадачи, если она пустая
+        setStartTimeIFEmpty(issue);
 
-            //Проверяем, что в сетке есть место на заданный интервал
-            if (issue.getType() != IssueType.EPIC) {
-                Instant startIssue = findNearestBorderOfGrid(issue.getStartTime(), false);
-                Instant endIssue = findNearestBorderOfGrid(issue.getStartTime().plus(issue.getDuration()), true);
-                while (startIssue.isBefore(endIssue)) {
-                    if (!grid.get(startIssue)) {
-                        itemsValid.add(startIssue);
-                        startIssue = startIssue.plus(Duration.ofMinutes(ITEM_GRID));
-                    } else {
-                        //Если хотя юы один отрезок занят, то весь интервал считаем не валидным
-                        itemsValid.clear();
-                        break;
-                    }
+        //Проверяем, что в сетке есть место на заданный интервал
+        if (issue.getType() != IssueType.EPIC) {
+            Instant startIssue = findNearestBorderOfGrid(issue.getStartTime(), false);
+            Instant endIssue = findNearestBorderOfGrid(issue.getStartTime().plus(issue.getDuration()), true);
+            while (startIssue.isBefore(endIssue)) {
+                if (!grid.get(startIssue)) {
+                    itemsValid.add(startIssue);
+                    startIssue = startIssue.plus(Duration.ofMinutes(ITEM_GRID));
+                } else {
+                    //Если хотя юы один отрезок занят, то весь интервал считаем не валидным
+                    itemsValid.clear();
+                    break;
                 }
             }
         }
+
         return itemsValid;
     }
 
     /**
      * Возвращает следующую свободную дату для планирования,
      * под каждую задачу закладываем отрезки кратные отрезку в сетке
+     *
      * @param startTime дата начала последней запланированной задачи
-     * @param duration продолжительность последней задачи
+     * @param duration  продолжительность последней задачи
      * @return подходящая дата для начала новой задачи
      */
-    protected static LocalDateTime shiftTheTimer(LocalDateTime startTime,Duration duration) {
+    protected static LocalDateTime shiftTheTimer(LocalDateTime startTime, Duration duration) {
         //смещаем всегда на интервал, кратный минимальному отрезку
         if (duration.toMinutes() % ITEM_GRID == 0) {
             return startTime.plusMinutes(duration.toMinutes());
@@ -216,7 +222,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     private void freeItemsInGrid(Issue issue) {
         Instant startIssue = findNearestBorderOfGrid(issue.getStartTime(), false);
-        Instant endIssue   = findNearestBorderOfGrid(issue.getStartTime().plus(issue.getDuration()), true);
+        Instant endIssue = findNearestBorderOfGrid(issue.getStartTime().plus(issue.getDuration()), true);
         while (startIssue.isBefore(endIssue)) {
             grid.put(startIssue, false);
             startIssue = startIssue.plus(Duration.ofMinutes(ITEM_GRID));
@@ -226,32 +232,36 @@ public class InMemoryTaskManager implements TaskManager {
     /**
      * Добавить задачу менеджеру, принудительно назначив ему следующий свободный id менеджера.
      * Сам объект передается в качестве параметра.
+     *
      * @param task экземпляр класса {@link Task}
      * @return Новая задача типа {@link Task}. Если задача не прошла валидацию, то null
      */
     @Override
     public Task addTask(Task task) {
-        task.setId(getId());
-        return addTaskWithID(task);
+        if (task != null) {
+            task.setId(getId());
+            return addTaskWithID(task);
+        }
+        return null;
     }
 
     /**
      * Добавить задачу менеджеру, без изменения id.
      * Сам объект передается в качестве параметра.
+     *
      * @param task экземпляр класса {@link Task}
      * @return Новая задача типа {@link Task}. Если задача не прошла валидацию, то null
      * Валидация - задача не должна пересекать по времени, с другими задачами.
      */
     protected Task addTaskWithID(Task task) {
         List<Instant> itemsValid = validatePeriodIssue(task);
-
-        if (task != null && !itemsValid.isEmpty()) {
+        if (!itemsValid.isEmpty()) {
             tasks.put(task.getId(), task);
             synchronizeIDIssueANDManager(task);
             occupyItemsInGrid(itemsValid);
             issuesByPriority.add(task);
         } else {
-            System.out.println(MSG_ERROR_NULL);
+            return null;
         }
         return task;
     }
@@ -259,92 +269,94 @@ public class InMemoryTaskManager implements TaskManager {
     /**
      * Добавить подзадачу менеджеру, принудительно назначив ему следующий свободный id менеджера.
      * Сам объект передается в качестве параметра.
+     *
      * @param subTask экземпляр класса {@link SubTask}
      * @return Новая подзадача типа {@link SubTask}. Если подзадача не прошла валидацию, то null
      * Валидация - задача не должна пересекать по времени, с другими задачами.
      */
     @Override
     public SubTask addSubTask(SubTask subTask) {
-        subTask.setId(getId());
-        return addSubTaskWithID(subTask);
+        if (subTask != null) {
+            subTask.setId(getId());
+            return addSubTaskWithID(subTask);
+        }
+        return null;
     }
 
     /**
      * Добавить подзадачу менеджеру, без изменения id.
      * Сам объект передается в качестве параметра.
+     *
      * @param subTask экземпляр класса {@link SubTask}
      * @return Новая задача типа {@link SubTask}. Если подзадача не прошла валидацию, то null
      */
     protected SubTask addSubTaskWithID(SubTask subTask) {
         List<Instant> itemsValid = validatePeriodIssue(subTask);
-        if (subTask != null) {
-            Epic parent = epics.get(subTask.getParentID());
-            if (parent != null && !itemsValid.isEmpty()) {
-                List<SubTask> children = parent.getChildren();
 
-                //Помещаем подзадачу с корректным родителем в хранилище менеджера
-                subTasks.put(subTask.getId(), subTask);
-                synchronizeIDIssueANDManager(subTask);
+        Epic parent = epics.get(subTask.getParentID());
+        if (parent != null && !itemsValid.isEmpty()) {
+            List<SubTask> children = parent.getChildren();
 
-                //Добавляем родителю ребенка, если нужно
-                if (!children.contains(subTask)) {
-                    children.add(subTask);
-                }
-                //Обновляем статус родителя
-                updateStatusEpic(parent);
-                //Занимаем отрезки на сетке
-                occupyItemsInGrid(itemsValid);
-                issuesByPriority.add(subTask);
-            } else {
-                subTask = null;
-                System.out.println(MSG_ERROR_NOT_NEW);
+            //Помещаем подзадачу с корректным родителем в хранилище менеджера
+            subTasks.put(subTask.getId(), subTask);
+            synchronizeIDIssueANDManager(subTask);
+
+            //Добавляем родителю ребенка, если нужно
+            if (!children.contains(subTask)) {
+                children.add(subTask);
             }
-
+            //Обновляем статус родителя
+            updateStatusEpic(parent);
+            //Занимаем отрезки на сетке
+            occupyItemsInGrid(itemsValid);
+            issuesByPriority.add(subTask);
         } else {
             subTask = null;
-            System.out.println(MSG_ERROR_NULL);
+            System.out.println(MSG_ERROR_NOT_NEW);
         }
+
+
         return subTask;
     }
 
     /**
      * Добавить эпик менеджеру, принудительно назначив ему следующий свободный id менеджера
      * Сам объект передается в качестве параметра.
+     *
      * @param epic экземпляр класса {@link Epic}
      * @return Новый эпик типа {@link Epic}. Вернет Null, если на вход передать Null
      */
     @Override
     public Epic addEpic(Epic epic) {
-        epic.setId(getId());
-        return addEpicWithID(epic);
+        if (epic != null) {
+            epic.setId(getId());
+            return addEpicWithID(epic);
+        }
+        return null;
     }
 
     /**
      * Добавить эпик менеджеру как есть, без изменения id.
      * Сам объект передается в качестве параметра.
+     *
      * @param epic экземпляр класса {@link Epic}
      * @return Новый эпик типа {@link Epic}. Вернет Null, если на вход передать Null
      */
     protected Epic addEpicWithID(Epic epic) {
-        if (epic != null) {
-            List<SubTask> children = epic.getChildren();
 
+        List<SubTask> children = epic.getChildren();
+        if (children.size() == 0) {
             epics.put(epic.getId(), epic);
             synchronizeIDIssueANDManager(epic);
-
-            //Проверяем наличие подзадач в хранилище менеджера, если не находим, то добавляем
-            for (SubTask child : children) {
-                addSubTask(child);
-            }
-            //Актуализируем статус, хоть он и не должен меняться, но вдруг, на входе, нам дали не корректный
-            updateStatusEpic(epic);
+            //новый эпик не содержит детей
+            return epic;
         } else {
-            System.out.println(MSG_ERROR_NULL);
+            return null;
         }
-        return epic;
     }
 
     ///////////////////////////////////////////////
+
     /**
      * Обновить задачу. Новая версия объекта передается в качестве параметра.
      *
@@ -452,6 +464,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     ///////////////////////////////////////////////
+
     /**
      * Удалить задачу {@link Task} по id
      *
@@ -509,8 +522,8 @@ public class InMemoryTaskManager implements TaskManager {
         if (epics.containsKey(id)) {
             //Удалить подзадачи эпика в хранилище менеджера
             for (SubTask child : epics.get(id).getChildren()) {
-               subTasks.remove(child.getId());
-               historyManager.remove(child.getId());
+                subTasks.remove(child.getId());
+                historyManager.remove(child.getId());
             }
             //Удалить эпик из истории просмотров
             historyManager.remove(id);
@@ -523,6 +536,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     ///////////////////////////////////////////////
+
     /**
      * Удалить все задачи {@link Task}
      */
@@ -569,6 +583,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     ///////////////////////////////////////////////
+
     /**
      * Получить задачу {@link Task} по id. Может вернуть null.
      *
@@ -621,6 +636,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     ///////////////////////////////////////////////
+
     /**
      * Получить список всех задач менеджера.
      *
@@ -655,7 +671,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * <b>Получить список всех подзадач для эпика.</b>
-     * @param id  идентификатор эпика, по которому нужно получить список детей
+     *
+     * @param id идентификатор эпика, по которому нужно получить список детей
      * @return список подзадач эпика
      */
     @Override
@@ -715,11 +732,12 @@ public class InMemoryTaskManager implements TaskManager {
      * Рассчитать продолжительность эпика — сумма продолжительности всех его подзадач.
      * Рассчитать Время начала — дата старта самой ранней подзадачи.
      * Рассчитать время завершения — время окончания самой поздней из задач.
+     *
      * @param epic - эпик, для которого выполняется расчет временных характеристик
      */
     private void updateDurationAndDateEpic(Epic epic) {
         Duration durationEpic = Duration.ZERO;
-        final LocalDateTime[] dateTime = {LocalDateTime.MAX,LocalDateTime.MIN};
+        final LocalDateTime[] dateTime = {LocalDateTime.MAX, LocalDateTime.MIN};
 
         if (!epic.getChildren().isEmpty()) {
             for (SubTask child : epic.getChildren()) {
@@ -739,6 +757,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Получить историю просмотров задач.
+     *
      * @return список просмотренных задач = {Task, SubTask, Epic}
      */
     @Override

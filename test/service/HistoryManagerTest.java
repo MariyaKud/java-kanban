@@ -34,7 +34,7 @@ class HistoryManagerTest {
     @Test
     void addOneTaskTest() {
         //Проверяем наличие задачи в истории, после применения метода add()
-        Task task = new Task(0, "Test addTask", "Description", Duration.ofMinutes(10));
+        Task task = new Task("Test addTask", "Description", Duration.ofMinutes(10));
 
         historyManager.add(task);
 
@@ -48,7 +48,7 @@ class HistoryManagerTest {
     void addOneTaskTwiceCheckDoubleTest() {
         //Проверяем наличие задачи в истории, после добавления одной и той же задачи в очереди
         //Она не должна двоиться
-        Task task = new Task(0, "Test addTask", "Description", Duration.ofMinutes(10));
+        Task task = new Task("Test addTask", "Description", Duration.ofMinutes(10));
 
         historyManager.add(task);
         historyManager.add(task);
@@ -62,7 +62,7 @@ class HistoryManagerTest {
     @Test
     void removeSingleTaskTest() {
         //Удаляем единственную задачу, проверяем чтобы очередь не превращалась в null и была пустой
-        Task task = new Task(0, "Test remove", "Description", Duration.ofMinutes(10));
+        Task task = new Task("Test remove", "Description", Duration.ofMinutes(10));
 
         historyManager.add(task);
         historyManager.remove(0);

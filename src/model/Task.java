@@ -10,18 +10,24 @@ import java.time.LocalDateTime;
  */
 public class Task extends Issue {
 
-    public Task(int id, String title, String description, Duration duration) {
-        super(id, title, description, duration);
+    //Максимальный набор полей
+    public Task(int id, String title, String description, Duration duration, LocalDateTime startTime,
+                IssueStatus status) {
+        super(id, title, description, duration, startTime);
+        this.setStatus(status);
     }
 
     public Task(int id, String title, String description, Duration duration, LocalDateTime startTime) {
         super(id, title, description, duration, startTime);
     }
 
-    public Task(int id, String title, String description, Duration duration, LocalDateTime startTime,
-                IssueStatus status) {
-        super(id, title, description, duration, startTime);
-        this.setStatus(status);
+    public Task(int id, String title, String description, Duration duration) {
+        super(id, title, description, duration);
+    }
+
+    //Минимальный набор полей
+    public Task(String title, String description, Duration duration) {
+        super(0, title, description, duration);
     }
 
     @Override

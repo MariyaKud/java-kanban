@@ -29,6 +29,10 @@ public class Epic extends Issue {
         this.setEndTime(LocalDateTime.MIN);
     }
 
+    public Epic( String title, String description) {
+        this(0, title, description);
+    }
+
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
     }

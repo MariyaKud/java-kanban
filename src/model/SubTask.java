@@ -31,6 +31,14 @@ public class SubTask extends Issue {
         this(id, title, description, duration, LocalDateTime.MIN, parentID, IssueStatus.NEW);
     }
 
+    public SubTask(String title, String description, Duration duration, int parentID) {
+        this(0, title, description, duration, LocalDateTime.MIN, parentID, IssueStatus.NEW);
+    }
+
+    public SubTask(String title, String description, Duration duration, int parentID, IssueStatus status) {
+        this(0, title, description, duration, LocalDateTime.MIN, parentID);
+        this.setStatus(status);
+    }
 
     public int getParentID() {
         return parentID;

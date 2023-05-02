@@ -36,14 +36,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         final FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(Managers.getDefaultHistory(), file);
 
 
+        /*
         System.out.println("ЗАПУЩЕН АВТО ТЕСТ FileBackedTasksManager.");
         System.out.println("Заполнение объекта менеджера данными....");
-        Task newTask1 = new Task(0, "Task1", "Description", Duration.ofMinutes(10));
+        Task newTask1 = new Task("Task1", "Description", Duration.ofMinutes(10));
         if (fileBackedManager.addTask(newTask1) != null) {
             System.out.println("Добавлена задача: " + newTask1);
         }
 
-        Task newTask2 = new Task(0, "Task2", "Description", Duration.ofMinutes(20));
+        Task newTask2 = new Task("Task2", "Description", Duration.ofMinutes(20));
         if (fileBackedManager.addTask(newTask2) != null) {
             System.out.println("Добавлена задача: " + newTask2);
         }
@@ -81,20 +82,24 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println("Состояние менеджера задач:");
         fileBackedManager.tasks.forEach((key,value) -> System.out.println(value));
         fileBackedManager.epics.forEach((key,value) -> System.out.println(value));
-        System.out.println("\nСверим данные менеджера, с сохраненными данными в csv файле:");
 
+         */
+
+        Managers.simpleTestForTaskManager(fileBackedManager);
+
+        System.out.println("\nСверим данные менеджера, с сохраненными данными в csv файле:");
         FileBackedTasksManager loadFromFileTracker = loadFromFile(file);
 
         System.out.println("Результат сравнения задач менеджера и задач загруженных из csv файла: " +
-                loadFromFileTracker.tasks.equals(fileBackedManager.tasks));
+                ((loadFromFileTracker.tasks.equals(fileBackedManager.tasks)) ? "✅" : "❌"));
         System.out.println("Результат сравнения подзадач менеджера и подзадач загруженных из csv файла: " +
-                loadFromFileTracker.subTasks.equals(fileBackedManager.subTasks));
+                ((loadFromFileTracker.subTasks.equals(fileBackedManager.subTasks)) ? "✅" : "❌"));
         System.out.println("Результат сравнения эпиков менеджера и эпиков загруженных из csv файла: " +
-                loadFromFileTracker.epics.equals(fileBackedManager.epics));
+                ((loadFromFileTracker.epics.equals(fileBackedManager.epics)) ? "✅" : "❌"));
         System.out.println("Результат сравнения истории просмотров менеджера и истории восстановленной из csv файла: " +
-                loadFromFileTracker.getHistory().equals(fileBackedManager.getHistory()));
+                (loadFromFileTracker.getHistory().equals(fileBackedManager.getHistory()) ? "✅" : "❌"));
 
-        System.out.println("\nАВТО ТЕСТ завершен FileBackedTasksManager.");
+        System.out.println("\nАВТО ТЕСТ FileBackedTasksManager завершен");
     }
 
     /**
