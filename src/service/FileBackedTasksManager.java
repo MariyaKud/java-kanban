@@ -35,49 +35,48 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         final File file = new File(dirHome,nameFileCSV);
         final FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(Managers.getDefaultHistory(), file);
 
-        //Считаем, что планирование задач идет в будущее
-        LocalDateTime localDateTime = LocalDateTime.now();
 
-        System.out.println("\nЗАПУЩЕН АВТО ТЕСТ.");
+        System.out.println("ЗАПУЩЕН АВТО ТЕСТ FileBackedTasksManager.");
         System.out.println("Заполнение объекта менеджера данными....");
-        Task newTask1 = new Task(0, "Task1", "Description", Duration.ofMinutes(10),
-                                    localDateTime, IssueStatus.NEW);
-        localDateTime = shiftTheTimer(localDateTime,newTask1.getDuration());
-        fileBackedManager.addTask(newTask1);
-        System.out.println("Добавлена задача: " + newTask1);
+        Task newTask1 = new Task(0, "Task1", "Description", Duration.ofMinutes(10));
+        if (fileBackedManager.addTask(newTask1) != null) {
+            System.out.println("Добавлена задача: " + newTask1);
+        }
 
-        Task newTask2 = new Task(0, "Task2", "Description", Duration.ofMinutes(20),
-                                   localDateTime, IssueStatus.NEW);
-        localDateTime = shiftTheTimer(localDateTime,newTask1.getDuration());
-        fileBackedManager.addTask(newTask2);
-        System.out.println("Добавлена задача: " + newTask2);
+        Task newTask2 = new Task(0, "Task2", "Description", Duration.ofMinutes(20));
+        if (fileBackedManager.addTask(newTask2) != null) {
+            System.out.println("Добавлена задача: " + newTask2);
+        }
 
         newTask2.setStatus(IssueStatus.DONE);
-        fileBackedManager.updateTask(newTask2);
-        System.out.println("Установлен статус 'DONE' для задачи: " + newTask2);
-        System.out.println("Добавили в историю задачу: " + newTask2);
+        if (fileBackedManager.updateTask(newTask2) != null) {
+            System.out.println("Установлен статус 'DONE' для задачи: " + newTask2);
+            System.out.println("Добавили в историю задачу: " + newTask2);
+        }
 
         Epic newEpic = new Epic(0, "Epic1", "Description");
         fileBackedManager.addEpic(newEpic);
         System.out.println("Добавлен эпик: " + newEpic);
 
         SubTask newSubTask1 = new SubTask(0, "SubTask1", "Description", Duration.ofMinutes(15),
-                                            localDateTime, newEpic.getId());
-        localDateTime = shiftTheTimer(localDateTime,newTask1.getDuration());
-        fileBackedManager.addSubTask(newSubTask1);
-        System.out.println("Добавлена подзадача: " + newSubTask1);
+                                             newEpic.getId());
+        if (fileBackedManager.addSubTask(newSubTask1) != null) {
+            System.out.println("Добавлена подзадача: " + newSubTask1);
+        }
 
         newSubTask1.setStatus(IssueStatus.DONE);
-        fileBackedManager.updateSubTask(newSubTask1);
-        System.out.println("Установлен статус 'DONE' для подзадачи: " + newSubTask1);
-        System.out.println("Добавили в историю подзадачу: " + newSubTask1);
+        if (fileBackedManager.updateSubTask(newSubTask1) != null) {
+            System.out.println("Установлен статус 'DONE' для подзадачи: " + newSubTask1);
+            System.out.println("Добавили в историю подзадачу: " + newSubTask1);
+        }
 
         SubTask newSubTask2 = new SubTask(0, "SubTask2", "Description", Duration.ofMinutes(15),
-                                           localDateTime, newEpic.getId());
-        fileBackedManager.addSubTask(newSubTask2);
-        System.out.println("Добавлена подзадача: " + newSubTask2);
-        fileBackedManager.getSubTaskById(newSubTask2.getId());
-        System.out.println("Добавили в историю подзадачу: " + newSubTask2 + "\n");
+                                           newEpic.getId());
+        if (fileBackedManager.addSubTask(newSubTask2) != null) {
+            System.out.println("Добавлена подзадача: " + newSubTask2);
+            fileBackedManager.getSubTaskById(newSubTask2.getId());
+            System.out.println("Добавили в историю подзадачу: " + newSubTask2 + "\n");
+        }
 
         System.out.println("Состояние менеджера задач:");
         fileBackedManager.tasks.forEach((key,value) -> System.out.println(value));
@@ -95,7 +94,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println("Результат сравнения истории просмотров менеджера и истории восстановленной из csv файла: " +
                 loadFromFileTracker.getHistory().equals(fileBackedManager.getHistory()));
 
-        System.out.println("\nАВТО ТЕСТ завершен.");
+        System.out.println("\nАВТО ТЕСТ завершен FileBackedTasksManager.");
     }
 
     /**

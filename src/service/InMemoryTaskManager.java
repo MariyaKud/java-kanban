@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +46,9 @@ public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Epic> epics = new HashMap<>();      //Эпики
     protected final Map<Integer, SubTask> subTasks = new HashMap<>();//Подзадачи
     protected final HistoryManager historyManager;                   //История просмотров
-    protected final TreeSet<Issue> issuesByPriority;                 //Задачи и подзадачи отсортированные по startTime
+
+    //Задачи и подзадачи отсортированные по startTime
+    protected final TreeSet<Issue> issuesByPriority = new TreeSet<>(Comparator.comparing(Issue::getStartTime));
 
     //Временная сетка, разбитая на интервалы с признаком занято/свободно
     protected final Map<Instant,Boolean> grid = new HashMap<>();
@@ -67,6 +70,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     public InMemoryTaskManager(HistoryManager historyManager) {
         this.historyManager   = historyManager;
+        /*
         this.issuesByPriority = new TreeSet<>((o1, o2) -> {
             if (o1.getStartTime().isBefore(o2.getStartTime())) {
                 return 1;
@@ -76,6 +80,7 @@ public class InMemoryTaskManager implements TaskManager {
                 return -1;
             }
         });
+         */
     }
 
     /**
@@ -142,7 +147,7 @@ public class InMemoryTaskManager implements TaskManager {
      * @param issue - задача/подзадача для которой необходимо установить startTime
      */
     private void setStartTimeIFEmpty(Issue issue) {
-        if ((issue.getType() == IssueType.TASK || issue.getType() == IssueType.SUBTASK)) {
+        if ((issue.getType() != IssueType.EPIC)) {
             if (issue.getStartTime().isEqual(LocalDateTime.MIN)) {
                 if (issuesByPriority.isEmpty()) {
                     Instant nearestFreeTime = findNearestBorderOfGrid(LocalDateTime.now(), true);
@@ -162,7 +167,7 @@ public class InMemoryTaskManager implements TaskManager {
         //Инициализируем сетку при первой проверке валидности отрезка
         if (grid.isEmpty()) {
             initGrid();
-        };
+        }
 
         if (issue != null) {
             //Устанавливаем дату старта для задачи/подзадачи, если она пустая
@@ -244,6 +249,7 @@ public class InMemoryTaskManager implements TaskManager {
             tasks.put(task.getId(), task);
             synchronizeIDIssueANDManager(task);
             occupyItemsInGrid(itemsValid);
+            issuesByPriority.add(task);
         } else {
             System.out.println(MSG_ERROR_NULL);
         }
@@ -288,12 +294,14 @@ public class InMemoryTaskManager implements TaskManager {
                 updateStatusEpic(parent);
                 //Занимаем отрезки на сетке
                 occupyItemsInGrid(itemsValid);
-
+                issuesByPriority.add(subTask);
             } else {
+                subTask = null;
                 System.out.println(MSG_ERROR_NOT_NEW);
             }
 
         } else {
+            subTask = null;
             System.out.println(MSG_ERROR_NULL);
         }
         return subTask;
@@ -353,6 +361,7 @@ public class InMemoryTaskManager implements TaskManager {
             if (!itemsValid.isEmpty()) {
                 // обновляем задачу в менеджере
                 tasks.put(oldTask.getId(), task);
+                issuesByPriority.add(task);
                 occupyItemsInGrid(itemsValid);
             } else {
                 //Возвращаем бронь для старой задачи, т.к. новая не валидна
@@ -386,6 +395,7 @@ public class InMemoryTaskManager implements TaskManager {
 
                 subTasks.put(subTask.getId(), subTask);
                 occupyItemsInGrid(itemsValid);
+                issuesByPriority.add(subTask);
 
                 if (subTask.getParentID() != oldSubTask.getParentID()) {
                     //Удалить старую подзадачу у старого эпика родителя
