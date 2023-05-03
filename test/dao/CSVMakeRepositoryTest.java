@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.io.FileReader;
-import java.io.Reader;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -149,7 +148,7 @@ class CSVMakeRepositoryTest {
     @Test
     void shouldSaveEpicWithTwoChildrenTest() {
         Epic epic = Managers.addEpic(fileBackedTasksManager);
-        SubTask subTask = Managers.addSubTask(fileBackedTasksManager, epic.getId(), IssueStatus.NEW);
+        Managers.addSubTask(fileBackedTasksManager, epic.getId(), IssueStatus.NEW);
 
         try (BufferedReader br = new BufferedReader(new FileReader(file)))
         {
@@ -171,9 +170,9 @@ class CSVMakeRepositoryTest {
         }
     }
 
-    @DisplayName("Загрузить эпик и он же в истории.")
+    @DisplayName("Сохранить эпик и он же в истории.")
     @Test
-    void shouldTest() {
+    void shouldSaveEpicWithHistoryTest() {
         final Epic epic = Managers.addEpic(fileBackedTasksManager);
         fileBackedTasksManager.getEpicById(epic.getId());
 
@@ -190,4 +189,22 @@ class CSVMakeRepositoryTest {
         }
     }
 
+    @DisplayName("Загрузить задачу, эпик, подзадачу с историей.")
+    @Test
+    void shouldLoadTest() {
+        //Подготовить файл
+        Managers.simpleTestForTaskManager(fileBackedTasksManager);
+        FileBackedTasksManager loadTasksManager = new FileBackedTasksManager(new InMemoryHistoryManager(),file);
+        issueRepository.load(loadTasksManager, file);
+
+        assertEquals(fileBackedTasksManager.getAllTasks(), loadTasksManager.getAllTasks(),
+                 "Задачи загрузились не корректны.");
+        assertEquals(fileBackedTasksManager.getAllSubTasks(),loadTasksManager.getAllSubTasks(),
+                "Подзадачи загрузились не корректны.");
+        assertEquals(fileBackedTasksManager.getAllEpics(),loadTasksManager.getAllEpics(),
+                "Эпики загрузились не корректны.");
+        assertEquals(fileBackedTasksManager.getHistory(),loadTasksManager.getHistory(),
+                "История загрузилась не корректно.");
+
+    }
 }

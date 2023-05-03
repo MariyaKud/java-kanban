@@ -37,11 +37,6 @@ public abstract class Issue {
         this.setStartTime(startTime);
     }
 
-    public Issue(Issue other) {
-        this(other.getId(), other.getTitle(), other.getDescription(), other.getDuration(), other.getStartTime());
-        this.status = other.getStatus();
-    }
-
     public IssueType getType() {
         return IssueType.TASK;
     }
@@ -80,14 +75,6 @@ public abstract class Issue {
 
     public void setStatus(IssueStatus status) {
         this.status = status;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public void setDuration(Duration duration) {

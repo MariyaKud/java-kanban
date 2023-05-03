@@ -9,6 +9,7 @@ import model.Task;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -70,17 +71,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     public InMemoryTaskManager(HistoryManager historyManager) {
         this.historyManager = historyManager;
-        /*
-        this.issuesByPriority = new TreeSet<>((o1, o2) -> {
-            if (o1.getStartTime().isBefore(o2.getStartTime())) {
-                return 1;
-            } else if (o1.getStartTime().isEqual(o2.getStartTime())) {
-                return 0;
-            } else {
-                return -1;
-            }
-        });
-         */
     }
 
     /**
@@ -123,23 +113,29 @@ public class InMemoryTaskManager implements TaskManager {
 
     private Instant findNearestBorderOfGrid(LocalDateTime localDateTime, boolean inFuture) {
         int minutes = localDateTime.toLocalTime().getMinute();
+        int hours = localDateTime.toLocalTime().getHour();
+        int minutesNearest;
+
+        LocalDate localDate = localDateTime.toLocalDate();
 
         if (minutes % ITEM_GRID == 0) {
             return localDateTime.toInstant(ZoneOffset.UTC);
         } else {
-            int minutesNearest;
-            LocalTime localTime;
             if (inFuture) {
                 minutesNearest = (int) ((minutes / ITEM_GRID + 1) * ITEM_GRID);
             } else {
                 minutesNearest = (int) (minutes / ITEM_GRID * ITEM_GRID);
             }
             if (minutesNearest == 60) {
-                localTime = LocalTime.of(localDateTime.getHour() + 1, 0);
-            } else {
-                localTime = LocalTime.of(localDateTime.getHour(), minutesNearest);
+                ++hours;
+                minutesNearest = 0;
             }
-            return LocalDateTime.of(localDateTime.toLocalDate(), localTime).toInstant(ZoneOffset.UTC);
+            if (hours == 24) {
+                hours = 0;
+                localDate = localDate.plusDays(1);
+            }
+
+            return LocalDateTime.of(localDate, LocalTime.of(hours,minutesNearest)).toInstant(ZoneOffset.UTC);
         }
     }
 
@@ -183,7 +179,7 @@ public class InMemoryTaskManager implements TaskManager {
             Instant startIssue = findNearestBorderOfGrid(issue.getStartTime(), false);
             Instant endIssue = findNearestBorderOfGrid(issue.getStartTime().plus(issue.getDuration()), true);
             while (startIssue.isBefore(endIssue)) {
-                if (!grid.get(startIssue)) {
+                if (grid.containsKey(startIssue) && !grid.get(startIssue)) {
                     itemsValid.add(startIssue);
                     startIssue = startIssue.plus(Duration.ofMinutes(ITEM_GRID));
                 } else {
