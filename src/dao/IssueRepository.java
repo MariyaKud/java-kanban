@@ -10,6 +10,9 @@ import java.io.File;
  */
 public interface IssueRepository {
 
+    String FILE_HEAD = "id,type,name,status,description,duration,startTime,epic\n";
+    String MSG_ENUM = "Не известный тип задач";
+
     /**
      * Загрузить задачи и историю просмотров из файла в менеджер
      * @param tracker - экземпляр менеджер задач, поддерживающий контракт {@link TaskManager} для загрузки данных

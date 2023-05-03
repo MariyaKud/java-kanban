@@ -28,10 +28,6 @@ import java.util.List;
  */
 public final class CSVMakeRepository implements IssueRepository {
 
-    private final static String FILE_HEAD = "id,type,name,status,description,duration,startTime,epic\n";
-
-    private final static String MSG_ENUM = "Не корректное имя для перечисления";
-
     /**
      * Загрузить задачи и историю просмотров из файла в менеджер
      * @param tracker - менеджер, работающий с файлами, в который нужно загрузить данные из файла
