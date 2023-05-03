@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@DisplayName("Запущено тестирование класса InMemoryHistoryManager..")
-class TaskManagerTest {
+@DisplayName("Тест менеджера задач.")
+class InMemoryTaskManagerTest {
 
     private TaskManager taskManager;
 
@@ -29,24 +29,6 @@ class TaskManagerTest {
         taskManager = new InMemoryTaskManager(historyManager);
     }
 
-    private Task addTask() {
-        final Task task = new Task("Test", "Description", Duration.ofMinutes(10));
-        taskManager.addTask(task);
-        return task;
-    }
-
-    private Epic addEpic() {
-        final Epic epic = new Epic("Epic", "Description");
-        taskManager.addEpic(epic);
-        return epic;
-    }
-
-    private SubTask addSubTask(Epic epic, IssueStatus issueStatus) {
-        final SubTask subTask = new SubTask("SubTask", "Description", Duration.ofMinutes(15),
-                                                  epic.getId(), issueStatus);
-        taskManager.addSubTask(subTask);
-        return subTask;
-    }
 
     @DisplayName("Добавляем задачу с параметром NULL.")
     @Test
@@ -132,19 +114,22 @@ class TaskManagerTest {
     @Test
     void addTaskTest() {
 
-        final Task task = addTask();
+        final Task task = Managers.addTask(taskManager);
         final Task savedTask = taskManager.getTaskById(task.getId());
 
         //Анализируем задачу
         assertNotNull(savedTask, "Добавленная задача Null.");
         assertEquals(task, savedTask, "Задачи не совпадают.");
         assertEquals(IssueStatus.NEW, savedTask.getStatus(), "Статус задачи.");
+        assertEquals(savedTask,taskManager.getTaskById(1), "Не та задача");
 
         //Анализируем список задач
         final List<Task> tasks = taskManager.getAllTasks();
 
         assertNotNull(tasks, "Хранилище задач не инициализировано.");
         assertEquals(1, tasks.size(), "Неверное количество задач.");
+        assertEquals(1,taskManager.getAllTasks().size(), "Не верное количество эпиков");
+
         assertEquals(task, tasks.get(0), "Задачи не совпадают.");
     }
 
@@ -152,7 +137,7 @@ class TaskManagerTest {
     @Test
     void addEpicTest() {
 
-        final Epic epic = addEpic();
+        final Epic epic = Managers.addEpic(taskManager);
         final Epic savedEpic = taskManager.getEpicById(epic.getId());
 
         assertNotNull(savedEpic, "Добавленный эпик Null.");
@@ -161,6 +146,7 @@ class TaskManagerTest {
         assertEquals(savedEpic.getDuration(), Duration.ZERO, "У эпика не пустой интервал.");
         assertEquals(savedEpic.getStartTime(), LocalDateTime.MIN, "У эпика не пустой дата старта.");
         assertEquals(IssueStatus.NEW, savedEpic.getStatus(), "Статус эпика.");
+        assertEquals(epic,taskManager.getEpicById(1), "Не тот эпик");
 
         final List<Epic> epics = taskManager.getAllEpics();
 
@@ -173,8 +159,8 @@ class TaskManagerTest {
     @Test
     void addSubTaskTest() {
 
-        final Epic parent = addEpic();
-        final SubTask subTask = addSubTask(parent,IssueStatus.NEW);
+        final Epic parent = Managers.addEpic(taskManager);
+        final SubTask subTask = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
 
         final SubTask savedSubTask = taskManager.getSubTaskById(subTask.getId());
         final Epic savedParent = taskManager.getEpicById(subTask.getParentID());
@@ -191,6 +177,9 @@ class TaskManagerTest {
 
         assertEquals(1,savedParent.getChildren().size(),"Не верное количество детей.");
 
+        assertEquals(parent,taskManager.getEpicById(1), "Не тот эпик");
+        assertEquals(subTask,taskManager.getSubTaskById(2), "Не та подзадача");
+
         final List<SubTask> subTasks = taskManager.getAllSubTasks();
         final List<Epic> epics = taskManager.getAllEpics();
 
@@ -206,9 +195,9 @@ class TaskManagerTest {
     @Test
     void addEpicWithTwoChildrenInProgressTest() {
 
-        final Epic parent = addEpic();
-        final SubTask subTask1 = addSubTask(parent,IssueStatus.IN_PROGRESS);
-        final SubTask subTask2 = addSubTask(parent,IssueStatus.IN_PROGRESS);
+        final Epic parent = Managers.addEpic(taskManager);
+        final SubTask subTask1 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.IN_PROGRESS);
+        final SubTask subTask2 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.IN_PROGRESS);
 
         final SubTask savedSubTask1 = taskManager.getSubTaskById(subTask1.getId());
         final SubTask savedSubTask2 = taskManager.getSubTaskById(subTask2.getId());
@@ -237,10 +226,10 @@ class TaskManagerTest {
     @Test
     void addEpicWithTreeChildrenDoneTest() {
 
-        final Epic parent = addEpic();
-        final SubTask subTask1 = addSubTask(parent,IssueStatus.DONE);
-        final SubTask subTask2 = addSubTask(parent,IssueStatus.DONE);
-        final SubTask subTask3 = addSubTask(parent,IssueStatus.DONE);
+        final Epic parent = Managers.addEpic(taskManager);
+        final SubTask subTask1 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.DONE);
+        final SubTask subTask2 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.DONE);
+        final SubTask subTask3 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.DONE);
 
         final SubTask savedSubTask1 = taskManager.getSubTaskById(subTask1.getId());
         final SubTask savedSubTask2 = taskManager.getSubTaskById(subTask2.getId());
@@ -256,18 +245,23 @@ class TaskManagerTest {
         //Добавить проверку интервала
 
         assertEquals(3,savedParent.getChildren().size(),"Не верное количество детей.");
+        assertEquals(3, taskManager.getChildrenOfEpicById(savedParent.getId()).size(),
+                "Не верное количество детей.");
 
         assertEquals(3, taskManager.getAllSubTasks().size(), "Неверное количество подзадач.");
         assertEquals(1, taskManager.getAllEpics().size(), "Неверное количество эпиков.");
+
+        assertEquals(1,taskManager.getAllEpics().size(), "Не верное количество эпиков");
+        assertEquals(3,taskManager.getAllSubTasks().size(), "Не верное количество подзадач");
     }
 
     @DisplayName("Добавляем эпик с подзадачами в статусе DONE и NEW.")
     @Test
     void addEpicWithTwoChildrenNewDoneTest() {
 
-        final Epic parent = addEpic();
-        final SubTask subTask1 = addSubTask(parent,IssueStatus.NEW);
-        final SubTask subTask2 = addSubTask(parent,IssueStatus.DONE);
+        final Epic parent = Managers.addEpic(taskManager);
+        final SubTask subTask1 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
+        final SubTask subTask2 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.DONE);
 
         final SubTask savedSubTask1 = taskManager.getSubTaskById(subTask1.getId());
         final SubTask savedSubTask2 = taskManager.getSubTaskById(subTask2.getId());
@@ -281,7 +275,7 @@ class TaskManagerTest {
     @DisplayName("Обновить статус задачи с NEW в DONE.")
     @Test
     void updateStatusTaskTest() {
-        final Task task = addTask();
+        final Task task = Managers.addTask(taskManager);
         task.setStatus(IssueStatus.DONE);
         taskManager.updateTask(task);
         final Task updateTask = taskManager.getTaskById(task.getId());
@@ -294,8 +288,8 @@ class TaskManagerTest {
     @DisplayName("Обновить статус единственной подзадачи с NEW в DONE.")
     @Test
     void updateStatusSubTaskTest() {
-        final Epic epic = addEpic();
-        final SubTask subTask = addSubTask(epic,IssueStatus.NEW);
+        final Epic parent = Managers.addEpic(taskManager);
+        final SubTask subTask = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
         subTask.setStatus(IssueStatus.DONE);
         final SubTask updateSubTask = taskManager.getSubTaskById(subTask.getId());
 
@@ -308,7 +302,7 @@ class TaskManagerTest {
     @Test
     void updateStatusEpicTest() {
         //Статус эпика расчетная величина, его нельзя установить
-        final Epic epic = addEpic();
+        final Epic epic = Managers.addEpic(taskManager);
 
         epic.setStatus(IssueStatus.DONE);
         taskManager.updateEpic(epic);
@@ -317,6 +311,53 @@ class TaskManagerTest {
 
         assertNotNull(updateEpic, "Эпики не возвращаются.");
         assertNotEquals(IssueStatus.DONE, updateEpic.getStatus(), "Статус эпика обновлен.");
+    }
+
+    @DisplayName("Обновить статус подзадач для эпика с 2 детьми")
+    @Test
+    void updateStatusEpicWithTwoChildrenTest() {
+
+        final Epic parent = Managers.addEpic(taskManager);
+        final SubTask subTask1 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
+        final SubTask subTask2 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
+
+        subTask1.setStatus(IssueStatus.IN_PROGRESS);
+        taskManager.updateSubTask(subTask1);
+
+        final SubTask savedSubTask1 = taskManager.getSubTaskById(subTask1.getId());
+        final SubTask savedSubTask2 = taskManager.getSubTaskById(subTask2.getId());
+        final Epic savedParent = taskManager.getEpicById(parent.getId());
+
+        assertEquals(IssueStatus.IN_PROGRESS, savedSubTask1.getStatus(), "Статус подзадачи.");
+        assertEquals(IssueStatus.NEW, savedSubTask2.getStatus(), "Статус подзадачи.");
+        assertEquals(IssueStatus.IN_PROGRESS, savedParent.getStatus(), "Статус эпика.");
+
+        subTask1.setStatus(IssueStatus.DONE);
+        taskManager.updateSubTask(subTask1);
+
+        assertEquals(IssueStatus.DONE, savedSubTask1.getStatus(), "Статус подзадачи.");
+        assertEquals(IssueStatus.NEW, savedSubTask2.getStatus(), "Статус подзадачи.");
+        assertEquals(IssueStatus.IN_PROGRESS, savedParent.getStatus(), "Статус эпика.");
+
+        subTask2.setStatus(IssueStatus.IN_PROGRESS);
+        taskManager.updateSubTask(subTask2);
+
+        assertEquals(IssueStatus.DONE, savedSubTask1.getStatus(), "Статус подзадачи.");
+        assertEquals(IssueStatus.IN_PROGRESS, savedSubTask2.getStatus(), "Статус подзадачи.");
+        assertEquals(IssueStatus.IN_PROGRESS, savedParent.getStatus(), "Статус эпика.");
+
+        subTask2.setStatus(IssueStatus.DONE);
+        taskManager.updateSubTask(subTask2);
+
+        assertEquals(IssueStatus.DONE, savedSubTask1.getStatus(), "Статус подзадачи.");
+        assertEquals(IssueStatus.DONE, savedSubTask2.getStatus(), "Статус подзадачи.");
+        assertEquals(IssueStatus.DONE, savedParent.getStatus(), "Статус эпика.");
+
+        assertEquals(2, taskManager.getChildrenOfEpicById(parent.getId()).size(),
+                                 "Не верное количество детей.");
+
+        assertEquals(1,taskManager.getAllEpics().size(), "Не верное количество эпиков");
+        assertEquals(2,taskManager.getAllSubTasks().size(), "Не верное количество подзадач");
     }
 
     @DisplayName("Удаление существующей задачи по id.")
@@ -352,7 +393,7 @@ class TaskManagerTest {
     @Test
     void deleteTaskByNotHaveIdTest() {
 
-        final Task task = addTask();
+        final Task task = Managers.addTask(taskManager);
         final Task newTask = taskManager.addTask(task);
         taskManager.deleteTaskById(100);
         final List<Task> tasks = taskManager.getAllTasks();
@@ -386,7 +427,7 @@ class TaskManagerTest {
     @Test
     void deleteEpicById() {
         //Стандартный вариант - когда есть эпик
-        final Epic newEpic = addEpic();
+        final Epic newEpic = Managers.addEpic(taskManager);
         taskManager.deleteEpicById(newEpic.getId());
 
         final List<Epic> epics = taskManager.getAllEpics();
@@ -411,7 +452,7 @@ class TaskManagerTest {
     @DisplayName("Не корректный id. Удаление не существующего эпика по id.")
     @Test
     void deleteEpicByNotHaveIdTest() {
-        addEpic();
+        Managers.addEpic(taskManager);
         final Epic delEpic = taskManager.deleteEpicById(100);
         final List<Epic> epics = taskManager.getAllEpics();
 
@@ -529,7 +570,7 @@ class TaskManagerTest {
         assertEquals(0, children.size(), "Список детей эпика не пустая.");
     }
 
-    @DisplayName("Получить историю списка для нового менеджера.")
+    @DisplayName("Получить историю просмотров для нового менеджера.")
     @Test
     void getHistoryForNewManagerTest() {
         //Для нового менеджера история задач пустой список и не null
@@ -537,5 +578,16 @@ class TaskManagerTest {
 
         assertNotNull(history, "История - null.");
         assertEquals(0, history.size(), "История не пустая для нового менеджера.");
+    }
+
+    @DisplayName("Получить историю просмотров для менеджера в работе.")
+    @Test
+    void getHistoryTest() {
+        Managers.simpleTestForTaskManager(taskManager);
+
+        final List<Issue> history = taskManager.getHistory();
+
+        assertNotNull(history, "История - null.");
+        assertEquals(3, history.size(), "Не корректное количество задач в истории.");
     }
 }
