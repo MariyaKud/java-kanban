@@ -132,4 +132,40 @@ public class Managers {
         System.out.println("\nОтсортированный список задач по дате старта:");
         taskManager.getPrioritizedTasks().forEach(System.out::println);
     }
+
+    /**
+     * Добавить новую задачу в менеджер со статусом NEW
+     * @param taskManager менеджер задач, в него будем добавлять задачу
+     * @return добавленная задача, экземпляр класса {@link Task}
+     */
+    public static Task addTask(TaskManager taskManager) {
+        final Task task = new Task("Test", "Description", Duration.ofMinutes(20));
+        taskManager.addTask(task);
+        return task;
+    }
+
+    /**
+     * Добавить новый эпик без детей в менеджере задач
+     * @param taskManager менеджер задач, в него будем добавлять эпик
+     * @return добавленный эпик, экземпляр класса {@link Epic}
+     */
+    public static Epic addEpic(TaskManager taskManager) {
+        final Epic epic = new Epic("Epic", "Description");
+        taskManager.addEpic(epic);
+        return epic;
+    }
+
+    /**
+     * Добавить новую подзадачу в менеджер со статусом NEW
+     * @param taskManager менеджер задач, в него будем добавлять подзадачу
+     * @param epicID родительский ID
+     * @param issueStatus статус добавляемой подзадачи {@link IssueStatus}
+     * @return добавленная подзадача, экземпляр класса {@link SubTask}
+     */
+    public static SubTask addSubTask(TaskManager taskManager, int epicID, IssueStatus issueStatus) {
+        final SubTask subTask = new SubTask("SubTask", "Description", Duration.ofMinutes(15),
+                epicID, issueStatus);
+        taskManager.addSubTask(subTask);
+        return subTask;
+    }
 }
