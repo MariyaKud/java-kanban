@@ -3,6 +3,7 @@ package service;
 import model.Issue;
 import model.Task;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -11,6 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("Тест менеджера истории просмотров.")
 class HistoryManagerTest {
 
     private static HistoryManager historyManager;
@@ -21,6 +23,7 @@ class HistoryManagerTest {
         historyManager = new InMemoryHistoryManager();
     }
 
+    @DisplayName("Поверяем метод getHistory() для пустого списка.")
     @Test
     void getHistoryNewTest() {
         //Для нового экземпляра класса HistoryManager - история это пустой список
@@ -31,6 +34,7 @@ class HistoryManagerTest {
         assertEquals(0, history.size(), "История не пустая.");
     }
 
+    @DisplayName("Поверяем метод getHistory() для НЕ пустого списка.")
     @Test
     void addOneTaskTest() {
         //Проверяем наличие задачи в истории, после применения метода add()
@@ -44,6 +48,7 @@ class HistoryManagerTest {
         assertEquals(1, history.size(), "Длина очереди не соответствует ожидаемой.");
     }
 
+    @DisplayName("Проверка дублирования, добавляем в истории одну и ту же задачу.")
     @Test
     void addOneTaskTwiceCheckDoubleTest() {
         //Проверяем наличие задачи в истории, после добавления одной и той же задачи в очереди
@@ -59,6 +64,7 @@ class HistoryManagerTest {
         assertEquals(1, history.size(), "Длина очереди не соответствует ожидаемой.");
     }
 
+    @DisplayName("Удаляем единственную задачу из истории.")
     @Test
     void removeSingleTaskTest() {
         //Удаляем единственную задачу, проверяем чтобы очередь не превращалась в null и была пустой
@@ -73,6 +79,7 @@ class HistoryManagerTest {
         assertEquals(0, history.size(), "Длина очереди не соответствует ожидаемой.");
     }
 
+    @DisplayName("Удаляем задачу из начала очереди.")
     @Test
     void removeFromBeginOfLineTest() {
         //Удаляем задачу из начала очереди
@@ -94,6 +101,7 @@ class HistoryManagerTest {
         assertEquals(task2, history.get(0), "Не корректная задача в очереди.");
     }
 
+    @DisplayName("Удаляем задачу из конца очереди.")
     @Test
     void removeFromEndOfLineTest() {
         //Удаляем задачу из конца очереди
@@ -115,6 +123,7 @@ class HistoryManagerTest {
         assertEquals(task1, history.get(0), "Не корректная задача в очереди.");
     }
 
+    @DisplayName("Удаляем задачу из середины очереди.")
     @Test
     void removeFromMiddleOfLineTest() {
         //Удаляем задачу из середины очереди
