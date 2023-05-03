@@ -30,10 +30,10 @@ public class SerializerIssue {
         result.append(issue.getTitle()).append(",").append(issue.getStatus()).append(",");
         result.append(issue.getDescription()).append(",");
         result.append(issue.getDuration().toMinutes()).append(",");
-        result.append(issue.getStartTime().format(Managers.getFormatter())).append(",");
+        result.append(issue.getStartTime().format(Managers.getFormatter()));
 
         if (issue.getType() == IssueType.SUBTASK) {
-            result.append(((SubTask) issue).getParentID());
+            result.append(",").append(((SubTask) issue).getParentID());
         }
         result.append("\n");
 
