@@ -1,7 +1,7 @@
 package model;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Универсальный класс задач, родитель любой сущности, управляемой менеджером.
@@ -20,7 +20,7 @@ public abstract class Issue {
     private String title;             // Название
     private String description;       // Описание
     private Duration duration;        //Продолжительность в минутах
-    private LocalDateTime startTime;  //Время запуска
+    private Instant startTime;        //Время запуска
     private IssueStatus status;       // Статус
 
     public Issue(int id, String title, String description, Duration duration) {
@@ -28,11 +28,11 @@ public abstract class Issue {
         this.title       = title;
         this.description = description;
         this.duration    = duration;
-        this.startTime   = LocalDateTime.MIN;
+        this.startTime   = Instant.MIN;
         this.status      = IssueStatus.NEW;
     }
 
-    public Issue(int id, String title, String description, Duration duration, LocalDateTime startTime) {
+    public Issue(int id, String title, String description, Duration duration, Instant startTime) {
         this(id, title, description, duration);
         this.setStartTime(startTime);
     }
@@ -61,12 +61,12 @@ public abstract class Issue {
         return duration;
     }
 
-    public LocalDateTime getStartTime() {
+    public Instant getStartTime() {
         return startTime;
     }
 
-    public LocalDateTime getEndTime() {
-        return startTime.plusMinutes(duration.toMinutes());
+    public Instant getEndTime() {
+        return startTime.plusSeconds(duration.toSeconds());
     }
 
     public void setId(int id) {
@@ -81,7 +81,7 @@ public abstract class Issue {
         this.duration = duration;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
+    public void setStartTime(Instant startTime) {
         this.startTime = startTime;
     }
 
@@ -104,9 +104,7 @@ public abstract class Issue {
         return getId() == task.getId() &&
                 getStatus() == task.getStatus() &&
                 getDuration().equals(task.getDuration()) &&
-                getStartTime().toLocalDate().equals(task.getStartTime().toLocalDate()) &&
-                getStartTime().getHour() == task.getStartTime().getHour() &&
-                getStartTime().getMinute() == task.getStartTime().getMinute() &&
+                getStartTime().equals(task.getStartTime()) &&
                 getTitle().equals(task.getTitle()) &&
                 getDescription().equals(task.getDescription());
     }

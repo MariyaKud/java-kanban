@@ -8,6 +8,7 @@ import model.SubTask;
 import model.Task;
 
 import java.time.Duration;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -20,7 +21,8 @@ import java.time.format.DateTimeFormatter;
 public class Managers {
 
     private static final IssueRepository issueRepository = new CSVMakeRepository();
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").
+                                                       withZone(ZoneId.systemDefault());
 
     /**
      * Приватный конструктор для закрытия возможности создать объект.

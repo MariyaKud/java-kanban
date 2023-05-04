@@ -6,10 +6,9 @@ import model.IssueStatus;
 import model.IssueType;
 import model.SubTask;
 import model.Task;
-import service.Managers;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +29,11 @@ public class SerializerIssue {
         result.append(issue.getTitle()).append(",").append(issue.getStatus()).append(",");
         result.append(issue.getDescription()).append(",");
         result.append(issue.getDuration().toMinutes()).append(",");
-        result.append(issue.getStartTime().format(Managers.getFormatter()));
+        if (issue.getStartTime()==Instant.MIN) {
+            result.append(0);
+        } else {
+            result.append(issue.getStartTime());
+        }
 
         if (issue.getType() == IssueType.SUBTASK) {
             result.append(",").append(((SubTask) issue).getParentID());
@@ -87,10 +90,16 @@ public class SerializerIssue {
             System.out.println(e.getMessage());
         }
 
-        String name = split[2].trim();
-        String description = split[4].trim();
+        final String name = split[2].trim();
+        final String description = split[4].trim();
 
-        LocalDateTime startTime = LocalDateTime.parse(split[6].trim(),Managers.getFormatter());
+        final String startTimeStr = split[6].trim();
+        final Instant startTime;
+        if ("0".equals(startTimeStr)) {
+            startTime = Instant.MIN;
+        } else {
+            startTime  = Instant.parse(startTimeStr);
+        }
         Duration duration = Duration.ZERO;
         final long minutes;
         try {

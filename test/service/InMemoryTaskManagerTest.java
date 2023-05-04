@@ -11,7 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,9 +73,11 @@ class InMemoryTaskManagerTest {
     @DisplayName("Добавляем задачу с собственным id")
     @Test
     void addTaskWithIdTest() {
-        final Task task = new Task(99, "Test", "Description", Duration.ofMinutes(100));
+        final Task task = new Task(99, "Test", "Description", Duration.ofMinutes(1000));
         taskManager.addTask(task);
         final Task savedTask = taskManager.getTaskById(task.getId());
+        System.out.println(task.getStartTime());
+        System.out.println(task.getEndTime());
 
         assertNotNull(task, "Добавленная задача Null.");
         //не совпадут только id, он будет переназначен менеджером
@@ -85,8 +87,8 @@ class InMemoryTaskManagerTest {
         assertEquals(IssueStatus.NEW, savedTask.getStatus(), "Не корректный Type.");
         assertEquals("Test", savedTask.getTitle(), "Не корректный Title.");
         assertEquals("Description", savedTask.getDescription(), "Не корректный Description.");
-        assertEquals(100, savedTask.getDuration().toMinutes(), "Не корректный Duration.");
-        assertNotEquals(LocalDateTime.MIN, savedTask.getStartTime(), "Не корректный StartTime.");
+        assertEquals(1000, savedTask.getDuration().toMinutes(), "Не корректный Duration.");
+        assertNotEquals(Instant.MIN, savedTask.getStartTime(), "Не корректный StartTime.");
 
         assertEquals(1,taskManager.getAllTasks().size(),"Не корректный список задач.");
     }
@@ -107,8 +109,8 @@ class InMemoryTaskManagerTest {
         assertEquals("Test", savedEpic.getTitle(), "Не корректный Title.");
         assertEquals("Description", savedEpic.getDescription(), "Не корректный Description.");
         assertEquals(0, savedEpic.getDuration().toMinutes(), "Не корректный Duration.");
-        assertEquals(LocalDateTime.MIN, savedEpic.getStartTime(), "Не корректный StartTime.");
-        assertEquals(LocalDateTime.MIN, savedEpic.getEndTime(), "Не корректный EndTime.");
+        assertEquals(Instant.MIN, savedEpic.getStartTime(), "Не корректный StartTime.");
+        assertEquals(Instant.MIN, savedEpic.getEndTime(), "Не корректный EndTime.");
 
         assertEquals(1,taskManager.getAllEpics().size(),"Не корректный список эпиков.");
     }
@@ -144,9 +146,9 @@ class InMemoryTaskManagerTest {
         assertEquals("Test", savedSubTask.getTitle(), "Не корректный Title.");
         assertEquals("Description", savedSubTask.getDescription(), "Не корректный Description.");
 
-        assertNotEquals(LocalDateTime.MIN, savedSubTask.getStartTime(), "Не корректный StartTime.");
-        assertNotEquals(LocalDateTime.MIN, saveParent.getStartTime(), "Не корректный StartTime.");
-        assertNotEquals(LocalDateTime.MIN, saveParent.getEndTime(), "Не корректный EndTime.");
+        assertNotEquals(Instant.MIN, savedSubTask.getStartTime(), "Не корректный StartTime.");
+        assertNotEquals(Instant.MIN, saveParent.getStartTime(), "Не корректный StartTime.");
+        assertNotEquals(Instant.MIN, saveParent.getEndTime(), "Не корректный EndTime.");
 
         assertEquals(1,taskManager.getAllEpics().size(),"Не корректный список эпиков.");
         assertEquals(1,taskManager.getAllSubTasks().size(),"Не корректный список эпиков.");
@@ -184,8 +186,8 @@ class InMemoryTaskManagerTest {
         assertNotNull(savedEpic, "Добавленный эпик Null.");
         assertEquals(epic, savedEpic, "Эпики не совпадают.");
         assertEquals(0, savedEpic.getChildren().size(), "Есть дети.");
-        assertEquals(savedEpic.getDuration(), Duration.ZERO, "Не корректный Duration у эпика.");
-        assertEquals(savedEpic.getStartTime(), LocalDateTime.MIN, "Не корректный StartTime у эпика.");
+        assertEquals(Duration.ZERO, savedEpic.getDuration(), "Не корректный Duration у эпика.");
+        assertEquals(Instant.MIN, savedEpic.getStartTime(), "Не корректный StartTime у эпика.");
         assertEquals(IssueStatus.NEW, savedEpic.getStatus(), "Не корректный статус.");
         assertEquals(epic,taskManager.getEpicById(1), "Не тот эпик");
 
@@ -405,11 +407,8 @@ class InMemoryTaskManagerTest {
     @Test
     void deleteTaskByIdTest() {
         //Стандартный вариант - когда есть задача
-        final Task task = new Task(0, "Test addTask", "Test addTask description", Duration.ofMinutes(10),
-                             LocalDateTime.now(), IssueStatus.IN_PROGRESS);
-
-        final Task newTask = taskManager.addTask(task);
-        taskManager.deleteTaskById(newTask.getId());
+        final Task task = Managers.addTask(taskManager);
+        taskManager.deleteTaskById(task.getId());
         final List<Task> tasks = taskManager.getAllTasks();
 
         assertNotNull(tasks, "Возвращает null.");
@@ -600,14 +599,10 @@ class InMemoryTaskManagerTest {
     @Test
     void getSubTaskByIdWithNotCorrectIdTest() {
         //Ищем подзадачу с неверным id
-        final Epic epic = new Epic(0, "Epic", "Description");
-        final Epic newEpic = taskManager.addEpic(epic);
+        final Epic parent = Managers.addEpic(taskManager);
+        Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
 
-        final SubTask subTask = new SubTask(1, "SubTask", "Description",
-                Duration.ofMinutes(15), LocalDateTime.now(), newEpic.getId());
-
-        final SubTask newSubTask = taskManager.addSubTask(subTask);
-        final SubTask savedSubTask = taskManager.getSubTaskById(newSubTask.getId()+1);
+        final SubTask savedSubTask = taskManager.getSubTaskById(parent.getId());
 
         assertNull(savedSubTask, "Не возвращает null.");
     }

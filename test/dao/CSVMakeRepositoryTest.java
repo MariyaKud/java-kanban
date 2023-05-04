@@ -136,7 +136,7 @@ class CSVMakeRepositoryTest {
         try (BufferedReader br = new BufferedReader(new FileReader(file)))
         {
             assertEquals(issueRepository.FILE_HEAD, br.readLine()+"\n", "Не верный заголовок.");
-            assertEquals("1,EPIC,Epic,NEW,Description,0,01.01.+1000000000 00:00",
+            assertEquals("1,EPIC,Epic,NEW,Description,0,0",
                           br.readLine(), "Данные в файле не корректны");
 
         } catch (IOException e) {
@@ -179,7 +179,7 @@ class CSVMakeRepositoryTest {
         try (BufferedReader br = new BufferedReader(new FileReader(file)))
         {
             assertEquals(issueRepository.FILE_HEAD, br.readLine()+"\n", "Не верный заголовок.");
-            assertEquals("1,EPIC,Epic,NEW,Description,0,01.01.+1000000000 00:00",
+            assertEquals("1,EPIC,Epic,NEW,Description,0,0",
                     br.readLine(), "Данные по эпику в файле не корректны");
             assertEquals("",br.readLine(),"Нет разделительной строки перед историей");
             assertEquals("1", br.readLine(),"Не корректная история");

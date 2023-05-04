@@ -10,7 +10,7 @@ public class Main {
         //Авто тест InMemoryTaskManager
         TaskManager taskManager = Managers.getDefault();
         Managers.simpleTestForTaskManager(taskManager);
-        System.out.println("\nАВТО ТЕСТ FileBackedTasksManager завершен");
+        System.out.println("\nАВТО ТЕСТ InMemoryTaskManager завершен");
         System.out.println("-----------------------------------------");
 
         //Авто тест FileBackedTasksManager

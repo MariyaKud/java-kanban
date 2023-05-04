@@ -7,7 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -82,14 +82,13 @@ class HistoryManagerTest {
     @DisplayName("Удаляем задачу из начала очереди.")
     @Test
     void removeFromBeginOfLineTest() {
-        //Удаляем задачу из начала очереди
-        LocalDateTime startTime = LocalDateTime.now();
+        Instant startTime = Instant.now();
 
-        Task task1 = new Task(0, "Test", "Description", Duration.ofMinutes(10), startTime);
+        Task task1 = new Task(0, "Test", "Description", Duration.ofMinutes(10), Instant.now());
         historyManager.add(task1);
 
         Task task2 = new Task(1, "Test", "Description",
-                               Duration.ofMinutes(10), startTime.plusMinutes(15));
+                               Duration.ofMinutes(10), startTime.plus(Duration.ofMinutes(15)));
         historyManager.add(task2);
 
         historyManager.remove(0);
@@ -105,13 +104,13 @@ class HistoryManagerTest {
     @Test
     void removeFromEndOfLineTest() {
         //Удаляем задачу из конца очереди
-        LocalDateTime startTime = LocalDateTime.now();
+        Instant startTime = Instant.now();
 
         Task task1 = new Task(0, "Test", "Description", Duration.ofMinutes(10), startTime);
         historyManager.add(task1);
 
         Task task2 = new Task(1, "Test", "Description",
-                Duration.ofMinutes(10), startTime.plusMinutes(15));
+                Duration.ofMinutes(10), startTime.plus(Duration.ofMinutes(15)));
         historyManager.add(task2);
 
         historyManager.remove(1);
@@ -127,17 +126,17 @@ class HistoryManagerTest {
     @Test
     void removeFromMiddleOfLineTest() {
         //Удаляем задачу из середины очереди
-        LocalDateTime startTime = LocalDateTime.now();
+        Instant startTime = Instant.now();
 
         Task task1 = new Task(0, "Test", "Description", Duration.ofMinutes(10), startTime);
         historyManager.add(task1);
 
         Task task2 = new Task(1, "Test", "Description",
-                Duration.ofMinutes(10), startTime.plusMinutes(15));
+                Duration.ofMinutes(10), startTime.plus(Duration.ofMinutes(15)));
         historyManager.add(task2);
 
         Task task3 = new Task(2, "Test", "Description",
-                Duration.ofMinutes(10), startTime.plusMinutes(30));
+                Duration.ofMinutes(10), startTime.plus(Duration.ofMinutes(30)));
         historyManager.add(task3);
 
         historyManager.remove(1);

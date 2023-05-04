@@ -12,13 +12,14 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeSet;
 
 /**
@@ -92,136 +93,6 @@ public class InMemoryTaskManager implements TaskManager {
         if (issue != null && issue.getId() >= id) {
             id = issue.getId();
             getId();
-        }
-    }
-
-    /**
-     * Инициализируем сетку занятости, разбитую на интервалы размером ITEM_GRID.
-     * При первой валидации заполняем сетку значением - false, т.е. все интервалы свободны.
-     * Первый интервал в сетке - начало часа запуска программы.
-     * Сетка заполняется на год вперед.
-     */
-    private void initGrid() {
-        Instant endGrid = START_GRID.plus(SIZE_GRID);
-        Instant itemGrid = START_GRID;
-
-        while (itemGrid.isBefore(endGrid)) {
-            grid.put(itemGrid, false);
-            itemGrid = itemGrid.plus(Duration.ofMinutes(ITEM_GRID));
-        }
-    }
-
-    private Instant findNearestBorderOfGrid(LocalDateTime localDateTime, boolean inFuture) {
-        int minutes = localDateTime.toLocalTime().getMinute();
-        int hours = localDateTime.toLocalTime().getHour();
-        int minutesNearest;
-
-        LocalDate localDate = localDateTime.toLocalDate();
-
-        if (minutes % ITEM_GRID == 0) {
-            return localDateTime.toInstant(ZoneOffset.UTC);
-        } else {
-            if (inFuture) {
-                minutesNearest = (int) ((minutes / ITEM_GRID + 1) * ITEM_GRID);
-            } else {
-                minutesNearest = (int) (minutes / ITEM_GRID * ITEM_GRID);
-            }
-            if (minutesNearest == 60) {
-                ++hours;
-                minutesNearest = 0;
-            }
-            if (hours == 24) {
-                hours = 0;
-                localDate = localDate.plusDays(1);
-            }
-
-            return LocalDateTime.of(localDate, LocalTime.of(hours,minutesNearest)).toInstant(ZoneOffset.UTC);
-        }
-    }
-
-    /**
-     * Если дата старта не задана, определяет задачу в конец списка задач, подзадач, отсортированных по startTime
-     *
-     * @param issue - задача/подзадача для которой необходимо установить startTime
-     */
-    private void setStartTimeIFEmpty(Issue issue) {
-        if ((issue.getType() != IssueType.EPIC)) {
-            if (issue.getStartTime().isEqual(LocalDateTime.MIN)) {
-                if (issuesByPriority.isEmpty()) {
-                    Instant nearestFreeTime = findNearestBorderOfGrid(LocalDateTime.now(), true);
-                    issue.setStartTime(LocalDateTime.ofInstant(nearestFreeTime, ZoneId.systemDefault()));
-                } else {
-                    Issue lastIssue = issuesByPriority.last();
-                    issue.setStartTime(shiftTheTimer(lastIssue.getStartTime(), lastIssue.getDuration()));
-                }
-            }
-        }
-    }
-
-    private List<Instant> validatePeriodIssue(Issue issue) {
-
-        List<Instant> itemsValid = new ArrayList<>();
-
-        if (issue == null) {
-            return itemsValid;
-        }
-
-        //Инициализируем сетку при первой проверке валидности отрезка
-        if (grid.isEmpty()) {
-            initGrid();
-        }
-
-        //Устанавливаем дату старта для задачи/подзадачи, если она пустая
-        setStartTimeIFEmpty(issue);
-
-        //Проверяем, что в сетке есть место на заданный интервал
-        if (issue.getType() != IssueType.EPIC) {
-            Instant startIssue = findNearestBorderOfGrid(issue.getStartTime(), false);
-            Instant endIssue = findNearestBorderOfGrid(issue.getStartTime().plus(issue.getDuration()), true);
-            while (startIssue.isBefore(endIssue)) {
-                if (grid.containsKey(startIssue) && !grid.get(startIssue)) {
-                    itemsValid.add(startIssue);
-                    startIssue = startIssue.plus(Duration.ofMinutes(ITEM_GRID));
-                } else {
-                    //Если хотя юы один отрезок занят, то весь интервал считаем не валидным
-                    itemsValid.clear();
-                    break;
-                }
-            }
-        }
-
-        return itemsValid;
-    }
-
-    /**
-     * Возвращает следующую свободную дату для планирования,
-     * под каждую задачу закладываем отрезки кратные отрезку в сетке
-     *
-     * @param startTime дата начала последней запланированной задачи
-     * @param duration  продолжительность последней задачи
-     * @return подходящая дата для начала новой задачи
-     */
-    protected static LocalDateTime shiftTheTimer(LocalDateTime startTime, Duration duration) {
-        //смещаем всегда на интервал, кратный минимальному отрезку
-        if (duration.toMinutes() % ITEM_GRID == 0) {
-            return startTime.plusMinutes(duration.toMinutes());
-        } else {
-            return startTime.plusMinutes((duration.dividedBy(Duration.ofMinutes(ITEM_GRID)) + 1) * ITEM_GRID);
-        }
-    }
-
-    private void occupyItemsInGrid(List<Instant> instants) {
-        for (Instant instant : instants) {
-            grid.put(instant, true);
-        }
-    }
-
-    private void freeItemsInGrid(Issue issue) {
-        Instant startIssue = findNearestBorderOfGrid(issue.getStartTime(), false);
-        Instant endIssue = findNearestBorderOfGrid(issue.getStartTime().plus(issue.getDuration()), true);
-        while (startIssue.isBefore(endIssue)) {
-            grid.put(startIssue, false);
-            startIssue = startIssue.plus(Duration.ofMinutes(ITEM_GRID));
         }
     }
 
@@ -733,7 +604,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     private void updateDurationAndDateEpic(Epic epic) {
         Duration durationEpic = Duration.ZERO;
-        final LocalDateTime[] dateTime = {LocalDateTime.MAX, LocalDateTime.MIN};
+        final Instant[] dateTime = {Instant.MAX, Instant.MIN};
 
         if (!epic.getChildren().isEmpty()) {
             for (SubTask child : epic.getChildren()) {
@@ -761,8 +632,149 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager.getHistory();
     }
 
+    /**
+     * Возвращает отсортированный список задач по приоритету
+     *
+     * @return отсортированный список задач и подзадачи по дате старта
+     */
     @Override
     public List<Issue> getPrioritizedTasks() {
         return new ArrayList<>(issuesByPriority);
+    }
+
+    /**
+     * Если дата старта не задана, определяет задачу в конец списка задач, подзадач, отсортированных по startTime
+     *
+     * @param issue - задача/подзадача для которой необходимо установить startTime
+     */
+    private void setStartTimeIfEmpty(Issue issue) {
+        if ((issue.getType() != IssueType.EPIC)) {
+            if (issue.getStartTime().equals(Instant.MIN)) {
+                if (issuesByPriority.isEmpty()) {
+                    issue.setStartTime(findNearestBorderOfGrid(START_GRID.plus(Duration.ofMinutes(ITEM_GRID)),
+                                                        true));
+                } else {
+                    Issue lastIssue = issuesByPriority.last();
+                    issue.setStartTime(findNearestBorderOfGrid(lastIssue.getStartTime().plus(lastIssue.getDuration()),
+                            true));
+                }
+            }
+        }
+    }
+
+    /**
+     * Находит ближайшую границу сетки в прошлое или в будущее к переданному моменту времени
+     * @param instant момент времени
+     * @param inFuture в будущее
+     * @return момент времени кратный интервалу сетки доступа на временной оси
+     */
+    private Instant findNearestBorderOfGrid(Instant instant, boolean inFuture) {
+        OffsetDateTime localDateTime = Objects.requireNonNull(instant).atOffset(ZoneOffset.UTC);
+        int minutes = localDateTime.toLocalTime().getMinute();
+
+        if (minutes % ITEM_GRID == 0) {
+            return instant;
+        } else {
+            LocalDate localDate = localDateTime.toLocalDate();
+            int hours = localDateTime.toLocalTime().getHour();
+            int minutesNearest;
+
+            if (inFuture) {
+                minutesNearest = (int) ((minutes / ITEM_GRID + 1) * ITEM_GRID);
+            } else {
+                minutesNearest = (int) (minutes / ITEM_GRID * ITEM_GRID);
+            }
+            if (minutesNearest == 60) {
+                hours = hours + 1;
+                minutesNearest = 0;
+            }
+            if (hours == 24) {
+                hours = 0;
+                localDate = localDate.plusDays(1);
+            }
+
+            return LocalDateTime.of(localDate, LocalTime.of(hours, minutesNearest)).toInstant(ZoneOffset.UTC);
+        }
+    }
+
+    /**
+     * Занять на временной сетке переданный список отрезков
+     * @param instants список отрезков на временной оси
+     */
+    private void occupyItemsInGrid(List<Instant> instants) {
+        for (Instant instant : instants) {
+            grid.put(instant, true);
+        }
+    }
+
+    /**
+     * Освободить на сетке занятые задачей отрезки времени
+     * @param issue задача или подзадача
+     */
+    private void freeItemsInGrid(Issue issue) {
+        Instant startIssue = findNearestBorderOfGrid(issue.getStartTime(), false);
+        Instant endIssue = findNearestBorderOfGrid(issue.getStartTime().plus(issue.getDuration()), true);
+        while (startIssue.isBefore(endIssue)) {
+            grid.put(startIssue, false);
+            startIssue = startIssue.plus(Duration.ofMinutes(ITEM_GRID));
+        }
+    }
+
+    /**
+     * Инициализируем сетку занятости, разбитую на интервалы размером ITEM_GRID.
+     * При первой валидации заполняем сетку значением - false, т.е. все интервалы свободны.
+     * Первый интервал в сетке - начало часа запуска программы.
+     * Сетка заполняется на год вперед.
+     */
+    private void initGrid() {
+        Instant endGrid = START_GRID.plus(SIZE_GRID);
+        Instant itemGrid = START_GRID;
+
+        while (itemGrid.isBefore(endGrid)) {
+            grid.put(itemGrid, false);
+            itemGrid = itemGrid.plus(Duration.ofMinutes(ITEM_GRID));
+        }
+    }
+
+    /**
+     * Проверяет валидность временных характеристик задачи.
+     * Весь интервал задачи разбивается на отрезки, для каждого отрезка проверяется занят он на временной сетке или нет.
+     * Если занят хотя бы один отрезок, то валидация не пройдена и будет возвращен пустой список
+     * @param issue задача любого типа
+     * @return интервал задачи разбитый на интервалы длинной минимального отрезка сетки
+     */
+    private List<Instant> validatePeriodIssue(Issue issue) {
+
+        List<Instant> itemsValid = new ArrayList<>();
+
+        if (issue == null) {
+            return itemsValid;
+        }
+
+        //Инициализируем сетку при первой проверке валидности отрезка
+        if (grid.isEmpty()) {
+            initGrid();
+        }
+
+        //Устанавливаем дату старта для задачи/подзадачи, если она пустая
+        setStartTimeIfEmpty(issue);
+
+        //Проверяем, что в сетке есть место на заданный интервал
+        if (issue.getType() != IssueType.EPIC) {
+            Instant startIssue = findNearestBorderOfGrid(issue.getStartTime(), false);
+            Instant endIssue = findNearestBorderOfGrid(issue.getStartTime().plus(issue.getDuration()), true);
+            while (startIssue.isBefore(endIssue)) {
+                if (grid.containsKey(startIssue) && !grid.get(startIssue)) {
+                    itemsValid.add(startIssue);
+                    startIssue = startIssue.plus(Duration.ofMinutes(ITEM_GRID));
+                } else {
+                    //Если хотя юы один отрезок занят, то весь интервал считаем не валидным
+                    itemsValid.clear();
+                    break;
+                }
+            }
+        }
+
+        return itemsValid;
     }
 }

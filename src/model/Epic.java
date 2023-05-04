@@ -3,7 +3,7 @@ package model;
 import service.Managers;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,22 +18,20 @@ public class Epic extends Issue {
     private final List<SubTask> children = new ArrayList<>();
 
     //Расчетное поле, время окончания самой поздней из задач
-    private LocalDateTime endTime;
+    private Instant endTime;
 
     public Epic(int id, String title, String description) {
         super(id, title, description, Duration.ZERO);
-        //Продолжительность нулевая у нового эпика бех детей
-        this.setDuration(Duration.ZERO);
         //Время старта/завершения текущая дата
-        this.setStartTime(LocalDateTime.MIN);
-        this.setEndTime(LocalDateTime.MIN);
+        this.setStartTime(Instant.MIN);
+        this.setEndTime(Instant.MIN);
     }
 
     public Epic( String title, String description) {
         this(0, title, description);
     }
 
-    public void setEndTime(LocalDateTime endTime) {
+    public void setEndTime(Instant endTime) {
         this.endTime = endTime;
     }
 
@@ -71,8 +69,13 @@ public class Epic extends Issue {
         }
         result.append("Epic{").append("id=").append(getId()).append(", status=").append(getStatus());
         result.append(", title='").append(getTitle() ).append('\'').append(", description='").append(getDescription());
-        result.append('\'').append(", startTime='").append(getStartTime().format(Managers.getFormatter()));
-        result.append('\'').append(", endTime='").append(getEndTime().format(Managers.getFormatter())).append('\'');
+        if (getStartTime() == Instant.MIN) {
+            result.append('\'').append(", startTime='0");
+            result.append('\'').append(", endTime='0'");
+        } else {
+            result.append('\'').append(", startTime='").append(Managers.getFormatter().format(getStartTime()));
+            result.append('\'').append(", endTime='").append(Managers.getFormatter().format(getEndTime())).append('\'');
+        }
         result.append(", duration='").append(getDuration().toMinutes()).append("мин.").append('\'');
         result.append(", children.size='").append(children.size()).append('\'');
         result.append(", children.id='").append(idChildren).append('\'').append("}");
