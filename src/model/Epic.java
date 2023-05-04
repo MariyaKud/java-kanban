@@ -2,7 +2,6 @@ package model;
 
 import service.Managers;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +20,7 @@ public class Epic extends Issue {
     private Instant endTime;
 
     public Epic(int id, String title, String description) {
-        super(id, title, description, Duration.ZERO);
+        super(id, title, description, 0);
         //Время старта/завершения текущая дата
         this.setStartTime(Instant.MIN);
         this.setEndTime(Instant.MIN);
@@ -35,10 +34,6 @@ public class Epic extends Issue {
         this(other.getId(), other.getTitle(), other.getDescription());
     }
 
-    public void setEndTime(Instant endTime) {
-        this.endTime = endTime;
-    }
-
     /**
      * Получить всех детей экземпляра класса {@code Epic}
      * @return - список элементов класса {@link SubTask}, содержащихся в экземпляре {@code Epic}
@@ -47,9 +42,18 @@ public class Epic extends Issue {
         return children;
     }
 
+    public void setEndTime(Instant endTime) {
+        this.endTime = endTime;
+    }
+
     @Override
     public IssueType getType() {
         return IssueType.EPIC;
+    }
+
+    @Override
+    public Instant getEndTime() {
+        return endTime;
     }
 
     @Override
@@ -80,7 +84,7 @@ public class Epic extends Issue {
             result.append('\'').append(", startTime='").append(Managers.getFormatter().format(getStartTime()));
             result.append('\'').append(", endTime='").append(Managers.getFormatter().format(getEndTime())).append('\'');
         }
-        result.append(", duration='").append(getDuration().toMinutes()).append("мин.").append('\'');
+        result.append(", duration='").append(getDuration()).append("мин.").append('\'');
         result.append(", children.size='").append(children.size()).append('\'');
         result.append(", children.id='").append(idChildren).append('\'').append("}");
 

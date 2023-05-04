@@ -7,7 +7,6 @@ import model.IssueStatus;
 import model.SubTask;
 import model.Task;
 
-import java.time.Duration;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
@@ -72,14 +71,14 @@ public class Managers {
 
         System.out.println("ЗАПУЩЕН АВТО ТЕСТ менеджера: " + taskManager.getClass());
 
-        Task newTask1 = new Task("Test", "Description", Duration.ofMinutes(10));
+        Task newTask1 = new Task("Test", "Description", 10);
         if (taskManager.addTask(newTask1) != null) {
             System.out.println("✅" + "Добавлена задача: " + newTask1);
         } else {
             System.out.println("❌" + "Добавление задачи не состоялось");
         }
 
-        Task newTask2 = new Task("Task2", "Description", Duration.ofMinutes(20));
+        Task newTask2 = new Task("Task2", "Description", 2000);
         if (taskManager.addTask(newTask2) != null) {
             System.out.println("✅" + "Добавлена задача: " + newTask2);
         } else {
@@ -101,8 +100,7 @@ public class Managers {
             System.out.println("❌" + "Добавление эпика не состоялось");
         }
 
-        SubTask newSubTask1 = new SubTask(0, "SubTask1", "Description", Duration.ofMinutes(15),
-                newEpic.getId());
+        SubTask newSubTask1 = new SubTask(0, "SubTask1", "Description",15, newEpic.getId());
         if (taskManager.addSubTask(newSubTask1) != null) {
             System.out.println("✅" + "Добавлена подзадача: " + newSubTask1);
         }
@@ -114,8 +112,7 @@ public class Managers {
             System.out.println("❌" + "Обновление подзадачи не состоялось");
         }
 
-        SubTask newSubTask2 = new SubTask(0, "SubTask2", "Description", Duration.ofMinutes(15),
-                                           newEpic.getId());
+        SubTask newSubTask2 = new SubTask(0, "SubTask2", "Description", 59, newEpic.getId());
         if (taskManager.addSubTask(newSubTask2) != null) {
             System.out.println("✅" + "Добавлена подзадача: " + newSubTask2);
         } else {
@@ -141,7 +138,7 @@ public class Managers {
      * @return добавленная задача, экземпляр класса {@link Task}
      */
     public static Task addTask(TaskManager taskManager) {
-        final Task task = new Task("Test", "Description", Duration.ofMinutes(20));
+        final Task task = new Task("Test", "Description", 25);
         taskManager.addTask(task);
         return task;
     }
@@ -165,7 +162,7 @@ public class Managers {
      * @return добавленная подзадача, экземпляр класса {@link SubTask}
      */
     public static SubTask addSubTask(TaskManager taskManager, int epicID, IssueStatus issueStatus) {
-        final SubTask subTask = new SubTask("SubTask", "Description", Duration.ofMinutes(15),
+        final SubTask subTask = new SubTask("SubTask", "Description", 33,
                 epicID, issueStatus);
         taskManager.addSubTask(subTask);
         return subTask;

@@ -7,7 +7,6 @@ import model.IssueType;
 import model.SubTask;
 import model.Task;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +27,7 @@ public class SerializerIssue {
         result.append(issue.getId()).append(",").append(issue.getType()).append(",");
         result.append(issue.getTitle()).append(",").append(issue.getStatus()).append(",");
         result.append(issue.getDescription()).append(",");
-        result.append(issue.getDuration().toMinutes()).append(",");
+        result.append(issue.getDuration()).append(",");
         if (issue.getStartTime()==Instant.MIN) {
             result.append(0);
         } else {
@@ -100,14 +99,12 @@ public class SerializerIssue {
         } else {
             startTime  = Instant.parse(startTimeStr);
         }
-        Duration duration = Duration.ZERO;
-        final long minutes;
+
+        int duration = 0;
         try {
-            minutes = Long.parseLong(split[5].trim());
-            duration = Duration.ofMinutes(minutes);
+            duration = Integer.parseInt(split[5].trim());
         } catch (NumberFormatException e) {
             System.out.println(e.getMessage());
-            System.out.println("Продолжительность задачи с id = " + split[0] + " не загружена!");
         }
 
         switch (type) {

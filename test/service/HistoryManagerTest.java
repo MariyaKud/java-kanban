@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
@@ -38,7 +37,7 @@ class HistoryManagerTest {
     @Test
     void addOneTaskTest() {
         //Проверяем наличие задачи в истории, после применения метода add()
-        Task task = new Task("Test addTask", "Description", Duration.ofMinutes(10));
+        Task task = new Task("Test addTask", "Description", 10);
 
         historyManager.add(task);
 
@@ -53,7 +52,7 @@ class HistoryManagerTest {
     void addOneTaskTwiceCheckDoubleTest() {
         //Проверяем наличие задачи в истории, после добавления одной и той же задачи в очереди
         //Она не должна двоиться
-        Task task = new Task("Test addTask", "Description", Duration.ofMinutes(10));
+        Task task = new Task("Test addTask", "Description", 10);
 
         historyManager.add(task);
         historyManager.add(task);
@@ -68,7 +67,7 @@ class HistoryManagerTest {
     @Test
     void removeSingleTaskTest() {
         //Удаляем единственную задачу, проверяем чтобы очередь не превращалась в null и была пустой
-        Task task = new Task("Test remove", "Description", Duration.ofMinutes(10));
+        Task task = new Task("Test remove", "Description", 10);
 
         historyManager.add(task);
         historyManager.remove(0);
@@ -84,11 +83,11 @@ class HistoryManagerTest {
     void removeFromBeginOfLineTest() {
         Instant startTime = Instant.now();
 
-        Task task1 = new Task(0, "Test", "Description", Duration.ofMinutes(10), Instant.now());
+        Task task1 = new Task(0, "Test", "Description", 10, Instant.now());
         historyManager.add(task1);
 
         Task task2 = new Task(1, "Test", "Description",
-                               Duration.ofMinutes(10), startTime.plus(Duration.ofMinutes(15)));
+                               10, startTime.plusSeconds(10 * 60L));
         historyManager.add(task2);
 
         historyManager.remove(0);
@@ -106,11 +105,11 @@ class HistoryManagerTest {
         //Удаляем задачу из конца очереди
         Instant startTime = Instant.now();
 
-        Task task1 = new Task(0, "Test", "Description", Duration.ofMinutes(10), startTime);
+        Task task1 = new Task(0, "Test", "Description", 10, startTime);
         historyManager.add(task1);
 
         Task task2 = new Task(1, "Test", "Description",
-                Duration.ofMinutes(10), startTime.plus(Duration.ofMinutes(15)));
+                          10, startTime.plusSeconds(10 * 60L));
         historyManager.add(task2);
 
         historyManager.remove(1);
@@ -128,15 +127,15 @@ class HistoryManagerTest {
         //Удаляем задачу из середины очереди
         Instant startTime = Instant.now();
 
-        Task task1 = new Task(0, "Test", "Description", Duration.ofMinutes(10), startTime);
+        Task task1 = new Task(0, "Test", "Description", 10, startTime);
         historyManager.add(task1);
 
         Task task2 = new Task(1, "Test", "Description",
-                Duration.ofMinutes(10), startTime.plus(Duration.ofMinutes(15)));
+                           10, startTime.plusSeconds(20 * 60L));
         historyManager.add(task2);
 
         Task task3 = new Task(2, "Test", "Description",
-                Duration.ofMinutes(10), startTime.plus(Duration.ofMinutes(30)));
+                         10, startTime.plusSeconds(30 * 60L));
         historyManager.add(task3);
 
         historyManager.remove(1);

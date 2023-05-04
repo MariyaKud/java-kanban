@@ -1,6 +1,5 @@
 package model;
 
-import java.time.Duration;
 import java.time.Instant;
 
 /**
@@ -19,11 +18,11 @@ public abstract class Issue {
     private int id;                   // Идентификатор
     private String title;             // Название
     private String description;       // Описание
-    private Duration duration;        //Продолжительность в минутах
+    private int duration;             //Продолжительность в минутах
     private Instant startTime;        //Время запуска
     private IssueStatus status;       // Статус
 
-    public Issue(int id, String title, String description, Duration duration) {
+    public Issue(int id, String title, String description, int duration) {
         this.id          = id;
         this.title       = title;
         this.description = description;
@@ -32,7 +31,7 @@ public abstract class Issue {
         this.status      = IssueStatus.NEW;
     }
 
-    public Issue(int id, String title, String description, Duration duration, Instant startTime) {
+    public Issue(int id, String title, String description, int duration, Instant startTime) {
         this(id, title, description, duration);
         this.setStartTime(startTime);
     }
@@ -57,7 +56,7 @@ public abstract class Issue {
         return description;
     }
 
-    public Duration getDuration() {
+    public int getDuration() {
         return duration;
     }
 
@@ -66,7 +65,7 @@ public abstract class Issue {
     }
 
     public Instant getEndTime() {
-        return startTime.plusSeconds(duration.toSeconds());
+        return startTime.plusSeconds(duration * 60L);
     }
 
     public void setId(int id) {
@@ -77,7 +76,7 @@ public abstract class Issue {
         this.status = status;
     }
 
-    public void setDuration(Duration duration) {
+    public void setDuration(int duration) {
         this.duration = duration;
     }
 
@@ -103,7 +102,7 @@ public abstract class Issue {
         Issue task = (Issue) o;
         return getId() == task.getId() &&
                 getStatus() == task.getStatus() &&
-                getDuration().equals(task.getDuration()) &&
+                getDuration() == task.getDuration() &&
                 getStartTime().equals(task.getStartTime()) &&
                 getTitle().equals(task.getTitle()) &&
                 getDescription().equals(task.getDescription());

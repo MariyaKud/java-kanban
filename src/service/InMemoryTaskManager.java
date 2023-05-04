@@ -53,9 +53,6 @@ public class InMemoryTaskManager implements TaskManager {
     //Задачи и подзадачи отсортированные по startTime
     protected final TreeSet<Issue> issuesByPriority = new TreeSet<>(Comparator.comparing(Issue::getStartTime));
 
-    //Временная сетка, разбитая на интервалы с признаком занято/свободно
-    protected final Map<Instant, Boolean> grid = new HashMap<>();
-
     //Момент запуска программы, планируем в будущее
     private static final LocalDateTime START_MOMENT = LocalDateTime.now();
 
@@ -70,6 +67,9 @@ public class InMemoryTaskManager implements TaskManager {
             LocalTime.of(START_MOMENT.getHour(), 0));
     //Первый интервал в сетке
     private static final Instant START_GRID = START_GRID_LOCAL.toInstant(ZoneOffset.UTC);
+
+    //Временная сетка, разбитая на интервалы с признаком занято/свободно
+    protected final Map<Instant, Boolean> grid =  initGrid();
 
     public InMemoryTaskManager(HistoryManager historyManager) {
         this.historyManager = historyManager;
@@ -240,7 +240,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (oldTask != null) {
             //Проверка валидации нужна только если есть изменения в периоде
             if (!oldTask.getStartTime().equals(task.getStartTime()) ||
-                    !oldTask.getDuration().equals(task.getDuration())) {
+                    oldTask.getDuration() != task.getDuration()) {
                 freeItemsInGrid(oldTask);
                 try {
                     itemsValid = validatePeriodIssue(task);
@@ -278,7 +278,7 @@ public class InMemoryTaskManager implements TaskManager {
             if (newParent != null) {
                 //Проверка валидации нужна только если есть изменения в периоде
                 if (!oldSubTask.getStartTime().equals(subTask.getStartTime()) ||
-                        !oldSubTask.getDuration().equals(subTask.getDuration())) {
+                        oldSubTask.getDuration() != subTask.getDuration()) {
                     freeItemsInGrid(oldSubTask);
                     try {
                         itemsValid = validatePeriodIssue(subTask);
@@ -315,7 +315,7 @@ public class InMemoryTaskManager implements TaskManager {
                 //Обновляем статус родителя
                 updateStatusEpic(newParent);
 
-            }  else {
+            } else {
                 System.out.println(MSG_ERROR_ID_NOT_FOUND);
             }
         } else {
@@ -632,17 +632,17 @@ public class InMemoryTaskManager implements TaskManager {
      * @param epic - эпик, для которого выполняется расчет временных характеристик
      */
     private void updateDurationAndDateEpic(Epic epic) {
-        Duration durationEpic = Duration.ZERO;
+        int durationEpic = 0;
         final Instant[] dateTime = {Instant.MAX, Instant.MIN};
 
         if (!epic.getChildren().isEmpty()) {
             for (SubTask child : epic.getChildren()) {
-                durationEpic = durationEpic.plus(child.getDuration());
+                durationEpic = durationEpic + child.getDuration();
                 if (dateTime[0].isAfter(child.getStartTime())) {
                     dateTime[0] = child.getStartTime();
                 }
-                if (dateTime[1].isBefore(child.getStartTime())) {
-                    dateTime[1] = child.getStartTime();
+                if (dateTime[1].isBefore(child.getEndTime())) {
+                    dateTime[1] = child.getEndTime();
                 }
             }
             epic.setDuration(durationEpic);
@@ -672,6 +672,42 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
+     * Проверяет валидность временных характеристик задачи.
+     * Весь интервал задачи разбивается на отрезки, для каждого отрезка проверяется занят он на временной сетке или нет.
+     * Если занят хотя бы один отрезок, то валидация не пройдена и будет возвращен пустой список
+     *
+     * @param issue задача любого типа
+     * @return интервал задачи разбитый на интервалы длинной минимального отрезка сетки
+     */
+    private List<Instant> validatePeriodIssue(Issue issue) throws ValidateException {
+        List<Instant> itemsValid = new ArrayList<>();
+
+        if (issue == null) {
+            throw new ValidateException("На проверку валидации передан null");
+        }
+
+        //Устанавливаем дату старта для задачи/подзадачи, если она пустая
+        setStartTimeIfEmpty(issue);
+
+        //Проверяем, что в сетке есть место на заданный интервал
+        if (issue.getType() != IssueType.EPIC) {
+            Instant startIssue = findNearestBorderOfGrid(issue.getStartTime(), false);
+            Instant endIssue = findNearestBorderOfGrid(issue.getStartTime().
+                    plusSeconds(issue.getDuration() * 60L), true);
+            while (startIssue.isBefore(endIssue)) {
+                if (grid.containsKey(startIssue) && !grid.get(startIssue)) {
+                    itemsValid.add(startIssue);
+                    startIssue = startIssue.plus(Duration.ofMinutes(ITEM_GRID));
+                } else {
+                    //Если хотя юы один отрезок занят, то весь интервал считаем не валидным
+                    throw new ValidateException("Не пройдена валидация по задаче: " + issue);
+                }
+            }
+        }
+        return itemsValid;
+    }
+
+    /**
      * Если дата старта не задана, определяет задачу в конец списка задач, подзадач, отсортированных по startTime
      *
      * @param issue - задача/подзадача для которой необходимо установить startTime
@@ -681,11 +717,11 @@ public class InMemoryTaskManager implements TaskManager {
             if (issue.getStartTime().equals(Instant.MIN)) {
                 if (issuesByPriority.isEmpty()) {
                     issue.setStartTime(findNearestBorderOfGrid(START_GRID.plus(Duration.ofMinutes(ITEM_GRID)),
-                                                        true));
+                            true));
                 } else {
                     Issue lastIssue = issuesByPriority.last();
-                    issue.setStartTime(findNearestBorderOfGrid(lastIssue.getStartTime().plus(lastIssue.getDuration()),
-                            true));
+                    issue.setStartTime(findNearestBorderOfGrid(lastIssue.getStartTime().
+                            plusSeconds(lastIssue.getDuration() * 60L), true));
                 }
             }
         }
@@ -693,7 +729,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Находит ближайшую границу сетки в прошлое или в будущее к переданному моменту времени
-     * @param instant момент времени
+     *
+     * @param instant  момент времени
      * @param inFuture в будущее
      * @return момент времени кратный интервалу сетки доступа на временной оси
      */
@@ -728,6 +765,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Занять на временной сетке переданный список отрезков
+     *
      * @param instants список отрезков на временной оси
      */
     private void occupyItemsInGrid(List<Instant> instants) {
@@ -738,11 +776,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Освободить на сетке занятые задачей отрезки времени
+     *
      * @param issue задача или подзадача
      */
     private void freeItemsInGrid(Issue issue) {
         Instant startIssue = findNearestBorderOfGrid(issue.getStartTime(), false);
-        Instant endIssue = findNearestBorderOfGrid(issue.getStartTime().plus(issue.getDuration()), true);
+        Instant endIssue = findNearestBorderOfGrid(issue.getStartTime().
+                plusSeconds(issue.getDuration() * 60L), true);
         while (startIssue.isBefore(endIssue)) {
             grid.put(startIssue, false);
             startIssue = startIssue.plus(Duration.ofMinutes(ITEM_GRID));
@@ -755,52 +795,15 @@ public class InMemoryTaskManager implements TaskManager {
      * Первый интервал в сетке - начало часа запуска программы.
      * Сетка заполняется на год вперед.
      */
-    private void initGrid() {
+    private  Map<Instant, Boolean> initGrid() {
+        Map<Instant, Boolean> itemsGrid = new HashMap<>();
         Instant endGrid = START_GRID.plus(SIZE_GRID);
         Instant itemGrid = START_GRID;
 
         while (itemGrid.isBefore(endGrid)) {
-            grid.put(itemGrid, false);
+            itemsGrid.put(itemGrid, false);
             itemGrid = itemGrid.plus(Duration.ofMinutes(ITEM_GRID));
         }
-    }
-
-    /**
-     * Проверяет валидность временных характеристик задачи.
-     * Весь интервал задачи разбивается на отрезки, для каждого отрезка проверяется занят он на временной сетке или нет.
-     * Если занят хотя бы один отрезок, то валидация не пройдена и будет возвращен пустой список
-     * @param issue задача любого типа
-     * @return интервал задачи разбитый на интервалы длинной минимального отрезка сетки
-     */
-        private List<Instant> validatePeriodIssue (Issue issue) throws ValidateException {
-        List<Instant> itemsValid = new ArrayList<>();
-
-        if (issue == null) {
-            throw new ValidateException("На проверку валидации передан null");
-        }
-
-        //Инициализируем сетку при первой проверке валидности отрезка
-        if (grid.isEmpty()) {
-            initGrid();
-        }
-
-        //Устанавливаем дату старта для задачи/подзадачи, если она пустая
-        setStartTimeIfEmpty(issue);
-
-        //Проверяем, что в сетке есть место на заданный интервал
-        if (issue.getType() != IssueType.EPIC) {
-            Instant startIssue = findNearestBorderOfGrid(issue.getStartTime(), false);
-            Instant endIssue = findNearestBorderOfGrid(issue.getStartTime().plus(issue.getDuration()), true);
-            while (startIssue.isBefore(endIssue)) {
-                if (grid.containsKey(startIssue) && !grid.get(startIssue)) {
-                    itemsValid.add(startIssue);
-                    startIssue = startIssue.plus(Duration.ofMinutes(ITEM_GRID));
-                } else {
-                    //Если хотя юы один отрезок занят, то весь интервал считаем не валидным
-                    throw new ValidateException("Не пройдена валидация по задаче: " + issue);
-                }
-            }
-        }
-        return itemsValid;
+        return itemsGrid;
     }
 }

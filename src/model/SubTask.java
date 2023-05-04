@@ -2,9 +2,7 @@ package model;
 
 import service.Managers;
 
-import java.time.Duration;
 import java.time.Instant;
-
 
 /**
  * Подзадача - класс для разбиения масштабных задач
@@ -17,26 +15,26 @@ public class SubTask extends Issue {
      */
     private final int parentID;
 
-    public SubTask(int id, String title, String description, Duration duration, Instant startTime,
+    public SubTask(int id, String title, String description, int duration, Instant startTime,
                    int parentID, IssueStatus status) {
         super(id, title, description, duration, startTime);
         this.parentID = parentID;
         this.setStatus(status);
     }
 
-    public SubTask(int id, String title, String description, int parentID, Duration duration, Instant startTime) {
+    public SubTask(int id, String title, String description, int parentID, int duration, Instant startTime) {
         this(id, title, description, duration, startTime, parentID, IssueStatus.NEW);
     }
 
-    public SubTask(int id, String title, String description, Duration duration, int parentID) {
+    public SubTask(int id, String title, String description, int duration, int parentID) {
         this(id, title, description, duration, Instant.MIN, parentID, IssueStatus.NEW);
     }
 
-    public SubTask(String title, String description, Duration duration, int parentID) {
+    public SubTask(String title, String description, int duration, int parentID) {
         this(0, title, description, duration, Instant.MIN, parentID, IssueStatus.NEW);
     }
 
-    public SubTask(String title, String description, Duration duration, int parentID, IssueStatus status) {
+    public SubTask(String title, String description, int duration, int parentID, IssueStatus status) {
         this(0, title, description, parentID, duration, Instant.MIN);
         this.setStatus(status);
     }
@@ -44,7 +42,6 @@ public class SubTask extends Issue {
     public SubTask (SubTask other) {
         this(other.getId(), other.getTitle(), other.getDescription(), other.getParentID() , other.getDuration(),
                 other.getStartTime());
-
     }
 
     public int getParentID() {
@@ -66,7 +63,7 @@ public class SubTask extends Issue {
                 ", description='"   + getDescription() + '\'' +
                 ", startTime='" + Managers.getFormatter().format(getStartTime()) + '\'' +
                 ", endTime='" + Managers.getFormatter().format(getEndTime()) + '\'' +
-                ", duration='" + getDuration().toMinutes() + "мин." + '\'' +
+                ", duration='" + getDuration() + "мин." + '\'' +
                 '}';
     }
 
