@@ -1,4 +1,4 @@
-package dao;
+package exception;
 
 /**
  * Исключение вида IOException

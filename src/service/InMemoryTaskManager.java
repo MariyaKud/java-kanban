@@ -1,5 +1,6 @@
 package service;
 
+import exception.ValidateException;
 import model.Epic;
 import model.Issue;
 import model.IssueStatus;
@@ -121,13 +122,16 @@ public class InMemoryTaskManager implements TaskManager {
      * Валидация - задача не должна пересекать по времени, с другими задачами.
      */
     protected Task addTaskWithID(Task task) {
-        List<Instant> itemsValid = validatePeriodIssue(task);
-        if (!itemsValid.isEmpty()) {
+        try {
+            List<Instant> itemsValid = validatePeriodIssue(task);
+
             tasks.put(task.getId(), task);
+            issuesByPriority.add(task);
             synchronizeIDIssueANDManager(task);
             occupyItemsInGrid(itemsValid);
-            issuesByPriority.add(task);
-        } else {
+
+        } catch (ValidateException e) {
+            System.out.println(e.getMessage());
             return null;
         }
         return task;
@@ -158,31 +162,30 @@ public class InMemoryTaskManager implements TaskManager {
      * @return Новая задача типа {@link SubTask}. Если подзадача не прошла валидацию, то null
      */
     protected SubTask addSubTaskWithID(SubTask subTask) {
-        List<Instant> itemsValid = validatePeriodIssue(subTask);
+        try {
+            List<Instant> itemsValid = validatePeriodIssue(subTask);
+            Epic parent = epics.get(subTask.getParentID());
+            if (parent != null) {
+                List<SubTask> children = parent.getChildren();
 
-        Epic parent = epics.get(subTask.getParentID());
-        if (parent != null && !itemsValid.isEmpty()) {
-            List<SubTask> children = parent.getChildren();
+                //Помещаем подзадачу с корректным родителем в хранилище менеджера
+                subTasks.put(subTask.getId(), subTask);
+                synchronizeIDIssueANDManager(subTask);
 
-            //Помещаем подзадачу с корректным родителем в хранилище менеджера
-            subTasks.put(subTask.getId(), subTask);
-            synchronizeIDIssueANDManager(subTask);
-
-            //Добавляем родителю ребенка, если нужно
-            if (!children.contains(subTask)) {
-                children.add(subTask);
+                //Добавляем родителю ребенка, если нужно
+                if (!children.contains(subTask)) {
+                    children.add(subTask);
+                }
+                //Обновляем статус родителя
+                updateStatusEpic(parent);
+                //Занимаем отрезки на сетке
+                occupyItemsInGrid(itemsValid);
+                issuesByPriority.add(subTask);
             }
-            //Обновляем статус родителя
-            updateStatusEpic(parent);
-            //Занимаем отрезки на сетке
-            occupyItemsInGrid(itemsValid);
-            issuesByPriority.add(subTask);
-        } else {
-            subTask = null;
-            System.out.println(MSG_ERROR_NOT_NEW);
+        } catch (ValidateException e) {
+            System.out.println(e.getMessage());
+            return null;
         }
-
-
         return subTask;
     }
 
@@ -210,7 +213,6 @@ public class InMemoryTaskManager implements TaskManager {
      * @return Новый эпик типа {@link Epic}. Вернет Null, если на вход передать Null
      */
     protected Epic addEpicWithID(Epic epic) {
-
         List<SubTask> children = epic.getChildren();
         if (children.size() == 0) {
             epics.put(epic.getId(), epic);
@@ -232,25 +234,31 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public Task updateTask(Task task) {
-        Task oldTask = tasks.get(task.getId());
+        List<Instant> itemsValid = null;
+        final Task oldTask = tasks.get(task.getId());
         //Можно обновить только существующий объект
         if (oldTask != null) {
-            freeItemsInGrid(oldTask);
-            List<Instant> itemsValid = validatePeriodIssue(task);
-            if (!itemsValid.isEmpty()) {
-                // обновляем задачу в менеджере
-                tasks.put(oldTask.getId(), task);
-                issuesByPriority.add(task);
-                occupyItemsInGrid(itemsValid);
-            } else {
-                //Возвращаем бронь для старой задачи, т.к. новая не валидна
-                itemsValid = validatePeriodIssue(oldTask);
+            //Проверка валидации нужна только если есть изменения в периоде
+            if (!oldTask.getStartTime().equals(task.getStartTime()) ||
+                    !oldTask.getDuration().equals(task.getDuration())) {
+                freeItemsInGrid(oldTask);
+                try {
+                    itemsValid = validatePeriodIssue(task);
+                } catch (ValidateException e) {
+                    itemsValid = validatePeriodIssue(oldTask);
+                    occupyItemsInGrid(itemsValid);
+                    System.out.println(e.getMessage());
+                    return null;
+                }
+            }
+            tasks.put(oldTask.getId(), task);
+            issuesByPriority.add(task);
+            if (itemsValid != null) {
                 occupyItemsInGrid(itemsValid);
             }
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
         }
-
         return getTaskById(task.getId());
     }
 
@@ -262,19 +270,32 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public SubTask updateSubTask(SubTask subTask) {
-        SubTask oldSubTask = subTasks.get(subTask.getId());
+        List<Instant> itemsValid = null;
+        final SubTask oldSubTask = subTasks.get(subTask.getId());
         if (oldSubTask != null) {
-            freeItemsInGrid(oldSubTask);
-            List<Instant> itemsValid = validatePeriodIssue(subTask);
-
             Epic newParent = epics.get(subTask.getParentID());
             Epic oldParent = epics.get(oldSubTask.getParentID());
-            if (newParent != null && !itemsValid.isEmpty()) {
+            if (newParent != null) {
+                //Проверка валидации нужна только если есть изменения в периоде
+                if (!oldSubTask.getStartTime().equals(subTask.getStartTime()) ||
+                        !oldSubTask.getDuration().equals(subTask.getDuration())) {
+                    freeItemsInGrid(oldSubTask);
+                    try {
+                        itemsValid = validatePeriodIssue(subTask);
+                    } catch (ValidateException e) {
+                        itemsValid = validatePeriodIssue(oldSubTask);
+                        occupyItemsInGrid(itemsValid);
+                        System.out.println(e.getMessage());
+                        return null;
+                    }
+                }
                 // обновляем подзадачу
-
                 subTasks.put(subTask.getId(), subTask);
-                occupyItemsInGrid(itemsValid);
                 issuesByPriority.add(subTask);
+
+                if (itemsValid != null) {
+                    occupyItemsInGrid(itemsValid);
+                }
 
                 if (subTask.getParentID() != oldSubTask.getParentID()) {
                     //Удалить старую подзадачу у старого эпика родителя
@@ -293,15 +314,13 @@ public class InMemoryTaskManager implements TaskManager {
 
                 //Обновляем статус родителя
                 updateStatusEpic(newParent);
-            } else {
-                itemsValid = validatePeriodIssue(oldSubTask);
-                occupyItemsInGrid(itemsValid);
+
+            }  else {
                 System.out.println(MSG_ERROR_ID_NOT_FOUND);
             }
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
         }
-
         return getSubTaskById(subTask.getId());
     }
 
@@ -343,6 +362,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (tasks.containsKey(id)) {
             freeItemsInGrid(tasks.get(id));
             historyManager.remove(id);
+            issuesByPriority.remove(tasks.get(id));
             return tasks.remove(id);
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
@@ -371,6 +391,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
             //Удаляем подзадачу из истории просмотров
             historyManager.remove(id);
+            issuesByPriority.remove(delSubTask);
             return delSubTask;
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
@@ -387,15 +408,19 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Epic deleteEpicById(int id) {
         if (epics.containsKey(id)) {
+            Epic delEpic = epics.remove(id);
             //Удалить подзадачи эпика в хранилище менеджера
-            for (SubTask child : epics.get(id).getChildren()) {
-                subTasks.remove(child.getId());
+            for (SubTask child : delEpic.getChildren()) {
+                SubTask delSubTask = subTasks.remove(child.getId());
                 historyManager.remove(child.getId());
+                issuesByPriority.remove(delSubTask);
+                freeItemsInGrid(delSubTask);
             }
             //Удалить эпик из истории просмотров
             historyManager.remove(id);
+            issuesByPriority.remove(delEpic);
             //Удалить эпик из хранилища менеджера
-            return epics.remove(id);
+            return delEpic;
         } else {
             System.out.println(MSG_ERROR_ID_NOT_FOUND);
             return null;
@@ -411,6 +436,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteAllTasks() {
         for (Integer id : tasks.keySet()) {
             historyManager.remove(id);
+            issuesByPriority.remove(tasks.get(id));
             freeItemsInGrid(tasks.get(id));
         }
         tasks.clear();
@@ -423,6 +449,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteAllSubTasks() {
         for (Integer id : subTasks.keySet()) {
             historyManager.remove(id);
+            issuesByPriority.remove(subTasks.get(id));
             freeItemsInGrid(subTasks.get(id));
         }
         subTasks.clear();
@@ -440,6 +467,8 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteAllEpics() {
         for (Integer id : subTasks.keySet()) {
             historyManager.remove(id);
+            issuesByPriority.remove(subTasks.get(id));
+            freeItemsInGrid(subTasks.get(id));
         }
         subTasks.clear();
 
@@ -743,12 +772,11 @@ public class InMemoryTaskManager implements TaskManager {
      * @param issue задача любого типа
      * @return интервал задачи разбитый на интервалы длинной минимального отрезка сетки
      */
-    private List<Instant> validatePeriodIssue(Issue issue) {
-
+        private List<Instant> validatePeriodIssue (Issue issue) throws ValidateException {
         List<Instant> itemsValid = new ArrayList<>();
 
         if (issue == null) {
-            return itemsValid;
+            throw new ValidateException("На проверку валидации передан null");
         }
 
         //Инициализируем сетку при первой проверке валидности отрезка
@@ -769,12 +797,10 @@ public class InMemoryTaskManager implements TaskManager {
                     startIssue = startIssue.plus(Duration.ofMinutes(ITEM_GRID));
                 } else {
                     //Если хотя юы один отрезок занят, то весь интервал считаем не валидным
-                    itemsValid.clear();
-                    break;
+                    throw new ValidateException("Не пройдена валидация по задаче: " + issue);
                 }
             }
         }
-
         return itemsValid;
     }
 }
