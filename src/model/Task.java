@@ -31,6 +31,10 @@ public class Task extends Issue {
         super(0, title, description, duration);
     }
 
+    public Task(Task other) {
+        super(other.getId(), other.getTitle(), other.getDescription(), other.getDuration(),other.getStartTime());
+    }
+
     @Override
     public String toString() {
         return "Task{" +

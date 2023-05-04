@@ -31,6 +31,10 @@ public class Epic extends Issue {
         this(0, title, description);
     }
 
+    public Epic(Epic other) {
+        this(other.getId(), other.getTitle(), other.getDescription());
+    }
+
     public void setEndTime(Instant endTime) {
         this.endTime = endTime;
     }

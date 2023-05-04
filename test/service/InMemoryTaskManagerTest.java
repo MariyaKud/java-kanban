@@ -315,16 +315,68 @@ class InMemoryTaskManagerTest {
         assertEquals(IssueStatus.IN_PROGRESS, savedParent.getStatus(), "Статус эпика.");
     }
 
+    @DisplayName("Пересечение интервалов задач при добавлении.")
+    @Test
+    void addTaskWithCrossTest() {
+        Task task1 = Managers.addTask(taskManager);
+        Task task2 = new Task(0,"Test", "Description",task1.getDuration(),
+                task1.getStartTime(),IssueStatus.DONE);
+
+        Task crossTask = taskManager.addTask(task2);
+
+        assertNull(crossTask, "Ошибка валидации");
+        assertEquals(1, taskManager.getAllTasks().size(), "Ошибка валидации. В списке задач ошибка.");
+    }
+
+    @DisplayName("Изменить интервал задачи на доступный.")
+    @Test
+    void addTaskWithoutCrossTest() {
+        final Task task1 = Managers.addTask(taskManager);
+        final Task task2 = Managers.addTask(taskManager);
+
+        final Task taskToUpdate = new Task(task1);
+        taskToUpdate.setStartTime(task2.getEndTime().plusSeconds(960));
+        final Task updateTask = taskManager.updateTask(taskToUpdate);
+
+        assertNotNull(updateTask, "Ошибка валидации");
+        assertEquals(2, taskManager.getAllTasks().size(), "Ошибка валидации. В списке задач ошибка.");
+        assertEquals(taskToUpdate.getStartTime(),updateTask.getStartTime(),"Стартовое время " +
+                                                                                  "обновлено не корректно");
+    }
+
+    @DisplayName("Пересечение интервалов задач при обновлении")
+    @Test
+    void updateTaskWithCrossTest() {
+        final Task task1 = Managers.addTask(taskManager);
+        final Task task2 = Managers.addTask(taskManager);
+
+        final Task updateTask = new Task(task2);
+        updateTask.setStartTime(task1.getStartTime());
+        updateTask.setDuration(task1.getDuration());
+
+        final Task crossTask = taskManager.updateTask(updateTask);
+
+        final List<Task> tasks = taskManager.getAllTasks();
+
+        assertNull(crossTask, "Ошибка валидации");
+        assertEquals(2, tasks.size(), "Ошибка валидации. В списке задач ошибка.");
+        assertEquals(task2, taskManager.getTaskById(task2.getId()), "Задача обновлена.");
+        assertNotEquals(updateTask, taskManager.getTaskById(task2.getId()), "Задача обновлена.");
+    }
+
     @DisplayName("Обновить статус задачи с NEW в DONE.")
     @Test
     void updateStatusTaskTest() {
         final Task task = Managers.addTask(taskManager);
-        task.setStatus(IssueStatus.DONE);
-        taskManager.updateTask(task);
+        final Task updateForTask = new Task(task);
+
+        updateForTask.setStatus(IssueStatus.DONE);
+        taskManager.updateTask(updateForTask);
+
         final Task updateTask = taskManager.getTaskById(task.getId());
 
         assertNotNull(updateTask, "Задачи не возвращаются.");
-        assertEquals(task, updateTask, "Задачи не совпадают.");
+        assertEquals(updateForTask, updateTask, "Задачи не совпадают.");
         assertEquals(IssueStatus.DONE, updateTask.getStatus(), "Статус задачи не обновлен.");
     }
 
@@ -333,12 +385,50 @@ class InMemoryTaskManagerTest {
     void updateStatusSubTaskTest() {
         final Epic parent = Managers.addEpic(taskManager);
         final SubTask subTask = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
-        subTask.setStatus(IssueStatus.DONE);
+
+        final SubTask subTaskToUpdate = new SubTask(subTask);
+        subTaskToUpdate.setStatus(IssueStatus.DONE);
+        taskManager.updateSubTask(subTaskToUpdate);
+
         final SubTask updateSubTask = taskManager.getSubTaskById(subTask.getId());
 
         assertNotNull(updateSubTask, "Обновленная подзадача не найдена.");
-        assertEquals(subTask, updateSubTask, "Подзадачи не совпадают.");
+        assertEquals(subTaskToUpdate, updateSubTask, "Подзадачи не совпадают.");
         assertEquals(IssueStatus.DONE, updateSubTask.getStatus(), "Статус подзадачи не обновлен.");
+    }
+
+    @DisplayName("Обновить дату старта подзадачи на свободную.")
+    @Test
+    void updateStartTimeSubTaskTest() {
+        final Epic parent = Managers.addEpic(taskManager);
+        final SubTask subTask1 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
+        final SubTask subTask2 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
+
+        final SubTask subTaskToUpdate = new SubTask(subTask1);
+        subTaskToUpdate.setStartTime(subTask2.getEndTime().plusSeconds(960));
+        taskManager.updateSubTask(subTaskToUpdate);
+        final SubTask updateSubTask = taskManager.getSubTaskById(subTask1.getId());
+
+        assertNotNull(updateSubTask, "Обновленная подзадача не найдена.");
+        assertEquals(subTaskToUpdate.getStartTime(), updateSubTask.getStartTime(), "Ошибка обновления.");
+    }
+
+    @DisplayName("Пересечение интервалов задач при обновлении.")
+    @Test
+    void updateStartTimeWithCrossSubTaskTest() {
+        final Epic parent = Managers.addEpic(taskManager);
+        final SubTask subTask1 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
+        final SubTask subTask2 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
+
+        final SubTask subTaskToUpdate = new SubTask(subTask1);
+        subTaskToUpdate.setStartTime(subTask2.getStartTime());
+        final SubTask updateSubTask = taskManager.updateSubTask(subTaskToUpdate);
+
+        taskManager.getSubTaskById(subTask1.getId());
+        assertNull(updateSubTask, "Ошибка обновления подзадачи.");
+
+        assertEquals(subTask1.getStartTime(), taskManager.getSubTaskById(subTask1.getId()).getStartTime(),
+                "Ошибка обновления подзадачи.");
     }
 
     @DisplayName("Обновить статус эпика без подзадач в DONE.")
@@ -346,9 +436,10 @@ class InMemoryTaskManagerTest {
     void updateStatusEpicTest() {
         //Статус эпика расчетная величина, его нельзя установить
         final Epic epic = Managers.addEpic(taskManager);
+        final Epic epicToUpdate = new Epic(epic);
 
-        epic.setStatus(IssueStatus.DONE);
-        taskManager.updateEpic(epic);
+        epicToUpdate.setStatus(IssueStatus.DONE);
+        taskManager.updateEpic(epicToUpdate);
 
         final Epic updateEpic = taskManager.getEpicById(epic.getId());
 
@@ -364,33 +455,41 @@ class InMemoryTaskManagerTest {
         final SubTask subTask1 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
         final SubTask subTask2 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
 
-        subTask1.setStatus(IssueStatus.IN_PROGRESS);
-        taskManager.updateSubTask(subTask1);
+        SubTask subTask1ToUpdate = new SubTask(subTask1);
+        subTask1ToUpdate.setStatus(IssueStatus.IN_PROGRESS);
+        taskManager.updateSubTask(subTask1ToUpdate);
 
-        final SubTask savedSubTask1 = taskManager.getSubTaskById(subTask1.getId());
-        final SubTask savedSubTask2 = taskManager.getSubTaskById(subTask2.getId());
-        final Epic savedParent = taskManager.getEpicById(parent.getId());
+        SubTask savedSubTask1 = taskManager.getSubTaskById(subTask1.getId());
+        SubTask savedSubTask2 = taskManager.getSubTaskById(subTask2.getId());
+        Epic savedParent = taskManager.getEpicById(parent.getId());
 
         assertEquals(IssueStatus.IN_PROGRESS, savedSubTask1.getStatus(), "Статус подзадачи.");
         assertEquals(IssueStatus.NEW, savedSubTask2.getStatus(), "Статус подзадачи.");
         assertEquals(IssueStatus.IN_PROGRESS, savedParent.getStatus(), "Статус эпика.");
 
-        subTask1.setStatus(IssueStatus.DONE);
-        taskManager.updateSubTask(subTask1);
+        subTask1ToUpdate.setStatus(IssueStatus.DONE);
+        taskManager.updateSubTask(subTask1ToUpdate);
+        savedSubTask1 = taskManager.getSubTaskById(subTask1.getId());
+        savedParent = taskManager.getEpicById(parent.getId());
 
         assertEquals(IssueStatus.DONE, savedSubTask1.getStatus(), "Статус подзадачи.");
         assertEquals(IssueStatus.NEW, savedSubTask2.getStatus(), "Статус подзадачи.");
         assertEquals(IssueStatus.IN_PROGRESS, savedParent.getStatus(), "Статус эпика.");
 
-        subTask2.setStatus(IssueStatus.IN_PROGRESS);
-        taskManager.updateSubTask(subTask2);
+        SubTask subTask2ToUpdate = new SubTask(subTask2);
+        subTask2ToUpdate.setStatus(IssueStatus.IN_PROGRESS);
+        taskManager.updateSubTask(subTask2ToUpdate);
+        savedSubTask2 = taskManager.getSubTaskById(subTask2.getId());
+        savedParent = taskManager.getEpicById(parent.getId());
 
         assertEquals(IssueStatus.DONE, savedSubTask1.getStatus(), "Статус подзадачи.");
         assertEquals(IssueStatus.IN_PROGRESS, savedSubTask2.getStatus(), "Статус подзадачи.");
         assertEquals(IssueStatus.IN_PROGRESS, savedParent.getStatus(), "Статус эпика.");
 
-        subTask2.setStatus(IssueStatus.DONE);
-        taskManager.updateSubTask(subTask2);
+        subTask2ToUpdate.setStatus(IssueStatus.DONE);
+        taskManager.updateSubTask(subTask2ToUpdate);
+        savedSubTask2 = taskManager.getSubTaskById(subTask2.getId());
+        savedParent = taskManager.getEpicById(parent.getId());
 
         assertEquals(IssueStatus.DONE, savedSubTask1.getStatus(), "Статус подзадачи.");
         assertEquals(IssueStatus.DONE, savedSubTask2.getStatus(), "Статус подзадачи.");
@@ -581,6 +680,18 @@ class InMemoryTaskManagerTest {
 
         assertNotNull(subTasks, "Возвращает null.");
         assertEquals(0, subTasks.size(), "Список подзадач не пуст.");
+    }
+
+    @DisplayName("Удалить все эпики при наличии эпика с детьми.")
+    @Test
+    void deleteAllEpicWithChildren() {
+        Epic epic = Managers.addEpic(taskManager);
+        Managers.addSubTask(taskManager, epic.getId(), IssueStatus.NEW);
+
+        taskManager.deleteAllEpics();
+
+        assertEquals(0, taskManager.getAllEpics().size(), "Список эпиков не пуст.");
+        assertEquals(0, taskManager.getAllSubTasks().size(), "Список подзадач не пуст.");
     }
 
     @DisplayName("Не корректный id. Найти задачу по не существующему id.")

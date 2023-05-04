@@ -41,6 +41,12 @@ public class SubTask extends Issue {
         this.setStatus(status);
     }
 
+    public SubTask (SubTask other) {
+        this(other.getId(), other.getTitle(), other.getDescription(), other.getParentID() , other.getDuration(),
+                other.getStartTime());
+
+    }
+
     public int getParentID() {
         return parentID;
     }
