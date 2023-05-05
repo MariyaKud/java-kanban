@@ -24,7 +24,7 @@ class HistoryManagerTest {
 
     @DisplayName("Поверяем метод getHistory() для пустого списка.")
     @Test
-    void getHistoryNewTest() {
+    void shouldGiveEmptyHistoryForNewManager() {
         //Для нового экземпляра класса HistoryManager - история это пустой список
         //Проверяем, что getHistory() вернет не null и размер списка = 0
         final List<Issue> history = historyManager.getHistory();
@@ -35,7 +35,7 @@ class HistoryManagerTest {
 
     @DisplayName("Поверяем метод getHistory() для НЕ пустого списка.")
     @Test
-    void addOneTaskTest() {
+    void shouldGiveOneTaskInHistory() {
         //Проверяем наличие задачи в истории, после применения метода add()
         Task task = new Task("Test addTask", "Description", 10);
 
@@ -44,12 +44,12 @@ class HistoryManagerTest {
         final List<Issue> history = historyManager.getHistory();
 
         assertNotNull(history, "История null.");
-        assertEquals(1, history.size(), "Длина очереди не соответствует ожидаемой.");
+        assertEquals(1, history.size(), "Длина списка не соответствует ожидаемой.");
     }
 
     @DisplayName("Проверка дублирования, добавляем в истории одну и ту же задачу.")
     @Test
-    void addOneTaskTwiceCheckDoubleTest() {
+    void shouldGiveOneTaskIfAddTwiceSameTasks() {
         //Проверяем наличие задачи в истории, после добавления одной и той же задачи в очереди
         //Она не должна двоиться
         Task task = new Task("Test addTask", "Description", 10);
@@ -65,7 +65,7 @@ class HistoryManagerTest {
 
     @DisplayName("Удаляем единственную задачу из истории.")
     @Test
-    void removeSingleTaskTest() {
+    void shouldGiveEmptyHistoryIfRemoveSingleTask() {
         //Удаляем единственную задачу, проверяем чтобы очередь не превращалась в null и была пустой
         Task task = new Task("Test remove", "Description", 10);
 
@@ -80,7 +80,7 @@ class HistoryManagerTest {
 
     @DisplayName("Удаляем задачу из начала очереди.")
     @Test
-    void removeFromBeginOfLineTest() {
+    void shouldGiveLastTaskIfRemoveFromBeginOfHistory() {
         Instant startTime = Instant.now();
 
         Task task1 = new Task(0, "Test", "Description", 10, Instant.now());
@@ -101,7 +101,7 @@ class HistoryManagerTest {
 
     @DisplayName("Удаляем задачу из конца очереди.")
     @Test
-    void removeFromEndOfLineTest() {
+    void shouldGiveFirstTaskIfRemoveFromEndOfHistory() {
         //Удаляем задачу из конца очереди
         Instant startTime = Instant.now();
 
@@ -123,7 +123,7 @@ class HistoryManagerTest {
 
     @DisplayName("Удаляем задачу из середины очереди.")
     @Test
-    void removeFromMiddleOfLineTest() {
+    void shoudSaveFirstAndLastIfRemoveFromMiddleOfHistory() {
         //Удаляем задачу из середины очереди
         Instant startTime = Instant.now();
 

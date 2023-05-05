@@ -27,7 +27,7 @@ import java.util.List;
  * <p> Пустая строка
  * <p> Идентификаторы просмотренных задач через ","
  */
-public final class CSVMakeRepository implements IssueRepository {
+public final class CsvMakeRepository implements IssueRepository {
 
     /**
      * Загрузить задачи и историю просмотров из файла в менеджер
@@ -49,15 +49,15 @@ public final class CSVMakeRepository implements IssueRepository {
                     if (issue != null) {
                         switch(issue.getType()){
                             case TASK:
-                                ((FileBackedTasksManager) tracker).addTaskWithID((Task) issue);
+                                ((FileBackedTasksManager) tracker).addTaskWithId((Task) issue);
                                 break;
 
                             case EPIC:
-                                ((FileBackedTasksManager) tracker).addEpicWithID((Epic) issue);
+                                ((FileBackedTasksManager) tracker).addEpicWithId((Epic) issue);
                                 break;
 
                             case SUBTASK:
-                                ((FileBackedTasksManager) tracker).addSubTaskWithID((SubTask) issue);
+                                ((FileBackedTasksManager) tracker).addSubTaskWithId((SubTask) issue);
                                 break;
 
                             default:

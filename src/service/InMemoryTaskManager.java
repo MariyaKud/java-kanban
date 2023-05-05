@@ -63,13 +63,12 @@ public class InMemoryTaskManager implements TaskManager {
     private static final Duration SIZE_GRID = Duration.ofDays(365);
 
     //Заполняем сетку с начала текущего часа
-    private static final LocalDateTime START_GRID_LOCAL = LocalDateTime.of(START_MOMENT.toLocalDate(),
-            LocalTime.of(START_MOMENT.getHour(), 0));
+    private static final LocalDateTime START_GRID_LOCAL = LocalDateTime.of(START_MOMENT.toLocalDate(), LocalTime.of(START_MOMENT.getHour(), 0));
     //Первый интервал в сетке
     private static final Instant START_GRID = START_GRID_LOCAL.toInstant(ZoneOffset.UTC);
 
     //Временная сетка, разбитая на интервалы с признаком занято/свободно
-    protected final Map<Instant, Boolean> grid =  initGrid();
+    protected final Map<Instant, Boolean> grid = initGrid();
 
     public InMemoryTaskManager(HistoryManager historyManager) {
         this.historyManager = historyManager;
@@ -90,7 +89,7 @@ public class InMemoryTaskManager implements TaskManager {
      *
      * @param issue - задача, добавляемая в хранилище менеджера
      */
-    private void synchronizeIDIssueANDManager(Issue issue) {
+    private void synchronizeIdIssueAndManager(Issue issue) {
         if (issue != null && issue.getId() >= id) {
             id = issue.getId();
             getId();
@@ -108,7 +107,7 @@ public class InMemoryTaskManager implements TaskManager {
     public Task addTask(Task task) {
         if (task != null) {
             task.setId(getId());
-            return addTaskWithID(task);
+            return addTaskWithId(task);
         }
         return null;
     }
@@ -121,13 +120,13 @@ public class InMemoryTaskManager implements TaskManager {
      * @return Новая задача типа {@link Task}. Если задача не прошла валидацию, то null
      * Валидация - задача не должна пересекать по времени, с другими задачами.
      */
-    protected Task addTaskWithID(Task task) {
+    protected Task addTaskWithId(Task task) {
         try {
             List<Instant> itemsValid = validatePeriodIssue(task);
 
             tasks.put(task.getId(), task);
             issuesByPriority.add(task);
-            synchronizeIDIssueANDManager(task);
+            synchronizeIdIssueAndManager(task);
             occupyItemsInGrid(itemsValid);
 
         } catch (ValidateException e) {
@@ -149,7 +148,7 @@ public class InMemoryTaskManager implements TaskManager {
     public SubTask addSubTask(SubTask subTask) {
         if (subTask != null) {
             subTask.setId(getId());
-            return addSubTaskWithID(subTask);
+            return addSubTaskWithId(subTask);
         }
         return null;
     }
@@ -161,7 +160,7 @@ public class InMemoryTaskManager implements TaskManager {
      * @param subTask экземпляр класса {@link SubTask}
      * @return Новая задача типа {@link SubTask}. Если подзадача не прошла валидацию, то null
      */
-    protected SubTask addSubTaskWithID(SubTask subTask) {
+    protected SubTask addSubTaskWithId(SubTask subTask) {
         try {
             List<Instant> itemsValid = validatePeriodIssue(subTask);
             Epic parent = epics.get(subTask.getParentID());
@@ -170,7 +169,7 @@ public class InMemoryTaskManager implements TaskManager {
 
                 //Помещаем подзадачу с корректным родителем в хранилище менеджера
                 subTasks.put(subTask.getId(), subTask);
-                synchronizeIDIssueANDManager(subTask);
+                synchronizeIdIssueAndManager(subTask);
 
                 //Добавляем родителю ребенка, если нужно
                 if (!children.contains(subTask)) {
@@ -200,7 +199,7 @@ public class InMemoryTaskManager implements TaskManager {
     public Epic addEpic(Epic epic) {
         if (epic != null) {
             epic.setId(getId());
-            return addEpicWithID(epic);
+            return addEpicWithId(epic);
         }
         return null;
     }
@@ -212,11 +211,11 @@ public class InMemoryTaskManager implements TaskManager {
      * @param epic экземпляр класса {@link Epic}
      * @return Новый эпик типа {@link Epic}. Вернет Null, если на вход передать Null
      */
-    protected Epic addEpicWithID(Epic epic) {
+    protected Epic addEpicWithId(Epic epic) {
         List<SubTask> children = epic.getChildren();
         if (children.size() == 0) {
             epics.put(epic.getId(), epic);
-            synchronizeIDIssueANDManager(epic);
+            synchronizeIdIssueAndManager(epic);
             //новый эпик не содержит детей
             return epic;
         } else {
@@ -239,8 +238,7 @@ public class InMemoryTaskManager implements TaskManager {
         //Можно обновить только существующий объект
         if (oldTask != null) {
             //Проверка валидации нужна только если есть изменения в периоде
-            if (!oldTask.getStartTime().equals(task.getStartTime()) ||
-                    oldTask.getDuration() != task.getDuration()) {
+            if (!oldTask.getStartTime().equals(task.getStartTime()) || oldTask.getDuration() != task.getDuration()) {
                 freeItemsInGrid(oldTask);
                 try {
                     itemsValid = validatePeriodIssue(task);
@@ -277,8 +275,7 @@ public class InMemoryTaskManager implements TaskManager {
             Epic oldParent = epics.get(oldSubTask.getParentID());
             if (newParent != null) {
                 //Проверка валидации нужна только если есть изменения в периоде
-                if (!oldSubTask.getStartTime().equals(subTask.getStartTime()) ||
-                        oldSubTask.getDuration() != subTask.getDuration()) {
+                if (!oldSubTask.getStartTime().equals(subTask.getStartTime()) || oldSubTask.getDuration() != subTask.getDuration()) {
                     freeItemsInGrid(oldSubTask);
                     try {
                         itemsValid = validatePeriodIssue(subTask);
@@ -692,8 +689,8 @@ public class InMemoryTaskManager implements TaskManager {
         //Проверяем, что в сетке есть место на заданный интервал
         if (issue.getType() != IssueType.EPIC) {
             Instant startIssue = findNearestBorderOfGrid(issue.getStartTime(), false);
-            Instant endIssue = findNearestBorderOfGrid(issue.getStartTime().
-                    plusSeconds(issue.getDuration() * 60L), true);
+            Instant endIssue = findNearestBorderOfGrid(issue.getStartTime()
+                    .plusSeconds(issue.getDuration() * 60L), true);
             while (startIssue.isBefore(endIssue)) {
                 if (grid.containsKey(startIssue) && !grid.get(startIssue)) {
                     itemsValid.add(startIssue);
@@ -716,12 +713,10 @@ public class InMemoryTaskManager implements TaskManager {
         if ((issue.getType() != IssueType.EPIC)) {
             if (issue.getStartTime().equals(Instant.MIN)) {
                 if (issuesByPriority.isEmpty()) {
-                    issue.setStartTime(findNearestBorderOfGrid(START_GRID.plus(Duration.ofMinutes(ITEM_GRID)),
-                            true));
+                    issue.setStartTime(findNearestBorderOfGrid(START_GRID.plus(Duration.ofMinutes(ITEM_GRID)), true));
                 } else {
                     Issue lastIssue = issuesByPriority.last();
-                    issue.setStartTime(findNearestBorderOfGrid(lastIssue.getStartTime().
-                            plusSeconds(lastIssue.getDuration() * 60L), true));
+                    issue.setStartTime(findNearestBorderOfGrid(lastIssue.getStartTime().plusSeconds(lastIssue.getDuration() * 60L), true));
                 }
             }
         }
@@ -781,8 +776,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     private void freeItemsInGrid(Issue issue) {
         Instant startIssue = findNearestBorderOfGrid(issue.getStartTime(), false);
-        Instant endIssue = findNearestBorderOfGrid(issue.getStartTime().
-                plusSeconds(issue.getDuration() * 60L), true);
+        Instant endIssue = findNearestBorderOfGrid(issue.getStartTime().plusSeconds(issue.getDuration() * 60L), true);
         while (startIssue.isBefore(endIssue)) {
             grid.put(startIssue, false);
             startIssue = startIssue.plus(Duration.ofMinutes(ITEM_GRID));
@@ -795,7 +789,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Первый интервал в сетке - начало часа запуска программы.
      * Сетка заполняется на год вперед.
      */
-    private  Map<Instant, Boolean> initGrid() {
+    private Map<Instant, Boolean> initGrid() {
         Map<Instant, Boolean> itemsGrid = new HashMap<>();
         Instant endGrid = START_GRID.plus(SIZE_GRID);
         Instant itemGrid = START_GRID;

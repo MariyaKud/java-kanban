@@ -1,6 +1,6 @@
 package service;
 
-import dao.CSVMakeRepository;
+import dao.CsvMakeRepository;
 import dao.IssueRepository;
 import model.Epic;
 import model.IssueStatus;
@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter;
  */
 public class Managers {
 
-    private static final IssueRepository issueRepository = new CSVMakeRepository();
+    private static final IssueRepository issueRepository = new CsvMakeRepository();
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").
                                                        withZone(ZoneId.systemDefault());
 

@@ -14,19 +14,16 @@ import service.InMemoryHistoryManager;
 import service.Managers;
 import service.TaskManager;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
-import java.io.FileReader;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@DisplayName("Тест работы менеджера с файлом CSV..")
-class CSVMakeRepositoryTest {
+@DisplayName("Тест работы менеджера с файлом csv..")
+class CscMakeRepositoryTest {
 
     final String dirHome     = System.getProperty("user.home");
     final String nameFileCSV = "taskManager.csv";
@@ -50,7 +47,7 @@ class CSVMakeRepositoryTest {
             assumeFalse(true, "Проблемы с доступом к файлу CSV");
         }
         //Класс обмена
-        issueRepository = new CSVMakeRepository();
+        issueRepository = new CsvMakeRepository();
         //Класс менеджера
         fileBackedTasksManager = new FileBackedTasksManager(historyManager, file);
     }
@@ -95,98 +92,102 @@ class CSVMakeRepositoryTest {
         assertEquals(0, history.size(), "Список истории не пуст.");
     }
 
-    @DisplayName("Новый менеджер задач сохранит файл с одной строкой (заголовок).")
+    @DisplayName("Новый менеджер сохраненный в файл восстанавливается с пустыми хранилищами.")
     @Test
-    void shouldSaveOnlyTittleForNewManagerTest() {
+    void shouldSaveNothingForNewManagerTest() {
+        //Сохраняем новый менеджер в файл
         issueRepository.save(fileBackedTasksManager, file);
+        //Восстанавливаем данные по новому менеджеру
+        FileBackedTasksManager loadTasksManager = new FileBackedTasksManager(new InMemoryHistoryManager(),file);
+        issueRepository.load(loadTasksManager, file);
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file)))
-        {
-            assertEquals(issueRepository.FILE_HEAD, br.readLine()+"\n", "Не верный заголовок.");
-            assertNotNull(br.readLine(), "В файле есть данные, кроме заголовка.");
+        final List<Task> tasks = fileBackedTasksManager.getAllTasks();
+        final List<SubTask> subTasks = fileBackedTasksManager.getAllSubTasks();
+        final List<Epic> epics = loadTasksManager.getAllEpics();
+        final List<Issue> history = loadTasksManager.getHistory();
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        assertNotNull(tasks, "Список задач null.");
+        assertEquals(0, tasks.size(), "Список задач не пуст.");
+
+        assertNotNull(subTasks, "Список подзадач null.");
+        assertEquals(0, subTasks.size(), "Список подзадач не пуст.");
+
+        assertNotNull(epics, "Список эпиков null.");
+        assertEquals(0, epics.size(), "Список эпиков не пуст.");
+
+        assertNotNull(history, "Список истории null.");
+        assertEquals(0, history.size(), "Список истории не пуст.");
     }
 
-    @DisplayName("Сохранить в файл задачу.")
+    @DisplayName("Сохранить/загрузить задачу.")
     @Test
-    void shouldSaveTaskWithoutChildrenTest() {
-        Managers.addTask(fileBackedTasksManager);
+    void shouldSaveTaskTest() {
+        Task task = Managers.addTask(fileBackedTasksManager);
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file)))
-        {
-            assertEquals(issueRepository.FILE_HEAD, br.readLine()+"\n", "Не верный заголовок.");
-            //проверяем не изменяемую часть
-            String lineToCheck = "1,TASK,Test,NEW,Description";
-            assertEquals(lineToCheck, br.readLine().substring(0,lineToCheck.length()),
-                     "Данные в файле не корректны");
+        FileBackedTasksManager loadTasksManager = new FileBackedTasksManager(new InMemoryHistoryManager(),file);
+        issueRepository.load(loadTasksManager, file);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Task loadTask = loadTasksManager.getTaskById(task.getId());
+
+        assertEquals(fileBackedTasksManager.getAllTasks(), loadTasksManager.getAllTasks(),
+                "Задача загрузилась не корректно.");
+        assertEquals(task,loadTask, "Задача загрузилась не корректно.");
     }
 
-    @DisplayName("Сохранить в файл эпик без детей.")
+    @DisplayName("Сохранить/загрузить эпик без детей.")
     @Test
     void shouldSaveEpicWithoutChildrenTest() {
-        Managers.addEpic(fileBackedTasksManager);
+        Epic epic = Managers.addEpic(fileBackedTasksManager);
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file)))
-        {
-            assertEquals(issueRepository.FILE_HEAD, br.readLine()+"\n", "Не верный заголовок.");
-            assertEquals("1,EPIC,Epic,NEW,Description,0,0",
-                          br.readLine(), "Данные в файле не корректны");
+        FileBackedTasksManager loadTasksManager = new FileBackedTasksManager(new InMemoryHistoryManager(),file);
+        issueRepository.load(loadTasksManager, file);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Epic loadEpic = loadTasksManager.getEpicById(epic.getId());
+
+        assertEquals(fileBackedTasksManager.getAllEpics(), loadTasksManager.getAllEpics(),
+                "Эпик загрузился не корректно.");
+        assertEquals(epic,loadEpic, "Эпик загрузился не корректно.");
+        assertEquals(0, epic.getChildren().size(), "Эпик для теста не подходит.");
+        assertEquals(0, loadEpic.getChildren().size(), "Эпик загрузился не корректно.");
     }
 
-    @DisplayName("Сохранить в файл эпик с ребенком.")
+    @DisplayName("Сохранить/загрузить эпик с ребенком.")
     @Test
     void shouldSaveEpicWithTwoChildrenTest() {
         Epic epic = Managers.addEpic(fileBackedTasksManager);
-        Managers.addSubTask(fileBackedTasksManager, epic.getId(), IssueStatus.NEW);
+        SubTask subTask = Managers.addSubTask(fileBackedTasksManager, epic.getId(), IssueStatus.NEW);
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file)))
-        {
-            assertEquals(issueRepository.FILE_HEAD, br.readLine()+"\n", "Не верный заголовок.");
-            //проверяем не изменяемую часть для эпика
-            String lineToCheck = "1,EPIC,Epic,NEW,Description";
-            assertEquals(lineToCheck, br.readLine().substring(0,lineToCheck.length()),
-                         "Данные в файле не корректны");
+        FileBackedTasksManager loadTasksManager = new FileBackedTasksManager(new InMemoryHistoryManager(),file);
+        issueRepository.load(loadTasksManager, file);
 
-            lineToCheck = "2,SUBTASK,SubTask,NEW,Description";
-            String Line = br.readLine();
-            assertEquals(lineToCheck, Line.substring(0,lineToCheck.length()),
-                    "Данные в файле не корректны");
-            assertEquals(Integer.toString(epic.getId()),Line.substring(Line.length()-1),
-                     "Не верный id у родителя.");
+        Epic loadEpic = loadTasksManager.getEpicById(epic.getId());
+        SubTask loadSubTask =loadTasksManager.getSubTaskById(subTask.getId());
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        assertEquals(fileBackedTasksManager.getAllEpics(), loadTasksManager.getAllEpics(),
+                "Эпик с детьми загрузился не корректно.");
+        assertEquals(fileBackedTasksManager.getAllSubTasks(), loadTasksManager.getAllSubTasks(),
+                "Эпик с детьми загрузился не корректно.");
+        assertEquals(epic,loadEpic, "Эпик загрузился не корректно.");
+        assertEquals(subTask,loadSubTask, "Подзадача загрузилась не корректно.");
     }
 
-    @DisplayName("Сохранить эпик и он же в истории.")
+    @DisplayName("Сохранить/Загрузить эпик и он же в истории.")
     @Test
     void shouldSaveEpicWithHistoryTest() {
         final Epic epic = Managers.addEpic(fileBackedTasksManager);
+        //Сохраняем в историю
         fileBackedTasksManager.getEpicById(epic.getId());
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file)))
-        {
-            assertEquals(issueRepository.FILE_HEAD, br.readLine()+"\n", "Не верный заголовок.");
-            assertEquals("1,EPIC,Epic,NEW,Description,0,0",
-                    br.readLine(), "Данные по эпику в файле не корректны");
-            assertEquals("",br.readLine(),"Нет разделительной строки перед историей");
-            assertEquals("1", br.readLine(),"Не корректная история");
+        FileBackedTasksManager loadTasksManager = new FileBackedTasksManager(new InMemoryHistoryManager(),file);
+        issueRepository.load(loadTasksManager, file);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Epic loadEpic = loadTasksManager.getEpicById(epic.getId());
+        final List<Issue> history = loadTasksManager.getHistory();
+
+        assertEquals(fileBackedTasksManager.getHistory(), history, "История не восстановилась.");
+        assertEquals(1, history.size(), "История не восстановилась.");
+        assertEquals(epic, history.get(0), "История не восстановилась.");
+        assertEquals(epic, loadEpic, "Эпик не восстановился.");
     }
 
     @DisplayName("Загрузить задачу, эпик, подзадачу с историей.")
@@ -205,6 +206,5 @@ class CSVMakeRepositoryTest {
                 "Эпики загрузились не корректны.");
         assertEquals(fileBackedTasksManager.getHistory(),loadTasksManager.getHistory(),
                 "История загрузилась не корректно.");
-
     }
 }
