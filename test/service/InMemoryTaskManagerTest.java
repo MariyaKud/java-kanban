@@ -533,15 +533,15 @@ class InMemoryTaskManagerTest {
 
         final Task task = Managers.addTask(taskManager);
         final Task delTask = taskManager.deleteTaskById(100);
+
         final List<Task> tasks = taskManager.getAllTasks();
 
         assertNull(delTask, "Найдена не существующая задача.");
-
         assertNotNull(tasks, "Возвращает null.");
-        assertNotEquals(task,delTask, "Удаляем существующую задачу");
 
         assertEquals(1, tasks.size(), "Список задач не пуст.");
         assertNull(taskManager.getTaskById(100), "Задача найдена.");
+        assertEquals(task, taskManager.getTaskById(task.getId()), "Список задач не корректен.");
     }
 
     @DisplayName("Удаление существующей подзадачи по id.")

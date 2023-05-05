@@ -130,6 +130,9 @@ public class Managers {
 
         System.out.println("\nОтсортированный список задач по дате старта:");
         taskManager.getPrioritizedTasks().forEach(System.out::println);
+
+        System.out.println("\nИстория просмотров");
+        taskManager.getHistory().forEach(System.out::println);
     }
 
     /**
