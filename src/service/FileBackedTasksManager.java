@@ -26,7 +26,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     public static void main(String[] args) {
 
         //Создаем экземпляр менеджера
-        final String dirHome     = System.getProperty("user.home");
+        final String dirHome     = "data";
         final String nameFileCSV = "taskManager.csv";
 
         final File file = new File(dirHome,nameFileCSV);

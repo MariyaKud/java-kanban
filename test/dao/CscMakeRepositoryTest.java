@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 @DisplayName("Тест работы менеджера с файлом csv..")
 class CscMakeRepositoryTest {
 
-    final String dirHome     = System.getProperty("user.home");
+    final String dirHome     = System.getProperty("data");
     final String nameFileCSV = "taskManager.csv";
     private IssueRepository issueRepository;
     private File file;
