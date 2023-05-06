@@ -2,6 +2,8 @@ package service;
 
 import dao.IssueRepository;
 
+import exception.NotValidate;
+import exception.ParentNotFound;
 import model.Epic;
 import model.SubTask;
 import model.Task;
@@ -78,7 +80,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public SubTask addSubTaskWithId(SubTask subTask) {
+    public SubTask addSubTaskWithId(SubTask subTask) throws NotValidate {
         return super.addSubTaskWithId(subTask);
     }
 
@@ -88,45 +90,45 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Task addTask(Task task) {
-        super.addTask(task);
+    public Task addTask(Task task) throws NotValidate {
+        Task newTask = super.addTask(task);
         save();
-        return task;
+        return newTask;
     }
 
     @Override
-    public SubTask addSubTask(SubTask subTask) {
-        super.addSubTask(subTask);
+    public SubTask addSubTask(SubTask subTask) throws NotValidate {
+        SubTask newSubTask = super.addSubTask(subTask);
         save();
-        return subTask;
+        return newSubTask;
     }
 
     @Override
     public Epic addEpic(Epic epic) {
-        super.addEpic(epic);
+        Epic newEpic = super.addEpic(epic);
         save();
-        return epic;
+        return newEpic;
     }
 
     @Override
-    public Task updateTask(Task task) {
-        super.updateTask(task);
+    public Task updateTask(Task task) throws NotValidate {
+        Task updateTask = super.updateTask(task);
         save();
-        return task;
+        return updateTask;
     }
 
     @Override
-    public SubTask updateSubTask(SubTask subTask) {
-        super.updateSubTask(subTask);
+    public SubTask updateSubTask(SubTask subTask) throws NotValidate, ParentNotFound {
+        SubTask updateSubTask = super.updateSubTask(subTask);
         save();
-        return subTask;
+        return updateSubTask;
     }
 
     @Override
     public Epic updateEpic(Epic epic) {
-        super.updateEpic(epic);
+        Epic updateEpic = super.updateEpic(epic);
         save();
-        return epic;
+        return updateEpic;
     }
 
     @Override

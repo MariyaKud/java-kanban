@@ -1,6 +1,8 @@
 package service;
 
 import exception.EmptyData;
+import exception.NotValidate;
+import exception.ParentNotFound;
 import model.Epic;
 import model.Issue;
 import model.IssueStatus;
@@ -14,7 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
+
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -51,7 +53,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     //Задачи и подзадачи отсортированные по startTime
     protected final TreeSet<Issue> issuesByPriority = new TreeSet<>(Comparator.comparing(Issue::getStartTime)
-                                                                              .thenComparing(Issue::getId));
+            .thenComparing(Issue::getId));
 
     //Интервала сетки в минутах.
     //Ограничение: час должен быть кратен ITEM_GRID.
@@ -92,9 +94,10 @@ public class InMemoryTaskManager implements TaskManager {
      *
      * @param task экземпляр класса {@link Task}
      * @return Новая задача типа {@link Task}. Если задача не прошла валидацию, то null
+     * @throws NotValidate ошибка валидации, по задаче есть пересечения с другими задачами
      */
     @Override
-    public Task addTask(Task task) {
+    public Task addTask(Task task) throws NotValidate {
         if (task != null) {
             task.setId(getId());
             return addTaskWithId(task);
@@ -108,16 +111,16 @@ public class InMemoryTaskManager implements TaskManager {
      *
      * @param task экземпляр класса {@link Task}
      * @return Новая задача типа {@link Task}. Если задача не прошла валидацию, то null
-     * Валидация - задача не должна пересекать по времени, с другими задачами.
+     * @throws NotValidate ошибка валидации, задача не должна пересекать по времени, с другими задачами.
      */
-    protected Task addTaskWithId(Task task) {
+    protected Task addTaskWithId(Task task) throws NotValidate {
         if (validatePeriodIssue(task)) {
             tasks.put(task.getId(), task);
             issuesByPriority.add(task);
             synchronizeIdIssueAndManager(task);
             occupyItemsInGrid(task);
         } else {
-            return null;
+            throw new NotValidate(task.toString());
         }
         return task;
     }
@@ -128,10 +131,10 @@ public class InMemoryTaskManager implements TaskManager {
      *
      * @param subTask экземпляр класса {@link SubTask}
      * @return Новая подзадача типа {@link SubTask}. Если подзадача не прошла валидацию, то null
-     * Валидация - задача не должна пересекать по времени, с другими задачами.
+     * @throws NotValidate ошибка валидации, по подзадаче есть пересечения с другими задачами
      */
     @Override
-    public SubTask addSubTask(SubTask subTask) {
+    public SubTask addSubTask(SubTask subTask) throws NotValidate {
         if (subTask != null) {
             subTask.setId(getId());
             return addSubTaskWithId(subTask);
@@ -146,7 +149,7 @@ public class InMemoryTaskManager implements TaskManager {
      * @param subTask экземпляр класса {@link SubTask}
      * @return Новая задача типа {@link SubTask}. Если подзадача не прошла валидацию, то null
      */
-    protected SubTask addSubTaskWithId(SubTask subTask) {
+    protected SubTask addSubTaskWithId(SubTask subTask) throws NotValidate {
         if (validatePeriodIssue(subTask)) {
             Epic parent = epics.get(subTask.getParentID());
             if (parent != null) {
@@ -167,7 +170,7 @@ public class InMemoryTaskManager implements TaskManager {
                 issuesByPriority.add(subTask);
             }
         } else {
-            return null;
+            throw new NotValidate(subTask.toString());
         }
         return subTask;
     }
@@ -216,20 +219,24 @@ public class InMemoryTaskManager implements TaskManager {
      * @return Обновленная задача типа {@link Task}. Если задача с заданным id не найдена, то null
      */
     @Override
-    public Task updateTask(Task task) {
+    public Task updateTask(Task task) throws NotValidate {
         final Task oldTask = tasks.get(task.getId());
 
-        if (oldTask != null && validatePeriodIssue(task)) {
-            //Корректируем занятые отрезки на сетке
-            if (!oldTask.getStartTime().equals(task.getStartTime()) ||
-                    oldTask.getDuration() != task.getDuration()) {
-                freeItemsInGrid(oldTask);
-                occupyItemsInGrid(task);
+        if (oldTask != null) {
+            if (validatePeriodIssue(task)) {
+                //Корректируем занятые отрезки на сетке
+                if (!oldTask.getStartTime().equals(task.getStartTime()) ||
+                        oldTask.getDuration() != task.getDuration()) {
+                    freeItemsInGrid(oldTask);
+                    occupyItemsInGrid(task);
+                }
+                //Обновляем в хранилище
+                tasks.put(oldTask.getId(), task);
+                //Обновляем в сортированном списке
+                issuesByPriority.add(task);
+            } else {
+                throw new NotValidate(task.toString());
             }
-            //Обновляем в хранилище
-            tasks.put(oldTask.getId(), task);
-            //Обновляем в сортированном списке
-            issuesByPriority.add(task);
         } else {
             return null;
         }
@@ -243,47 +250,49 @@ public class InMemoryTaskManager implements TaskManager {
      * @return Обновленная задача типа {@link SubTask}. Если задача не найдена, то null
      */
     @Override
-    public SubTask updateSubTask(SubTask subTask) {
+    public SubTask updateSubTask(SubTask subTask) throws NotValidate, ParentNotFound {
         final SubTask oldSubTask = subTasks.get(subTask.getId());
 
-        if (oldSubTask != null && validatePeriodIssue(subTask)) {
-            Epic newParent = epics.get(subTask.getParentID());
-            Epic oldParent = epics.get(oldSubTask.getParentID());
-            if (newParent != null) {
-                //Корректируем занятые отрезки на сетке
-                if (!oldSubTask.getStartTime().equals(subTask.getStartTime()) ||
-                        oldSubTask.getDuration() != subTask.getDuration()) {
-                    freeItemsInGrid(oldSubTask);
-                    occupyItemsInGrid(subTask);
-                }
+        if (oldSubTask != null) {
+            if (validatePeriodIssue(subTask)) {
+                Epic newParent = epics.get(subTask.getParentID());
+                Epic oldParent = epics.get(oldSubTask.getParentID());
+                if (newParent != null) {
+                    //Корректируем занятые отрезки на сетке
+                    if (!oldSubTask.getStartTime().equals(subTask.getStartTime()) ||
+                            oldSubTask.getDuration() != subTask.getDuration()) {
+                        freeItemsInGrid(oldSubTask);
+                        occupyItemsInGrid(subTask);
+                    }
 
-                // обновляем подзадачу
-                subTasks.put(subTask.getId(), subTask);
-                issuesByPriority.add(subTask);
+                    // обновляем подзадачу
+                    subTasks.put(subTask.getId(), subTask);
+                    issuesByPriority.add(subTask);
 
-                if (subTask.getParentID() != oldSubTask.getParentID()) {
-                    //Удалить старую подзадачу у старого эпика родителя
-                    oldParent.getChildren().remove(oldSubTask);
-                    //Обновляем статус старого родителя
-                    updateStatusEpic(oldParent);
+                    if (subTask.getParentID() != oldSubTask.getParentID()) {
+                        //Удалить старую подзадачу у старого эпика родителя
+                        oldParent.getChildren().remove(oldSubTask);
+                        //Обновляем статус старого родителя
+                        updateStatusEpic(oldParent);
+                    } else {
+                        //Удаляем ссылку на старую задачу
+                        newParent.getChildren().remove(oldSubTask);
+                    }
+
+                    //Добавляем обновленную подзадачу в эпик
+                    if (!newParent.getChildren().contains(subTask)) {
+                        newParent.getChildren().add(subTask);
+                    }
+
+                    //Обновляем статус родителя
+                    updateStatusEpic(newParent);
                 } else {
-                    //Удаляем ссылку на старую задачу
-                    newParent.getChildren().remove(oldSubTask);
+                    throw new ParentNotFound(subTask.getParentID());
                 }
-
-                //Добавляем обновленную подзадачу в эпик
-                if (!newParent.getChildren().contains(subTask)) {
-                    newParent.getChildren().add(subTask);
-                }
-
-                //Обновляем статус родителя
-                updateStatusEpic(newParent);
             } else {
-                System.out.println(MSG_ERROR_ID_NOT_FOUND);
-                return null;
+                throw new NotValidate(subTask.toString());
             }
         } else {
-            System.out.println(MSG_ERROR_ID_NOT_FOUND);
             return null;
         }
         return getSubTaskById(subTask.getId());
@@ -430,8 +439,9 @@ public class InMemoryTaskManager implements TaskManager {
         }
         subTasks.clear();
 
-        epics.values().forEach(e -> {e.getChildren().clear();
-                                     updateStatusEpic(e);
+        epics.values().forEach(e -> {
+            e.getChildren().clear();
+            updateStatusEpic(e);
         });
 
     }
@@ -453,6 +463,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     ///////////////////////////////////////////////
+
     /**
      * Получить задачу {@link Task} по id. Может вернуть null.
      *
@@ -686,6 +697,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Возвращает список отрезков длиной отрезка сетки. Вся продолжительно задачи должна перекрываться отрезками
+     *
      * @param issue задача или подзадача
      * @return список отрезков для сетки, каждый отрезок представлен временной меткой класса {@link ItemGrid},
      * начало отрезка
@@ -714,6 +726,7 @@ public class InMemoryTaskManager implements TaskManager {
     /**
      * Определяет валидность задачи/подзадачи. Переданный объект валиден, если продолжительность задачи не
      * пересекается с другими задачами и подзадачами менеджера.
+     *
      * @param issue задача или подзадача на проверку
      * @return истина - валидна, ложь - нет
      */
@@ -738,6 +751,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Занять отрезки на сетке, занятые задачей или подзадача
+     *
      * @param issue задача или подзадача
      */
     private void occupyItemsInGrid(Issue issue) {
@@ -746,6 +760,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     /**
      * Освободить отрезки на сетке, задачей или подзадача
+     *
      * @param issue задача или подзадача
      */
     private void freeItemsInGrid(Issue issue) {

@@ -123,7 +123,7 @@ class HistoryManagerTest {
 
     @DisplayName("Должны получить очередь из первого и последнего элемента очереди, после удаления центрального.")
     @Test
-    void shoudSaveFirstAndLastIfRemoveFromMiddleOfHistory() {
+    void shouldSaveFirstAndLastIfRemoveFromMiddleOfHistory() {
         //Удаляем задачу из середины очереди
         Instant startTime = Instant.now();
 

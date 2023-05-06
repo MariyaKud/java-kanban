@@ -1,5 +1,7 @@
 package service;
 
+import exception.NotValidate;
+import exception.ParentNotFound;
 import model.Epic;
 import model.Issue;
 import model.SubTask;
@@ -22,14 +24,14 @@ public interface TaskManager {
      * @param task экземпляр класса {@link Task}
      * @return - добавленная задача
      */
-    Task addTask(Task task);
+    Task addTask(Task task) throws NotValidate;
 
     /**
      * Добавить подзадачу менеджеру. Сам объект передается в качестве параметра.
      * @param subTask экземпляр класса {@link SubTask}
      * @return добавленная подзадача
      */
-    SubTask addSubTask(SubTask subTask);
+    SubTask addSubTask(SubTask subTask) throws NotValidate;
 
     /**
      * Добавить эпик менеджеру. Сам объект передается в качестве параметра.
@@ -44,14 +46,14 @@ public interface TaskManager {
      * @param task новая версия объекта с верным идентификатором, включая обновленный статус
      * @return - обновленная задача
      */
-    Task updateTask(Task task);
+    Task updateTask(Task task) throws NotValidate;
 
     /**
      * Обновить подзадачу. Новая версия объекта передается в качестве параметра.
      * @param subTask новая версия объекта с верным идентификатором, включая обновленный статус
      * @return обновленная подзадача
      */
-    SubTask updateSubTask(SubTask subTask);
+    SubTask updateSubTask(SubTask subTask) throws NotValidate, ParentNotFound;
 
     /**
      * Обновить эпик. Новая версия объекта передается в качестве параметра.

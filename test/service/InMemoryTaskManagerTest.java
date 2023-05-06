@@ -1,5 +1,6 @@
 package service;
 
+import exception.NotValidate;
 import model.Epic;
 import model.Issue;
 import model.IssueStatus;
@@ -433,17 +434,22 @@ class InMemoryTaskManagerTest {
         assertEquals(2,taskManager.getAllSubTasks().size(), "Не верное количество подзадач");
     }
 
-    @DisplayName("Должны получить null, при добавлении задачи на занятый интервал.")
+    @DisplayName("Должны получить исключение NotValidate, при добавлении задачи на занятый интервал.")
     @Test
-    void shouldRefuseAddTaskWithCross() {
-        Task task1 = Managers.addSimpleTaskForTest(taskManager, 100, Instant.now());
-        Task task2 = new Task(0,"Test", "Description",task1.getDuration(),
-                task1.getStartTime(),IssueStatus.DONE);
+    void shouldReturnNotValidateAddTaskWithCross() {
+        final Task task1 = Managers.addSimpleTaskForTest(taskManager, 100, Instant.now());
+        final NotValidate e = assertThrows(NotValidate.class,  () -> taskManager.addTask(task1));
+        assertEquals(task1.toString(), e.getMessage());
+    }
 
-        Task crossTask = taskManager.addTask(task2);
-
-        assertNull(crossTask, "Ошибка валидации");
-        assertEquals(1, taskManager.getAllTasks().size(), "Ошибка валидации. В списке задач ошибка.");
+    @DisplayName("Должны получить исключение NotValidate, при добавлении подзадачи на занятый интервал.")
+    @Test
+    void shouldReturnNotValidateAddSubTaskWithCross() {
+        final Epic parent = Managers.addSimpleEpicForTest(taskManager);
+        final SubTask subTask = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
+                                                                     10, Instant.now());
+        final NotValidate e = assertThrows(NotValidate.class,  () -> taskManager.addSubTask(subTask));
+        assertEquals(subTask.toString(), e.getMessage());
     }
 
     @DisplayName("Должны обновить интервал задачи на доступный.")
@@ -463,25 +469,37 @@ class InMemoryTaskManagerTest {
                 "обновлено не корректно");
     }
 
-    @DisplayName("Должны получить null, при обновлении задачи на занятый интервал.")
+    @DisplayName("Должны получить NotValidate, при обновлении задачи на занятый интервал.")
     @Test
     void shouldRefuseUpdateTaskWithCross() {
-        final Task task1 = Managers.addSimpleTaskForTest(taskManager, 10, Instant.now());
-        final Task task2 = Managers.addSimpleTaskForTest(taskManager, 100,
+        final Task task = Managers.addSimpleTaskForTest(taskManager, 10, Instant.now());
+        final Task taskToUpdate = Managers.addSimpleTaskForTest(taskManager, 100,
                 Instant.now().plusSeconds(2000));
 
-        final Task updateTask = new Task(task2);
-        updateTask.setStartTime(task1.getStartTime());
-        updateTask.setDuration(task1.getDuration());
+        final Task updateTask = new Task(taskToUpdate);
+        updateTask.setStartTime(task.getStartTime());
+        updateTask.setDuration(task.getDuration());
 
-        final Task crossTask = taskManager.updateTask(updateTask);
+        final NotValidate e = assertThrows(NotValidate.class,  () -> taskManager.updateTask(updateTask));
+        assertEquals(updateTask.toString(), e.getMessage());
+    }
 
-        final List<Task> tasks = taskManager.getAllTasks();
+    @DisplayName("Должны получить NotValidate, при обновлении подзадачи на занятый интервал.")
+    @Test
+    void shouldRefuseUpdateStartTimeWithCrossSubTask() {
+        final Epic parent = Managers.addSimpleEpicForTest(taskManager);
 
-        assertNull(crossTask, "Ошибка валидации");
-        assertEquals(2, tasks.size(), "Ошибка валидации. В списке задач ошибка.");
-        assertEquals(task2, taskManager.getTaskById(task2.getId()), "Задача обновлена.");
-        assertNotEquals(updateTask, taskManager.getTaskById(task2.getId()), "Задача обновлена.");
+        Instant now = Instant.now();
+        final SubTask subTask1 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
+                10, now);
+        final SubTask subTask2 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
+                10, now.plusSeconds(3000));
+
+        final SubTask subTaskToUpdate = new SubTask(subTask1);
+        subTaskToUpdate.setStartTime(subTask2.getStartTime());
+
+        final NotValidate e = assertThrows(NotValidate.class,  () -> taskManager.updateSubTask(subTaskToUpdate));
+        assertEquals(subTaskToUpdate.toString(), e.getMessage());
     }
 
     @DisplayName("Должны обновить дату старта Подзадачи на свободный отрезок.")
@@ -489,8 +507,7 @@ class InMemoryTaskManagerTest {
     void shouldUpdateStartTimeSubTask() {
         final Epic parent = Managers.addSimpleEpicForTest(taskManager);
         Instant now = Instant.now();
-        final SubTask subTask1 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
-                                                     10, now);
+        Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,10, now);
         final SubTask subTask2 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
                                                        10,now.plusSeconds(3000));
 
@@ -502,26 +519,6 @@ class InMemoryTaskManagerTest {
 
         assertNotNull(updateSubTask, "Обновление вернуло null.");
         assertEquals(subTaskToUpdate.getStartTime(), updateSubTask.getStartTime(), "Ошибка обновления даты.");
-    }
-
-    @DisplayName("Должны получить null, при обновлении подзадачи на занятый интервал.")
-    @Test
-    void shouldRefuseUpdateStartTimeWithCrossSubTask() {
-        final Epic parent = Managers.addSimpleEpicForTest(taskManager);
-
-        Instant now = Instant.now();
-        final SubTask subTask1 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
-                                                    10, now);
-        final SubTask subTask2 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
-                                                          10, now.plusSeconds(3000));
-
-        final SubTask subTaskToUpdate = new SubTask(subTask1);
-        subTaskToUpdate.setStartTime(subTask2.getStartTime());
-        final SubTask updateSubTask = taskManager.updateSubTask(subTaskToUpdate);
-
-        assertNull(updateSubTask, "Получен не null");
-        assertEquals(subTask1.getStartTime(), taskManager.getSubTaskById(subTask1.getId()).getStartTime(),
-                "Обновление интервала состоялось, хотя он занят.");
     }
 
     @DisplayName("Должны удалить задачу по существующему id.")
