@@ -31,7 +31,7 @@ public interface TaskManager {
      * @param subTask экземпляр класса {@link SubTask}
      * @return добавленная подзадача
      */
-    SubTask addSubTask(SubTask subTask) throws NotValidate;
+    SubTask addSubTask(SubTask subTask) throws NotValidate, ParentNotFound;
 
     /**
      * Добавить эпик менеджеру. Сам объект передается в качестве параметра.

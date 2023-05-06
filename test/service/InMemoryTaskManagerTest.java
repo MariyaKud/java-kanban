@@ -1,6 +1,7 @@
 package service;
 
 import exception.NotValidate;
+import exception.ParentNotFound;
 import model.Epic;
 import model.Issue;
 import model.IssueStatus;
@@ -434,6 +435,26 @@ class InMemoryTaskManagerTest {
         assertEquals(2,taskManager.getAllSubTasks().size(), "Не верное количество подзадач");
     }
 
+    @DisplayName("Должны получить ParentNotFound, при добавлении подзадачи с отсутствующим id родителем.")
+    @Test
+    void shouldReturnParentNotFoundAddSubTaskWithoutParent() {
+        final ParentNotFound e = assertThrows(ParentNotFound.class,  () -> Managers.addSimpleSubTaskForTest(
+                                               taskManager,10,IssueStatus.NEW,10, Instant.now()));
+        assertEquals("10", e.getMessage());
+    }
+
+    @DisplayName("Должны получить ParentNotFound, при обновлении родителя подзадачи на отсутствующий id родителем.")
+    @Test
+    void shouldReturnParentNotFoundUpdateSubTaskExistParent() {
+        final Epic parent = Managers.addSimpleEpicForTest(taskManager);
+        final SubTask subTask = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
+                10, Instant.now());
+        final SubTask subTaskToUpdate = new SubTask(subTask.getId(), subTask.getTitle(), subTask.getDescription(),
+                                                       10,10,subTask.getStartTime());
+        final ParentNotFound e = assertThrows(ParentNotFound.class,  () -> taskManager.updateSubTask(subTaskToUpdate));
+        assertEquals("10", e.getMessage());
+    }
+
     @DisplayName("Должны получить исключение NotValidate, при добавлении задачи на занятый интервал.")
     @Test
     void shouldReturnNotValidateAddTaskWithCross() {
@@ -471,7 +492,7 @@ class InMemoryTaskManagerTest {
 
     @DisplayName("Должны получить NotValidate, при обновлении задачи на занятый интервал.")
     @Test
-    void shouldRefuseUpdateTaskWithCross() {
+    void shouldReturnNotValidateUpdateTaskWithCross() {
         final Task task = Managers.addSimpleTaskForTest(taskManager, 10, Instant.now());
         final Task taskToUpdate = Managers.addSimpleTaskForTest(taskManager, 100,
                 Instant.now().plusSeconds(2000));
@@ -484,12 +505,51 @@ class InMemoryTaskManagerTest {
         assertEquals(updateTask.toString(), e.getMessage());
     }
 
+    @DisplayName("Должны обновить родителя c обновлением статуса старого и нового родителя.")
+    @Test
+    void shouldUpdateParent() {
+        final Epic parent1 = Managers.addSimpleEpicForTest(taskManager);
+        final Epic parent2 = Managers.addSimpleEpicForTest(taskManager);
+
+        final Instant now = Instant.now();
+        final SubTask subTask1 = Managers.addSimpleSubTaskForTest(taskManager,parent1.getId(),IssueStatus.NEW,
+                10, now);
+        final SubTask subTask2 = Managers.addSimpleSubTaskForTest(taskManager,parent2.getId(),IssueStatus.DONE,
+                10, subTask1.getEndTime().plusSeconds(2000));
+
+        final SubTask subTaskToUpdate = new SubTask(subTask2.getId(), subTask2.getTitle(), subTask2.getDescription(),
+                subTask2.getDuration(),subTask2.getStartTime(), parent1.getId(), subTask2.getStatus());
+
+        final SubTask subTaskUpdate = taskManager.updateSubTask(subTaskToUpdate);
+        final Epic parent1Update = taskManager.getEpicById(parent1.getId());
+        final Epic parent2Update = taskManager.getEpicById(parent2.getId());
+
+        assertEquals(parent1.getId(), subTaskUpdate.getParentID(), "Не корректный id родителя");
+        assertEquals(2, parent1Update.getChildren().size(),"Не корректное состояние детей у нового родителя");
+        assertEquals(0, parent2Update.getChildren().size(),"Не корректное состояние детей у старого родителя");
+
+        assertEquals(IssueStatus.IN_PROGRESS, parent1Update.getStatus(),"Не обновился статус нового родителя.");
+        assertEquals(IssueStatus.NEW, parent2Update.getStatus(),"Не обновился статус старого родителя.");
+
+
+        assertEquals(subTask2.getEndTime(), parent1Update.getEndTime(),
+                    "Не корректно обновилось время завершения нового родителя.");
+
+        assertEquals(subTask1.getDuration() + subTask2.getDuration(), parent1Update.getDuration(),
+                "Не корректно обновилось интервал нового родителя.");
+
+        assertEquals(Instant.MAX, parent2Update.getEndTime(),
+                "Не корректно обновилось время завершения старого родителя.");
+        assertEquals(0, parent2Update.getDuration(),
+                "Не корректно обновилось интервал старого родителя.");
+    }
+
     @DisplayName("Должны получить NotValidate, при обновлении подзадачи на занятый интервал.")
     @Test
     void shouldRefuseUpdateStartTimeWithCrossSubTask() {
         final Epic parent = Managers.addSimpleEpicForTest(taskManager);
 
-        Instant now = Instant.now();
+        final Instant now = Instant.now();
         final SubTask subTask1 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
                 10, now);
         final SubTask subTask2 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,

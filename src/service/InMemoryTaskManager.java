@@ -149,7 +149,7 @@ public class InMemoryTaskManager implements TaskManager {
      * @param subTask экземпляр класса {@link SubTask}
      * @return Новая задача типа {@link SubTask}. Если подзадача не прошла валидацию, то null
      */
-    protected SubTask addSubTaskWithId(SubTask subTask) throws NotValidate {
+    protected SubTask addSubTaskWithId(SubTask subTask) throws NotValidate, ParentNotFound {
         if (validatePeriodIssue(subTask)) {
             Epic parent = epics.get(subTask.getParentID());
             if (parent != null) {
@@ -168,6 +168,8 @@ public class InMemoryTaskManager implements TaskManager {
                 //Занимаем отрезки на сетке
                 occupyItemsInGrid(subTask);
                 issuesByPriority.add(subTask);
+            } else {
+                throw new ParentNotFound(subTask.getParentID());
             }
         } else {
             throw new NotValidate(subTask.toString());
@@ -632,6 +634,10 @@ public class InMemoryTaskManager implements TaskManager {
             epic.setDuration(durationEpic);
             epic.setStartTime(dateTime[0]);
             epic.setEndTime(dateTime[1]);
+        } else {
+            epic.setDuration(0);
+            epic.setStartTime(Instant.MAX);
+            epic.setEndTime(Instant.MAX);
         }
     }
 

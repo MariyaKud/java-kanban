@@ -34,11 +34,6 @@ public class SubTask extends Issue {
         this(id, title, description, duration, Instant.MAX, parentID, IssueStatus.NEW);
     }
 
-    public SubTask(String title, String description, int duration, int parentID, IssueStatus status) {
-        this(0, title, description, parentID, duration, Instant.MAX);
-        this.setStatus(status);
-    }
-
     public SubTask (SubTask other) {
         this(other.getId(), other.getTitle(), other.getDescription(), other.getParentID() , other.getDuration(),
                 other.getStartTime());

@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 @DisplayName("Тест работы менеджера с файлом csv..")
 class CscMakeRepositoryTest {
 
-    final String dirHome     = System.getProperty("data");
+    final String dirHome     = "data";
     final String nameFileCSV = "taskManagerTest.csv";
     private IssueRepository issueRepository;
     private File file;
@@ -210,5 +210,33 @@ class CscMakeRepositoryTest {
                 "История загрузилась не корректно.");
         assertEquals(fileBackedTasksManager.getPrioritizedTasks(),loadTasksManager.getPrioritizedTasks(),
                 "Сортированные списке различаются.");
+    }
+
+    @DisplayName("Очистить все хранилища.")
+    @Test
+    void shouldDeleteAll() {
+        //Подготовить файл
+        Managers.simpleTestForTaskManager(fileBackedTasksManager);
+
+        //задачи
+        fileBackedTasksManager.deleteAllTasks();
+        assertEquals(0,fileBackedTasksManager.getAllTasks().size(),"Список задач не пуст");
+
+        //Подзадачи
+        fileBackedTasksManager.deleteAllSubTasks();
+        assertEquals(0,fileBackedTasksManager.getAllSubTasks().size(),"Список подзадач не пуст");
+        for (Epic epic : fileBackedTasksManager.getAllEpics()) {
+            assertEquals(0, fileBackedTasksManager.getChildrenOfEpicById(epic.getId()).size(),
+                     "Есть дети у эпика, хотя все подзадачи удалены");
+        }
+
+        fileBackedTasksManager.deleteAllEpics();
+        assertEquals(0,fileBackedTasksManager.getAllEpics().size(),"Список эпиков не пуст");
+
+        assertEquals(0, fileBackedTasksManager.getPrioritizedTasks().size(),
+                "Есть данные в отсортированном хранилище");
+        assertEquals(0, fileBackedTasksManager.getHistory().size(),
+                "Есть данные в истории просмотров");
+
     }
 }

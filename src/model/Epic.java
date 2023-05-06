@@ -42,10 +42,6 @@ public class Epic extends Issue {
         return children;
     }
 
-    public void setEndTime(Instant endTime) {
-        this.endTime = endTime;
-    }
-
     @Override
     public IssueType getType() {
         return IssueType.EPIC;
@@ -54,6 +50,10 @@ public class Epic extends Issue {
     @Override
     public Instant getEndTime() {
         return endTime;
+    }
+
+    public void setEndTime(Instant endTime) {
+        this.endTime = endTime;
     }
 
     @Override

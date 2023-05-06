@@ -97,7 +97,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public SubTask addSubTask(SubTask subTask) throws NotValidate {
+    public SubTask addSubTask(SubTask subTask) throws NotValidate, ParentNotFound {
         SubTask newSubTask = super.addSubTask(subTask);
         save();
         return newSubTask;
