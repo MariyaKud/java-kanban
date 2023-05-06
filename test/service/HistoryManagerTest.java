@@ -22,7 +22,7 @@ class HistoryManagerTest {
         historyManager = new InMemoryHistoryManager();
     }
 
-    @DisplayName("Поверяем метод getHistory() для пустого списка.")
+    @DisplayName("Должны получить пустую историю для нового класса.")
     @Test
     void shouldGiveEmptyHistoryForNewManager() {
         //Для нового экземпляра класса HistoryManager - история это пустой список
@@ -33,7 +33,7 @@ class HistoryManagerTest {
         assertEquals(0, history.size(), "История не пустая.");
     }
 
-    @DisplayName("Поверяем метод getHistory() для НЕ пустого списка.")
+    @DisplayName("Должны получить задачу в истории просмотров.")
     @Test
     void shouldGiveOneTaskInHistory() {
         //Проверяем наличие задачи в истории, после применения метода add()
@@ -47,7 +47,7 @@ class HistoryManagerTest {
         assertEquals(1, history.size(), "Длина списка не соответствует ожидаемой.");
     }
 
-    @DisplayName("Проверка дублирования, добавляем в истории одну и ту же задачу.")
+    @DisplayName("Должны получить одну задачу, при добавлении дважды одной и той же задачи в историю.")
     @Test
     void shouldGiveOneTaskIfAddTwiceSameTasks() {
         //Проверяем наличие задачи в истории, после добавления одной и той же задачи в очереди
@@ -63,7 +63,7 @@ class HistoryManagerTest {
         assertEquals(1, history.size(), "Длина очереди не соответствует ожидаемой.");
     }
 
-    @DisplayName("Удаляем единственную задачу из истории.")
+    @DisplayName("Должны получить пустой список, при удалении единственной задачи из истории.")
     @Test
     void shouldGiveEmptyHistoryIfRemoveSingleTask() {
         //Удаляем единственную задачу, проверяем чтобы очередь не превращалась в null и была пустой
@@ -78,7 +78,7 @@ class HistoryManagerTest {
         assertEquals(0, history.size(), "Длина очереди не соответствует ожидаемой.");
     }
 
-    @DisplayName("Удаляем задачу из начала очереди.")
+    @DisplayName("Должны получить очередь из одной задач (хвост очереди), при удалении задачи из начала очереди.")
     @Test
     void shouldGiveLastTaskIfRemoveFromBeginOfHistory() {
         Instant startTime = Instant.now();
@@ -99,7 +99,7 @@ class HistoryManagerTest {
         assertEquals(task2, history.get(0), "Не корректная задача в очереди.");
     }
 
-    @DisplayName("Удаляем задачу из конца очереди.")
+    @DisplayName("Должны получить историю список5 из первой задачи, при удалении последней.")
     @Test
     void shouldGiveFirstTaskIfRemoveFromEndOfHistory() {
         //Удаляем задачу из конца очереди
@@ -121,7 +121,7 @@ class HistoryManagerTest {
         assertEquals(task1, history.get(0), "Не корректная задача в очереди.");
     }
 
-    @DisplayName("Удаляем задачу из середины очереди.")
+    @DisplayName("Должны получить очередь из первого и последнего элемента очереди, после удаления центрального.")
     @Test
     void shoudSaveFirstAndLastIfRemoveFromMiddleOfHistory() {
         //Удаляем задачу из середины очереди

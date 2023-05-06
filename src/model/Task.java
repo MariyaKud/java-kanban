@@ -20,6 +20,10 @@ public class Task extends Issue {
         super(id, title, description, duration, startTime);
     }
 
+    public Task(String title, String description, int duration, Instant startTime) {
+        this(0, title, description, duration, startTime);
+    }
+
     public Task(int id, String title, String description, int duration) {
         super(id, title, description, duration);
     }
@@ -35,13 +39,21 @@ public class Task extends Issue {
 
     @Override
     public String toString() {
+        String startTimeString = "";
+        String endTimeString = "";
+
+        if (getStartTime() != Instant.MAX) {
+            startTimeString = Managers.getFormatter().format(getStartTime());
+            endTimeString = Managers.getFormatter().format(getEndTime());
+        }
+
         return "Task{" +
                 "id=" + getId() +
                 ", status=" + getStatus() +
                 ", title='" + getTitle() + '\'' +
                 ", description='" + getDescription() + '\'' +
-                ", startTime='" + Managers.getFormatter().format(getStartTime()) + '\'' +
-                ", endTime='" + Managers.getFormatter().format(getEndTime()) + '\'' +
+                ", startTime='" + startTimeString + '\'' +
+                ", endTime='" + endTimeString + '\'' +
                 ", duration='" + getDuration() + "мин." + '\'' +
                 '}';
     }

@@ -1,5 +1,6 @@
 package service;
 
+import exception.EmptyData;
 import model.Epic;
 import model.Issue;
 import model.IssueStatus;
@@ -49,7 +50,8 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HistoryManager historyManager;                   //История просмотров
 
     //Задачи и подзадачи отсортированные по startTime
-    protected final TreeSet<Issue> issuesByPriority = new TreeSet<>(Comparator.comparing(Issue::getStartTime));
+    protected final TreeSet<Issue> issuesByPriority = new TreeSet<>(Comparator.comparing(Issue::getStartTime)
+                                                                              .thenComparing(Issue::getId));
 
     //Интервала сетки в минутах.
     //Ограничение: час должен быть кратен ITEM_GRID.
@@ -428,10 +430,10 @@ public class InMemoryTaskManager implements TaskManager {
         }
         subTasks.clear();
 
-        for (Epic epic : epics.values()) {
-            epic.getChildren().clear();
-            updateStatusEpic(epic);
-        }
+        epics.values().forEach(e -> {e.getChildren().clear();
+                                     updateStatusEpic(e);
+        });
+
     }
 
     /**
@@ -446,14 +448,11 @@ public class InMemoryTaskManager implements TaskManager {
         }
         subTasks.clear();
 
-        for (Integer id : epics.keySet()) {
-            historyManager.remove(id);
-        }
+        epics.keySet().forEach(historyManager::remove);
         epics.clear();
     }
 
     ///////////////////////////////////////////////
-
     /**
      * Получить задачу {@link Task} по id. Может вернуть null.
      *
@@ -646,32 +645,18 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     * Если дата старта не задана, определяет задачу в конец списка задач, подзадач, отсортированных по startTime
-     *
-     * @param issue - задача/подзадача для которой необходимо установить startTime
-     */
-    private void setStartTimeIfEmpty(Issue issue) {
-        if ((issue.getType() != IssueType.EPIC)) {
-            if (issue.getStartTime().equals(Instant.MIN)) {
-                if (issuesByPriority.isEmpty()) {
-                    issue.setStartTime(findNearestBorderOfGrid(Instant.now(),true).toInstant(ZoneOffset.UTC));
-                } else {
-                    Issue lastIssue = issuesByPriority.last();
-                    issue.setStartTime(findNearestBorderOfGrid(lastIssue.getStartTime().plusSeconds(
-                            lastIssue.getDuration() * 60L), true).toInstant(ZoneOffset.UTC));
-                }
-            }
-        }
-    }
-
-    /**
      * Находит ближайшую границу сетки в прошлое или в будущее к переданному моменту времени
      *
      * @param instant  момент времени
      * @param inFuture в будущее
      * @return момент времени кратный интервалу сетки доступа на временной оси
      */
-    private LocalDateTime findNearestBorderOfGrid(Instant instant, boolean inFuture) {
+    private LocalDateTime findNearestBorderOfGrid(Instant instant, boolean inFuture) throws EmptyData {
+
+        if (instant == Instant.MAX || instant == Instant.MIN) {
+            throw new EmptyData("Дата не задана.");
+        }
+
         LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
         int minutes = localDateTime.toLocalTime().getMinute();
 
@@ -699,30 +684,43 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    /**
+     * Возвращает список отрезков длиной отрезка сетки. Вся продолжительно задачи должна перекрываться отрезками
+     * @param issue задача или подзадача
+     * @return список отрезков для сетки, каждый отрезок представлен временной меткой класса {@link ItemGrid},
+     * начало отрезка
+     */
     private List<ItemGrid> cutIssueForItem(Issue issue) {
         final List<ItemGrid> items = new ArrayList<>();
 
-        //Дата начала задачи кратная размеру сетки
-        LocalDateTime startIssue = findNearestBorderOfGrid(issue.getStartTime(), false);
-        //Дата конца задачи кратная размеру сетки, 60L - количество секунд в минуте
-        final LocalDateTime endIssue = findNearestBorderOfGrid(issue.getStartTime().
-                plusSeconds(issue.getDuration() * 60L), true);
+        try {
+            //Дата начала задачи кратная размеру сетки
+            LocalDateTime startIssue = findNearestBorderOfGrid(issue.getStartTime(), false);
+            //Дата конца задачи кратная размеру сетки, 60L - количество секунд в минуте
+            final LocalDateTime endIssue = findNearestBorderOfGrid(issue.getStartTime().
+                    plusSeconds(issue.getDuration() * 60L), true);
 
-        while (startIssue.isBefore(endIssue)) {
-            items.add(new ItemGrid(startIssue.getYear(), startIssue.getDayOfYear(),
-                    startIssue.getHour() * 60 + startIssue.getMinute()));
-            startIssue = startIssue.plusMinutes(ITEM_GRID);
+            while (startIssue.isBefore(endIssue)) {
+                items.add(new ItemGrid(startIssue.getYear(), startIssue.getDayOfYear(),
+                        startIssue.getHour() * 60 + startIssue.getMinute()));
+                startIssue = startIssue.plusMinutes(ITEM_GRID);
+            }
+        } catch (EmptyData e) {
+            return items;
         }
         return items;
     }
 
+    /**
+     * Определяет валидность задачи/подзадачи. Переданный объект валиден, если продолжительность задачи не
+     * пересекается с другими задачами и подзадачами менеджера.
+     * @param issue задача или подзадача на проверку
+     * @return истина - валидна, ложь - нет
+     */
     private boolean validatePeriodIssue(Issue issue) {
         if (issue != null) {
             if (issue.getType() != IssueType.EPIC) {
-                setStartTimeIfEmpty(issue);
-
-                List<ItemGrid> items = cutIssueForItem(issue);
-                for (ItemGrid item : items) {
+                for (ItemGrid item : cutIssueForItem(issue)) {
                     if (grid.containsKey(item) && grid.get(item) != issue.getId()) {
                         //Пересечение
                         return false;
@@ -738,17 +736,19 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    /**
+     * Занять отрезки на сетке, занятые задачей или подзадача
+     * @param issue задача или подзадача
+     */
     private void occupyItemsInGrid(Issue issue) {
-        List<ItemGrid> items = cutIssueForItem(issue);
-        for (ItemGrid item : items) {
-            grid.put(item, issue.getId());
-        }
+        cutIssueForItem(issue).forEach(i -> grid.put(i, issue.getId()));
     }
 
+    /**
+     * Освободить отрезки на сетке, задачей или подзадача
+     * @param issue задача или подзадача
+     */
     private void freeItemsInGrid(Issue issue) {
-        List<ItemGrid> items = cutIssueForItem(issue);
-        for (ItemGrid item : items) {
-            grid.remove(item);
-        }
+        cutIssueForItem(issue).forEach(grid::remove);
     }
 }

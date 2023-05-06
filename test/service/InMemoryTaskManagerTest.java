@@ -30,7 +30,7 @@ class InMemoryTaskManagerTest {
     }
 
 
-    @DisplayName("Добавляем задачу с параметром null.")
+    @DisplayName("Должны получить null при добавлении задачи с параметром null.")
     @Test
     void shouldReturnNullIfAddTaskNull() {
         final Task task = taskManager.addTask(null);
@@ -43,7 +43,7 @@ class InMemoryTaskManagerTest {
         assertEquals(0, tasks.size(), "Неверное количество задач.");
     }
 
-    @DisplayName("Добавляем подзадачу с параметром NULL.")
+    @DisplayName("Должны получить null при добавлении подзадачи с параметром null.")
     @Test
     void shouldReturnNullIfAddSubTaskNull() {
         final SubTask subTask = taskManager.addSubTask(null);
@@ -56,7 +56,7 @@ class InMemoryTaskManagerTest {
         assertEquals(0, subTasks.size(), "Неверное количество подзадач.");
     }
 
-    @DisplayName("Добавляем эпик с параметром NULL.")
+    @DisplayName("Должны получить null при добавлении эпика с параметром null.")
     @Test
     void shouldReturnNullIfAddEpicNull() {
         final Epic epic = taskManager.addEpic(null);
@@ -69,7 +69,7 @@ class InMemoryTaskManagerTest {
         assertEquals(0, epics.size(), "Неверное количество эпиков.");
     }
 
-    @DisplayName("Добавляем задачу c коррекцией id")
+    @DisplayName("Должны добавить задачу с id = 1 (нумерация менеджера).")
     @Test
     void shouldAddTaskWithCorrectId() {
         final Task task = new Task(99, "Test", "Description", 1000);
@@ -92,7 +92,7 @@ class InMemoryTaskManagerTest {
         assertEquals(1,taskManager.getAllTasks().size(),"Не корректный список задач.");
     }
 
-    @DisplayName("Добавляем эпик c коррекцией id")
+    @DisplayName("Должны добавить эпик без детей с id = 1 (нумерация менеджера).")
     @Test
     void shouldAddEpicWithCorrectId() {
         final Epic epic = new Epic(99, "Test", "Description");
@@ -108,16 +108,16 @@ class InMemoryTaskManagerTest {
         assertEquals("Test", savedEpic.getTitle(), "Не корректный Title.");
         assertEquals("Description", savedEpic.getDescription(), "Не корректный Description.");
         assertEquals(0, savedEpic.getDuration(), "Не корректный Duration.");
-        assertEquals(Instant.MIN, savedEpic.getStartTime(), "Не корректный StartTime.");
-        assertEquals(Instant.MIN, savedEpic.getEndTime(), "Не корректный EndTime.");
+        assertEquals(Instant.MAX, savedEpic.getStartTime(), "Не корректный StartTime.");
+        assertEquals(Instant.MAX, savedEpic.getEndTime(), "Не корректный EndTime.");
 
         assertEquals(1,taskManager.getAllEpics().size(),"Не корректный список эпиков.");
     }
 
-    @DisplayName("Добавляем подзадачу c коррекцией id")
+    @DisplayName("Должны добавить эпик с id = 1 и подзадачу с id = 2 (нумерация менеджера).")
     @Test
     void shouldAddSubTaskWithCorrectId() {
-        final Epic parent = Managers.addEpic(taskManager);
+        final Epic parent = Managers.addSimpleEpicForTest(taskManager);
         final SubTask subTask = new SubTask(99, "Test", "Description",1500, parent.getId());
         taskManager.addSubTask(subTask);
 
@@ -152,11 +152,11 @@ class InMemoryTaskManagerTest {
         assertEquals(1,taskManager.getAllSubTasks().size(),"Не корректный список эпиков.");
     }
 
-    @DisplayName("Добавляем задачу.")
+    @DisplayName("Должны добавить задачу с id = 1, при добавлении задачи без id (id=0).")
     @Test
     void shouldAddTask() {
 
-        final Task task = Managers.addTask(taskManager);
+        final Task task = Managers.addSimpleTaskForTest(taskManager, 100, Instant.now());
         final Task savedTask = taskManager.getTaskById(task.getId());
 
         //Анализируем задачу
@@ -174,18 +174,18 @@ class InMemoryTaskManagerTest {
         assertEquals(task, tasks.get(0), "Задачи не совпадают.");
     }
 
-    @DisplayName("Добавляем эпик с пустым списком подзадач.")
+    @DisplayName("Должны добавить эпик с id=1 без детей со статусом NEW, при добавлении эпика без id (id=0).")
     @Test
     void shouldAddEpic() {
 
-        final Epic epic = Managers.addEpic(taskManager);
+        final Epic epic = Managers.addSimpleEpicForTest(taskManager);
         final Epic savedEpic = taskManager.getEpicById(epic.getId());
 
         assertNotNull(savedEpic, "Добавленный эпик Null.");
         assertEquals(epic, savedEpic, "Эпики не совпадают.");
         assertEquals(0, savedEpic.getChildren().size(), "Есть дети.");
         assertEquals(0, savedEpic.getDuration(), "Не корректный Duration у эпика.");
-        assertEquals(Instant.MIN, savedEpic.getStartTime(), "Не корректный StartTime у эпика.");
+        assertEquals(Instant.MAX, savedEpic.getStartTime(), "Не корректный StartTime у эпика.");
         assertEquals(IssueStatus.NEW, savedEpic.getStatus(), "Не корректный статус.");
         assertEquals(epic,taskManager.getEpicById(1), "Не тот эпик");
 
@@ -196,12 +196,13 @@ class InMemoryTaskManagerTest {
         assertEquals(epic, epics.get(0), "Эпики не совпадают.");
     }
 
-    @DisplayName("Добавляем эпик с подзадачей в статусе NEW.")
+    @DisplayName("Должны добавить эпик со статусом NEW с подзадачей в статусе NEW.")
     @Test
     void shouldAddSubTaskStatusNew() {
 
-        final Epic parent = Managers.addEpic(taskManager);
-        final SubTask subTask = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
+        final Epic parent = Managers.addSimpleEpicForTest(taskManager);
+        final SubTask subTask = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
+                                                     10, Instant.now());
 
         final SubTask savedSubTask = taskManager.getSubTaskById(subTask.getId());
         final Epic savedParent = taskManager.getEpicById(subTask.getParentID());
@@ -232,13 +233,15 @@ class InMemoryTaskManagerTest {
         assertEquals(1, epics.size(), "Неверное количество эпиков.");
     }
 
-    @DisplayName("Добавляем эпик с подзадачами в статусе IN_PROGRESS.")
+    @DisplayName("Должны добавить эпик со статусом IN_PROGRESS с подзадачами в статусе IN_PROGRESS.")
     @Test
     void shouldAddEpicWithTwoChildrenInProgress() {
 
-        final Epic parent = Managers.addEpic(taskManager);
-        final SubTask subTask1 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.IN_PROGRESS);
-        final SubTask subTask2 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.IN_PROGRESS);
+        final Epic parent = Managers.addSimpleEpicForTest(taskManager);
+        final SubTask subTask1 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.IN_PROGRESS,
+                                              10, Instant.now());
+        final SubTask subTask2 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.IN_PROGRESS,
+                                                   100, Instant.now().plusSeconds(2000));
 
         final SubTask savedSubTask1 = taskManager.getSubTaskById(subTask1.getId());
         final SubTask savedSubTask2 = taskManager.getSubTaskById(subTask2.getId());
@@ -263,14 +266,17 @@ class InMemoryTaskManagerTest {
         assertEquals(1, epics.size(), "Неверное количество эпиков.");
     }
 
-    @DisplayName("Добавляем эпик с подзадачами в статусе DONE.")
+    @DisplayName("Должны добавить эпик со статусом DONE с подзадачами в статусе DONE.")
     @Test
     void shouldAddEpicWithTreeChildrenDone() {
 
-        final Epic parent = Managers.addEpic(taskManager);
-        final SubTask subTask1 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.DONE);
-        final SubTask subTask2 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.DONE);
-        final SubTask subTask3 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.DONE);
+        final Epic parent = Managers.addSimpleEpicForTest(taskManager);
+        final SubTask subTask1 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.DONE,
+                                                     10, Instant.now());
+        final SubTask subTask2 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.DONE,
+                                                   10, Instant.now().plusSeconds(2000));
+        final SubTask subTask3 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.DONE,
+                                                      10, Instant.now().plusSeconds(6000));
 
         final SubTask savedSubTask1 = taskManager.getSubTaskById(subTask1.getId());
         final SubTask savedSubTask2 = taskManager.getSubTaskById(subTask2.getId());
@@ -297,13 +303,15 @@ class InMemoryTaskManagerTest {
         assertEquals(3,taskManager.getAllSubTasks().size(), "Не верное количество подзадач");
     }
 
-    @DisplayName("Добавляем эпик с подзадачами в статусе DONE и NEW.")
+    @DisplayName("Должны добавить эпик со статусом IN_PROGRESS с подзадачами NEW и DONE.")
     @Test
     void shouldAddEpicWithTwoChildrenNewDone() {
 
-        final Epic parent = Managers.addEpic(taskManager);
-        final SubTask subTask1 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
-        final SubTask subTask2 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.DONE);
+        final Epic parent = Managers.addSimpleEpicForTest(taskManager);
+        final SubTask subTask1 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
+                                                      10, Instant.now());
+        final SubTask subTask2 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.DONE,
+                                                         200, Instant.now().plusSeconds(2000));
 
         final SubTask savedSubTask1 = taskManager.getSubTaskById(subTask1.getId());
         final SubTask savedSubTask2 = taskManager.getSubTaskById(subTask2.getId());
@@ -314,59 +322,10 @@ class InMemoryTaskManagerTest {
         assertEquals(IssueStatus.IN_PROGRESS, savedParent.getStatus(), "Статус эпика.");
     }
 
-    @DisplayName("Пересечение интервалов задач при добавлении.")
-    @Test
-    void shouldRefuseAddTaskWithCross() {
-        Task task1 = Managers.addTask(taskManager);
-        Task task2 = new Task(0,"Test", "Description",task1.getDuration(),
-                task1.getStartTime(),IssueStatus.DONE);
-
-        Task crossTask = taskManager.addTask(task2);
-
-        assertNull(crossTask, "Ошибка валидации");
-        assertEquals(1, taskManager.getAllTasks().size(), "Ошибка валидации. В списке задач ошибка.");
-    }
-
-    @DisplayName("Изменить интервал задачи на доступный.")
-    @Test
-    void shouldAddTaskWithoutCross() {
-        final Task task1 = Managers.addTask(taskManager);
-        final Task task2 = Managers.addTask(taskManager);
-
-        final Task taskToUpdate = new Task(task1);
-        taskToUpdate.setStartTime(task2.getEndTime().plusSeconds(960));
-        final Task updateTask = taskManager.updateTask(taskToUpdate);
-
-        assertNotNull(updateTask, "Ошибка валидации");
-        assertEquals(2, taskManager.getAllTasks().size(), "Ошибка валидации. В списке задач ошибка.");
-        assertEquals(taskToUpdate.getStartTime(),updateTask.getStartTime(),"Стартовое время " +
-                                                                                  "обновлено не корректно");
-    }
-
-    @DisplayName("Пересечение интервалов задач при обновлении")
-    @Test
-    void shouldRefuseUpdateTaskWithCross() {
-        final Task task1 = Managers.addTask(taskManager);
-        final Task task2 = Managers.addTask(taskManager);
-
-        final Task updateTask = new Task(task2);
-        updateTask.setStartTime(task1.getStartTime());
-        updateTask.setDuration(task1.getDuration());
-
-        final Task crossTask = taskManager.updateTask(updateTask);
-
-        final List<Task> tasks = taskManager.getAllTasks();
-
-        assertNull(crossTask, "Ошибка валидации");
-        assertEquals(2, tasks.size(), "Ошибка валидации. В списке задач ошибка.");
-        assertEquals(task2, taskManager.getTaskById(task2.getId()), "Задача обновлена.");
-        assertNotEquals(updateTask, taskManager.getTaskById(task2.getId()), "Задача обновлена.");
-    }
-
-    @DisplayName("Обновить статус задачи с NEW в DONE.")
+    @DisplayName("Должны обновить статус задачи с NEW в DONE.")
     @Test
     void shouldUpdateStatusTaskNewToDone() {
-        final Task task = Managers.addTask(taskManager);
+        final Task task = Managers.addSimpleTaskForTest(taskManager, 10, Instant.now());
         final Task updateForTask = new Task(task);
 
         updateForTask.setStatus(IssueStatus.DONE);
@@ -376,14 +335,16 @@ class InMemoryTaskManagerTest {
 
         assertNotNull(updateTask, "Задачи не возвращаются.");
         assertEquals(updateForTask, updateTask, "Задачи не совпадают.");
+        assertEquals(IssueStatus.NEW, task.getStatus(), "Не подходящий статус задачи для обновления.");
         assertEquals(IssueStatus.DONE, updateTask.getStatus(), "Статус задачи не обновлен.");
     }
 
-    @DisplayName("Обновить статус единственной подзадачи с NEW в DONE.")
+    @DisplayName("Должны обновить статус подзадачи и его родителя с NEW в DONE. ")
     @Test
     void shouldUpdateStatusSubTaskNewToDone() {
-        final Epic parent = Managers.addEpic(taskManager);
-        final SubTask subTask = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
+        final Epic parent = Managers.addSimpleEpicForTest(taskManager);
+        final SubTask subTask = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
+                                                       10, Instant.now());
 
         final SubTask subTaskToUpdate = new SubTask(subTask);
         subTaskToUpdate.setStatus(IssueStatus.DONE);
@@ -392,49 +353,17 @@ class InMemoryTaskManagerTest {
         final SubTask updateSubTask = taskManager.getSubTaskById(subTask.getId());
 
         assertNotNull(updateSubTask, "Обновленная подзадача не найдена.");
-        assertEquals(subTaskToUpdate, updateSubTask, "Подзадачи не совпадают.");
+        assertEquals(subTaskToUpdate, updateSubTask, "Статус подзадачи не обновлен.");
         assertEquals(IssueStatus.DONE, updateSubTask.getStatus(), "Статус подзадачи не обновлен.");
+        assertEquals(IssueStatus.DONE, taskManager.getEpicById(updateSubTask.getParentID()).getStatus(),
+                                                     "Статус эпика не обновлен.");
     }
 
-    @DisplayName("Обновить дату старта подзадачи на свободную.")
-    @Test
-    void shouldUpdateStartTimeSubTask() {
-        final Epic parent = Managers.addEpic(taskManager);
-        final SubTask subTask1 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
-        final SubTask subTask2 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
-
-        final SubTask subTaskToUpdate = new SubTask(subTask1);
-        subTaskToUpdate.setStartTime(subTask2.getEndTime().plusSeconds(960));
-        taskManager.updateSubTask(subTaskToUpdate);
-        final SubTask updateSubTask = taskManager.getSubTaskById(subTask1.getId());
-
-        assertNotNull(updateSubTask, "Обновленная подзадача не найдена.");
-        assertEquals(subTaskToUpdate.getStartTime(), updateSubTask.getStartTime(), "Ошибка обновления.");
-    }
-
-    @DisplayName("Пересечение интервалов подзадач при обновлении.")
-    @Test
-    void shouldRefuseUpdateStartTimeWithCrossSubTask() {
-        final Epic parent = Managers.addEpic(taskManager);
-        final SubTask subTask1 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
-        final SubTask subTask2 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
-
-        final SubTask subTaskToUpdate = new SubTask(subTask1);
-        subTaskToUpdate.setStartTime(subTask2.getStartTime());
-        final SubTask updateSubTask = taskManager.updateSubTask(subTaskToUpdate);
-
-        taskManager.getSubTaskById(subTask1.getId());
-        assertNull(updateSubTask, "Ошибка обновления подзадачи.");
-
-        assertEquals(subTask1.getStartTime(), taskManager.getSubTaskById(subTask1.getId()).getStartTime(),
-                "Ошибка обновления подзадачи.");
-    }
-
-    @DisplayName("Обновить статус эпика без подзадач в DONE.")
+    @DisplayName("Должен оставить статус NEW при попытке обновить статус эпика в DONE")
     @Test
     void shouldUpdateStatusEpic() {
         //Статус эпика расчетная величина, его нельзя установить
-        final Epic epic = Managers.addEpic(taskManager);
+        final Epic epic = Managers.addSimpleEpicForTest(taskManager);
         final Epic epicToUpdate = new Epic(epic);
 
         epicToUpdate.setStatus(IssueStatus.DONE);
@@ -442,17 +371,20 @@ class InMemoryTaskManagerTest {
 
         assertNotNull(updateEpic, "Эпики не возвращаются.");
         assertNotEquals(IssueStatus.DONE, updateEpic.getStatus(), "Статус эпика обновлен.");
+        assertEquals(IssueStatus.NEW, updateEpic.getStatus(), "Статус эпика обновлен.");
         assertNotEquals(IssueStatus.DONE, taskManager.getEpicById(epic.getId()).getStatus(),
                 "Статус эпика обновлен.");
     }
 
-    @DisplayName("Обновить статус подзадач для эпика с 2 детьми")
+    @DisplayName("Должны обновить статус эпика с 2 детьми, при изменении статуса подзадач")
     @Test
     void shouldUpdateStatusEpicWithTwoChildren() {
 
-        final Epic parent = Managers.addEpic(taskManager);
-        final SubTask subTask1 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
-        final SubTask subTask2 = Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
+        final Epic parent = Managers.addSimpleEpicForTest(taskManager);
+        final SubTask subTask1 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
+                10, Instant.now());
+        final SubTask subTask2 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
+                10, Instant.now().plusSeconds(2000));
 
         SubTask subTask1ToUpdate = new SubTask(subTask1);
         subTask1ToUpdate.setStatus(IssueStatus.IN_PROGRESS);
@@ -495,17 +427,108 @@ class InMemoryTaskManagerTest {
         assertEquals(IssueStatus.DONE, savedParent.getStatus(), "Статус эпика.");
 
         assertEquals(2, taskManager.getChildrenOfEpicById(parent.getId()).size(),
-                                 "Не верное количество детей.");
+                "Не верное количество детей.");
 
         assertEquals(1,taskManager.getAllEpics().size(), "Не верное количество эпиков");
         assertEquals(2,taskManager.getAllSubTasks().size(), "Не верное количество подзадач");
     }
 
-    @DisplayName("Удаление существующей задачи по id.")
+    @DisplayName("Должны получить null, при добавлении задачи на занятый интервал.")
+    @Test
+    void shouldRefuseAddTaskWithCross() {
+        Task task1 = Managers.addSimpleTaskForTest(taskManager, 100, Instant.now());
+        Task task2 = new Task(0,"Test", "Description",task1.getDuration(),
+                task1.getStartTime(),IssueStatus.DONE);
+
+        Task crossTask = taskManager.addTask(task2);
+
+        assertNull(crossTask, "Ошибка валидации");
+        assertEquals(1, taskManager.getAllTasks().size(), "Ошибка валидации. В списке задач ошибка.");
+    }
+
+    @DisplayName("Должны обновить интервал задачи на доступный.")
+    @Test
+    void shouldAddTaskWithoutCross() {
+        final Task task1 = Managers.addSimpleTaskForTest(taskManager, 100, Instant.now());
+        final Task task2 = Managers.addSimpleTaskForTest(taskManager, 100, Instant.now()
+                .plusSeconds(10000));
+
+        final Task taskToUpdate = new Task(task1);
+        taskToUpdate.setStartTime(task2.getEndTime().plusSeconds(960));
+        final Task updateTask = taskManager.updateTask(taskToUpdate);
+
+        assertNotNull(updateTask, "Ошибка валидации");
+        assertEquals(2, taskManager.getAllTasks().size(), "Ошибка валидации. В списке задач ошибка.");
+        assertEquals(taskToUpdate.getStartTime(),updateTask.getStartTime(),"Стартовое время " +
+                "обновлено не корректно");
+    }
+
+    @DisplayName("Должны получить null, при обновлении задачи на занятый интервал.")
+    @Test
+    void shouldRefuseUpdateTaskWithCross() {
+        final Task task1 = Managers.addSimpleTaskForTest(taskManager, 10, Instant.now());
+        final Task task2 = Managers.addSimpleTaskForTest(taskManager, 100,
+                Instant.now().plusSeconds(2000));
+
+        final Task updateTask = new Task(task2);
+        updateTask.setStartTime(task1.getStartTime());
+        updateTask.setDuration(task1.getDuration());
+
+        final Task crossTask = taskManager.updateTask(updateTask);
+
+        final List<Task> tasks = taskManager.getAllTasks();
+
+        assertNull(crossTask, "Ошибка валидации");
+        assertEquals(2, tasks.size(), "Ошибка валидации. В списке задач ошибка.");
+        assertEquals(task2, taskManager.getTaskById(task2.getId()), "Задача обновлена.");
+        assertNotEquals(updateTask, taskManager.getTaskById(task2.getId()), "Задача обновлена.");
+    }
+
+    @DisplayName("Должны обновить дату старта Подзадачи на свободный отрезок.")
+    @Test
+    void shouldUpdateStartTimeSubTask() {
+        final Epic parent = Managers.addSimpleEpicForTest(taskManager);
+        Instant now = Instant.now();
+        final SubTask subTask1 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
+                                                     10, now);
+        final SubTask subTask2 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
+                                                       10,now.plusSeconds(3000));
+
+        final SubTask subTaskToUpdate = new SubTask(subTask2);
+        subTaskToUpdate.setStartTime(subTask2.getEndTime().plusSeconds(10000));
+        taskManager.updateSubTask(subTaskToUpdate);
+
+        final SubTask updateSubTask = taskManager.getSubTaskById(subTaskToUpdate.getId());
+
+        assertNotNull(updateSubTask, "Обновление вернуло null.");
+        assertEquals(subTaskToUpdate.getStartTime(), updateSubTask.getStartTime(), "Ошибка обновления даты.");
+    }
+
+    @DisplayName("Должны получить null, при обновлении подзадачи на занятый интервал.")
+    @Test
+    void shouldRefuseUpdateStartTimeWithCrossSubTask() {
+        final Epic parent = Managers.addSimpleEpicForTest(taskManager);
+
+        Instant now = Instant.now();
+        final SubTask subTask1 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
+                                                    10, now);
+        final SubTask subTask2 = Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW,
+                                                          10, now.plusSeconds(3000));
+
+        final SubTask subTaskToUpdate = new SubTask(subTask1);
+        subTaskToUpdate.setStartTime(subTask2.getStartTime());
+        final SubTask updateSubTask = taskManager.updateSubTask(subTaskToUpdate);
+
+        assertNull(updateSubTask, "Получен не null");
+        assertEquals(subTask1.getStartTime(), taskManager.getSubTaskById(subTask1.getId()).getStartTime(),
+                "Обновление интервала состоялось, хотя он занят.");
+    }
+
+    @DisplayName("Должны удалить задачу по существующему id.")
     @Test
     void shouldDeleteTaskById() {
         //Стандартный вариант - когда есть задача
-        final Task task = Managers.addTask(taskManager);
+        final Task task = Managers.addSimpleTaskForTest(taskManager, 10, Instant.now());
         taskManager.deleteTaskById(task.getId());
         final List<Task> tasks = taskManager.getAllTasks();
 
@@ -514,7 +537,7 @@ class InMemoryTaskManagerTest {
         assertNull(taskManager.getTaskById(0), "Задача найдена.");
     }
 
-    @DisplayName("Не корректный id. Удаление задачи по id в пустом списке задач.")
+    @DisplayName("Должны получить null, при удалении по id в пустом списке.")
     @Test
     void shouldReturnNullIfDeleteTaskByIdWhenTasksEmpty() {
 
@@ -527,11 +550,11 @@ class InMemoryTaskManagerTest {
         assertNull(task,"Возвращает не null.");
     }
 
-    @DisplayName("Не корректный id. Удаление не существующей задачи по id.")
+    @DisplayName("Должны получить null, при удалении задачи по не существующему id.")
     @Test
     void shouldReturnNullIfDeleteTaskByNotHaveId() {
 
-        final Task task = Managers.addTask(taskManager);
+        final Task task = Managers.addSimpleTaskForTest(taskManager, 10, Instant.now());
         final Task delTask = taskManager.deleteTaskById(100);
 
         final List<Task> tasks = taskManager.getAllTasks();
@@ -544,12 +567,13 @@ class InMemoryTaskManagerTest {
         assertEquals(task, taskManager.getTaskById(task.getId()), "Список задач не корректен.");
     }
 
-    @DisplayName("Удаление существующей подзадачи по id.")
+    @DisplayName("Должны удалить подзадачу по существующему id.")
     @Test
     void shouldDeleteSubTaskById() {
         //Стандартный вариант - когда есть подзадача
-        final Epic newEpic = Managers.addEpic(taskManager);
-        final SubTask subTask = Managers.addSubTask(taskManager,newEpic.getId(),IssueStatus.DONE);
+        final Epic newEpic = Managers.addSimpleEpicForTest(taskManager);
+        final SubTask subTask = Managers.addSimpleSubTaskForTest(taskManager,newEpic.getId(),IssueStatus.DONE,
+                                                     10, Instant.now());
 
         final SubTask delSubTask = taskManager.deleteSubTaskById(subTask.getId());
         final List<SubTask> subTasks = taskManager.getAllSubTasks();
@@ -559,11 +583,11 @@ class InMemoryTaskManagerTest {
         assertNull(taskManager.getSubTaskById(subTask.getId()), "Подзадача не удалена.");
     }
 
-    @DisplayName("Удаление существующей эпика по id.")
+    @DisplayName("Должны удалить эпик без детей по существующему id.")
     @Test
     void shouldDeleteEpicById() {
         //Стандартный вариант - когда есть эпик
-        final Epic newEpic = Managers.addEpic(taskManager);
+        final Epic newEpic = Managers.addSimpleEpicForTest(taskManager);
         taskManager.deleteEpicById(newEpic.getId());
 
         final List<Epic> epics = taskManager.getAllEpics();
@@ -573,12 +597,13 @@ class InMemoryTaskManagerTest {
         assertNull(taskManager.getEpicById(newEpic.getId()), "Эпик не удален.");
     }
 
-    @DisplayName("Удаление существующей эпика с детьми по id.")
+    @DisplayName("Должны удалить эпик и его детей по существующим id.")
     @Test
     void shouldDeleteEpicWithChildrenById() {
         //Стандартный вариант - когда есть эпик
-        final Epic epic = Managers.addEpic(taskManager);
-        final SubTask subTask = Managers.addSubTask(taskManager,epic.getId(),IssueStatus.IN_PROGRESS);
+        final Epic epic = Managers.addSimpleEpicForTest(taskManager);
+        final SubTask subTask = Managers.addSimpleSubTaskForTest(taskManager,epic.getId(),IssueStatus.IN_PROGRESS,
+                                              10, Instant.now());
 
         taskManager.deleteEpicById(epic.getId());
 
@@ -595,7 +620,7 @@ class InMemoryTaskManagerTest {
         assertNull(taskManager.getSubTaskById(subTask.getId()), "Ребенок не удален.");
     }
 
-    @DisplayName("Не корректный id. Удаление эпика по id в пустом списке.")
+    @DisplayName("Должны получить null, при удалении эпика в пустом списке.")
     @Test
     void shouldDeleteEpicByIdWhenTasksEmpty() {
         final Epic epic = taskManager.deleteEpicById(100);
@@ -607,10 +632,10 @@ class InMemoryTaskManagerTest {
         assertNull(taskManager.getEpicById(100), "Эпик найден.");
     }
 
-    @DisplayName("Не корректный id. Удаление не существующего эпика по id.")
+    @DisplayName("Должны получить null, при удалении эпика по не существующему id.")
     @Test
     void shouldDeleteEpicByNotHaveId() {
-        Managers.addEpic(taskManager);
+        Managers.addSimpleEpicForTest(taskManager);
         final Epic delEpic = taskManager.deleteEpicById(100);
         final List<Epic> epics = taskManager.getAllEpics();
 
@@ -620,7 +645,7 @@ class InMemoryTaskManagerTest {
         assertNull(taskManager.getEpicById(100), "Эпик не удален.");
     }
 
-    @DisplayName("Удалить все задачи, при пустом списке.")
+    @DisplayName("Должны получить пустой список задач, при пустом списке.")
     @Test
     void shouldTasksNotNullIfDeleteAllTasksForNewManager() {
         //Для нового менеджера, после удаления подзадач - пустой список и не null
@@ -631,10 +656,10 @@ class InMemoryTaskManagerTest {
         assertEquals(0, tasks.size(), "Список задач не пуст.");
     }
 
-    @DisplayName("Удалить все задачи, при наличии задач в истории.")
+    @DisplayName("Должны получить пустой список задач, при удалении всех задач, при наличии задач.")
     @Test
     void shouldDeleteAllTasks(){
-        Task task = Managers.addTask(taskManager);
+        Task task = Managers.addSimpleTaskForTest(taskManager, 10, Instant.now());
         //Добавляем в историю
         taskManager.getTaskById(task.getId());
 
@@ -646,7 +671,7 @@ class InMemoryTaskManagerTest {
         assertEquals(0, taskManager.getHistory().size(), "Список истории не пуст.");
     }
 
-    @DisplayName("Удалить все подзадачи, при пустом списке.")
+    @DisplayName("Должны получить пустой список подзадач, при пустом списке.")
     @Test
     void shouldSubTasksNotNullIfDeleteAllSubTasksForNewManager() {
         //Для нового менеджера, после удаления подзадач - пустой список и не null
@@ -657,11 +682,12 @@ class InMemoryTaskManagerTest {
         assertEquals(0, subTasks.size(), "Список подзадач не пуст.");
     }
 
-    @DisplayName("Удалить все подзадачи, при наличии подзадач.")
+    @DisplayName("Должны получить пустой список подзадачи эпики без детей, при наличии эпиков с детьми, " +
+            "после удаления всех подзадач.")
     @Test
     void shouldDeleteAllSubTasksTest(){
-        Epic epic = Managers.addEpic(taskManager);
-        Managers.addSubTask(taskManager, epic.getId(), IssueStatus.NEW);
+        Epic epic = Managers.addSimpleEpicForTest(taskManager);
+        Managers.addSimpleSubTaskForTest(taskManager, epic.getId(), IssueStatus.NEW, 10, Instant.now());
 
         taskManager.deleteAllSubTasks();
         final List<SubTask> subTasks = taskManager.getAllSubTasks();
@@ -671,7 +697,7 @@ class InMemoryTaskManagerTest {
         assertEquals(0, epic.getChildren().size(), "Список подзадач не пуст.");
     }
 
-    @DisplayName("Удалить все эпики, при пустом списке.")
+    @DisplayName("Должны получить пустой список эпиков, при пустом списке.")
     @Test
     void shouldEpicsNotNullIfDeleteAllEpicsForNewManager() {
         //Для нового менеджера, после удаления эпики - пустой список и не null
@@ -686,11 +712,12 @@ class InMemoryTaskManagerTest {
         assertEquals(0, subTasks.size(), "Список подзадач не пуст.");
     }
 
-    @DisplayName("Удалить все эпики при наличии эпика с детьми.")
+    @DisplayName("Должны получить пустые списки эпиков и подзадач, после удаления всех эпиков," +
+            " при наличии эпика с детьми.")
     @Test
     void shouldDeleteAllEpicWithChildren() {
-        Epic epic = Managers.addEpic(taskManager);
-        Managers.addSubTask(taskManager, epic.getId(), IssueStatus.NEW);
+        Epic epic = Managers.addSimpleEpicForTest(taskManager);
+        Managers.addSimpleSubTaskForTest(taskManager, epic.getId(), IssueStatus.NEW, 10, Instant.now());
 
         taskManager.deleteAllEpics();
 
@@ -698,7 +725,7 @@ class InMemoryTaskManagerTest {
         assertEquals(0, taskManager.getAllSubTasks().size(), "Список подзадач не пуст.");
     }
 
-    @DisplayName("Не корректный id. Найти задачу по не существующему id.")
+    @DisplayName("Должны получить null, при поиске эпика по не существующему id.")
     @Test
     void shouldReturnNullGetEpicByIdWithNotCorrectId() {
         //Ищем эпик с неверным id
@@ -710,19 +737,19 @@ class InMemoryTaskManagerTest {
         assertNull(findEpic, "Не возвращает null.");
     }
 
-    @DisplayName("Не корректный id. Найти подзадачу по не существующему id.")
+    @DisplayName("Должны получить null, при поиске подзадачи по не существующему id.")
     @Test
     void shouldReturnNullGetSubTaskByIdWithNotCorrectId() {
         //Ищем подзадачу с неверным id
-        final Epic parent = Managers.addEpic(taskManager);
-        Managers.addSubTask(taskManager,parent.getId(),IssueStatus.NEW);
+        final Epic parent = Managers.addSimpleEpicForTest(taskManager);
+        Managers.addSimpleSubTaskForTest(taskManager,parent.getId(),IssueStatus.NEW, 10, Instant.now());
 
         final SubTask savedSubTask = taskManager.getSubTaskById(parent.getId());
 
         assertNull(savedSubTask, "Не возвращает null.");
     }
 
-    @DisplayName("Проверить список задач для нового менеджера.")
+    @DisplayName("Должны получить пустой список задач, для нового менеджера")
     @Test
     void shouldReturnEmptyTasksIfGetAllTasksForNewManager() {
         //Для нового менеджера подзадачи пустой список и не null
@@ -732,7 +759,7 @@ class InMemoryTaskManagerTest {
         assertEquals(0, tasks.size(), "Хранилище задач не пустое для нового менеджера.");
     }
 
-    @DisplayName("Проверить список подзадач для нового менеджера.")
+    @DisplayName("Должны получить пустой список подзадач, для нового менеджера")
     @Test
     void shouldReturnEmptySubTasksIfGetAllSubTasksForNewManager() {
         //Для нового менеджера подзадачи пустой список и не null
@@ -742,7 +769,7 @@ class InMemoryTaskManagerTest {
         assertEquals(0, subTasks.size(), "Хранилище подзадач не пустое для нового менеджера.");
     }
 
-    @DisplayName("Проверить список эпиков для нового менеджера.")
+    @DisplayName("Должны получить пустой список эпиков, для нового менеджера")
     @Test
     void shouldReturnEmptyEpicsIfGetAllEpicsForNewManager() {
         //Для нового менеджера эпики пустой список и не null
@@ -752,7 +779,7 @@ class InMemoryTaskManagerTest {
         assertEquals(0, epics.size(), "Хранилище эпика не пустое для нового менеджера.");
     }
 
-    @DisplayName("Проверить список детей для нового эпика.")
+    @DisplayName("Должны получить пустой список подзадач, для нового эпика")
     @Test
     void shouldReturnEmptyListIfGetChildrenOfEpicByIdForNewEpic() {
         //Для нового эпика список подзадач пустой и не null
@@ -765,7 +792,7 @@ class InMemoryTaskManagerTest {
         assertEquals(0, children.size(), "Список детей эпика не пустая.");
     }
 
-    @DisplayName("Получить историю просмотров для нового менеджера.")
+    @DisplayName("Должны получить пустой список истории просмотров для нового менеджера.")
     @Test
     void shouldReturnEmptyListIfGetHistoryForNewManager() {
         //Для нового менеджера история задач пустой список и не null
@@ -775,7 +802,7 @@ class InMemoryTaskManagerTest {
         assertEquals(0, history.size(), "История не пустая для нового менеджера.");
     }
 
-    @DisplayName("Получить историю просмотров для менеджера в работе.")
+    @DisplayName("Должны получить историю просмотров для не нового менеджера.")
     @Test
     void shouldReturnHistoryListForGetHistory() {
         Managers.simpleTestForTaskManager(taskManager);

@@ -27,7 +27,7 @@ public abstract class Issue {
         this.title       = title;
         this.description = description;
         this.duration    = duration;
-        this.startTime   = Instant.MIN;
+        this.startTime   = Instant.MAX;
         this.status      = IssueStatus.NEW;
     }
 
@@ -65,7 +65,11 @@ public abstract class Issue {
     }
 
     public Instant getEndTime() {
-        return startTime.plusSeconds(duration * 60L);
+        if (Instant.MAX.equals(getStartTime())) {
+            return Instant.MAX;
+        } else {
+            return startTime.plusSeconds(duration * 60L);
+        }
     }
 
     public void setId(int id) {

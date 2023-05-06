@@ -7,8 +7,10 @@ import model.IssueStatus;
 import model.SubTask;
 import model.Task;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+
 
 /**
  * Утилитарный класс <b>{@code Managers}</b> ответственный за получение дефолтных значений
@@ -140,10 +142,10 @@ public class Managers {
      * @param taskManager менеджер задач, в него будем добавлять задачу
      * @return добавленная задача, экземпляр класса {@link Task}
      */
-    public static Task addTask(TaskManager taskManager) {
-        final Task task = new Task("Test", "Description", 25);
-        taskManager.addTask(task);
-        return task;
+    public static Task addSimpleTaskForTest(TaskManager taskManager, int duration, Instant start) {
+
+        final Task task = new Task("Test", "Description", duration, start);
+        return  taskManager.addTask(task);
     }
 
     /**
@@ -151,10 +153,9 @@ public class Managers {
      * @param taskManager менеджер задач, в него будем добавлять эпик
      * @return добавленный эпик, экземпляр класса {@link Epic}
      */
-    public static Epic addEpic(TaskManager taskManager) {
+    public static Epic addSimpleEpicForTest(TaskManager taskManager) {
         final Epic epic = new Epic("Epic", "Description");
-        taskManager.addEpic(epic);
-        return epic;
+        return taskManager.addEpic(epic);
     }
 
     /**
@@ -164,10 +165,10 @@ public class Managers {
      * @param issueStatus статус добавляемой подзадачи {@link IssueStatus}
      * @return добавленная подзадача, экземпляр класса {@link SubTask}
      */
-    public static SubTask addSubTask(TaskManager taskManager, int epicID, IssueStatus issueStatus) {
-        final SubTask subTask = new SubTask("SubTask", "Description", 33,
-                epicID, issueStatus);
-        taskManager.addSubTask(subTask);
-        return subTask;
+    public static SubTask addSimpleSubTaskForTest(TaskManager taskManager, int epicID, IssueStatus issueStatus,
+                                                  int duration, Instant start) {
+        final SubTask subTask = new SubTask("SubTask", "Description",
+                                              epicID, duration, start, issueStatus);
+        return taskManager.addSubTask(subTask);
     }
 }

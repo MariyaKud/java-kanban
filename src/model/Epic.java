@@ -22,8 +22,8 @@ public class Epic extends Issue {
     public Epic(int id, String title, String description) {
         super(id, title, description, 0);
         //Время старта/завершения текущая дата
-        this.setStartTime(Instant.MIN);
-        this.setEndTime(Instant.MIN);
+        this.setStartTime(Instant.MAX);
+        this.setEndTime(Instant.MAX);
     }
 
     public Epic( String title, String description) {
@@ -77,9 +77,9 @@ public class Epic extends Issue {
         }
         result.append("Epic{").append("id=").append(getId()).append(", status=").append(getStatus());
         result.append(", title='").append(getTitle() ).append('\'').append(", description='").append(getDescription());
-        if (getStartTime() == Instant.MIN) {
-            result.append('\'').append(", startTime='0");
-            result.append('\'').append(", endTime='0'");
+        if (getStartTime() == Instant.MAX) {
+            result.append('\'').append(", startTime='");
+            result.append('\'').append(", endTime=''");
         } else {
             result.append('\'').append(", startTime='").append(Managers.getFormatter().format(getStartTime()));
             result.append('\'').append(", endTime='").append(Managers.getFormatter().format(getEndTime())).append('\'');

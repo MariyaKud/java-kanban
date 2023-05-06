@@ -26,16 +26,16 @@ public class SubTask extends Issue {
         this(id, title, description, duration, startTime, parentID, IssueStatus.NEW);
     }
 
-    public SubTask(int id, String title, String description, int duration, int parentID) {
-        this(id, title, description, duration, Instant.MIN, parentID, IssueStatus.NEW);
+    public SubTask(String title, String description, int parentID, int duration, Instant start, IssueStatus status){
+        this(0, title, description, duration, start, parentID, status);
     }
 
-    public SubTask(String title, String description, int duration, int parentID) {
-        this(0, title, description, duration, Instant.MIN, parentID, IssueStatus.NEW);
+    public SubTask(int id, String title, String description, int duration, int parentID) {
+        this(id, title, description, duration, Instant.MAX, parentID, IssueStatus.NEW);
     }
 
     public SubTask(String title, String description, int duration, int parentID, IssueStatus status) {
-        this(0, title, description, parentID, duration, Instant.MIN);
+        this(0, title, description, parentID, duration, Instant.MAX);
         this.setStatus(status);
     }
 
@@ -55,14 +55,22 @@ public class SubTask extends Issue {
 
     @Override
     public String toString() {
+        String startTimeString = "";
+        String endTimeString = "";
+
+        if (getStartTime() != Instant.MAX) {
+            startTimeString = Managers.getFormatter().format(getStartTime());
+            endTimeString = Managers.getFormatter().format(getEndTime());
+        }
+
         return "SubTask{"  +
                 "id=" + getId() +
                 ", parentId=" + parentID +
                 ", status="   + getStatus() +
                 ", title='"   + getTitle() + '\'' +
                 ", description='"   + getDescription() + '\'' +
-                ", startTime='" + Managers.getFormatter().format(getStartTime()) + '\'' +
-                ", endTime='" + Managers.getFormatter().format(getEndTime()) + '\'' +
+                ", startTime='" + startTimeString + '\'' +
+                ", endTime='" + endTimeString + '\'' +
                 ", duration='" + getDuration() + "мин." + '\'' +
                 '}';
     }

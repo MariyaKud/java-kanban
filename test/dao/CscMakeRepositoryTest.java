@@ -17,6 +17,7 @@ import service.TaskManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 class CscMakeRepositoryTest {
 
     final String dirHome     = System.getProperty("data");
-    final String nameFileCSV = "taskManager.csv";
+    final String nameFileCSV = "taskManagerTest.csv";
     private IssueRepository issueRepository;
     private File file;
     private TaskManager fileBackedTasksManager;
@@ -122,7 +123,7 @@ class CscMakeRepositoryTest {
     @DisplayName("Сохранить/загрузить задачу.")
     @Test
     void shouldSaveTaskTest() {
-        Task task = Managers.addTask(fileBackedTasksManager);
+        Task task = Managers.addSimpleTaskForTest(fileBackedTasksManager,10 , Instant.now());
 
         FileBackedTasksManager loadTasksManager = new FileBackedTasksManager(new InMemoryHistoryManager(),file);
         issueRepository.load(loadTasksManager, file);
@@ -137,7 +138,7 @@ class CscMakeRepositoryTest {
     @DisplayName("Сохранить/загрузить эпик без детей.")
     @Test
     void shouldSaveEpicWithoutChildrenTest() {
-        Epic epic = Managers.addEpic(fileBackedTasksManager);
+        Epic epic = Managers.addSimpleEpicForTest(fileBackedTasksManager);
 
         FileBackedTasksManager loadTasksManager = new FileBackedTasksManager(new InMemoryHistoryManager(),file);
         issueRepository.load(loadTasksManager, file);
@@ -154,8 +155,9 @@ class CscMakeRepositoryTest {
     @DisplayName("Сохранить/загрузить эпик с ребенком.")
     @Test
     void shouldSaveEpicWithTwoChildrenTest() {
-        Epic epic = Managers.addEpic(fileBackedTasksManager);
-        SubTask subTask = Managers.addSubTask(fileBackedTasksManager, epic.getId(), IssueStatus.NEW);
+        Epic epic = Managers.addSimpleEpicForTest(fileBackedTasksManager);
+        SubTask subTask = Managers.addSimpleSubTaskForTest(fileBackedTasksManager, epic.getId(),
+                                              IssueStatus.NEW, 10, Instant.now());
 
         FileBackedTasksManager loadTasksManager = new FileBackedTasksManager(new InMemoryHistoryManager(),file);
         issueRepository.load(loadTasksManager, file);
@@ -174,7 +176,7 @@ class CscMakeRepositoryTest {
     @DisplayName("Сохранить/Загрузить эпик и он же в истории.")
     @Test
     void shouldSaveEpicWithHistoryTest() {
-        final Epic epic = Managers.addEpic(fileBackedTasksManager);
+        final Epic epic = Managers.addSimpleEpicForTest(fileBackedTasksManager);
         //Сохраняем в историю
         fileBackedTasksManager.getEpicById(epic.getId());
 
@@ -190,7 +192,7 @@ class CscMakeRepositoryTest {
         assertEquals(epic, loadEpic, "Эпик не восстановился.");
     }
 
-    @DisplayName("Загрузить задачу, эпик, подзадачу с историей.")
+    @DisplayName("Загрузить задачу, эпик, подзадачу с историей. Отсортированные списки должны совпасть.")
     @Test
     void shouldLoadTest() {
         //Подготовить файл
@@ -206,5 +208,7 @@ class CscMakeRepositoryTest {
                 "Эпики загрузились не корректны.");
         assertEquals(fileBackedTasksManager.getHistory(),loadTasksManager.getHistory(),
                 "История загрузилась не корректно.");
+        assertEquals(fileBackedTasksManager.getPrioritizedTasks(),loadTasksManager.getPrioritizedTasks(),
+                "Сортированные списке различаются.");
     }
 }

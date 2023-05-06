@@ -45,7 +45,7 @@ public final class CsvMakeRepository implements IssueRepository {
             while (fileReader.ready()) {
                 String line = fileReader.readLine();
                 if  (!line.isEmpty()) {
-                    Issue issue = SerializerIssue.issueFromString(line);
+                    Issue issue = SerializerIssue.stringToIssue(line);
                     if (issue != null) {
                         switch(issue.getType()){
                             case TASK:
@@ -74,7 +74,8 @@ public final class CsvMakeRepository implements IssueRepository {
             if (fileReader.ready()) {
                 String line = fileReader.readLine();
                 if  (!line.isEmpty()) {
-                    List<Integer> historyID = SerializerIssue.historyFromString(line.trim());
+                    List<Integer> historyID = SerializerIssue.stringToHistory(line.trim());
+
                     for (Integer id : historyID) {
                         if (tracker.getTaskById(id) == null) {
                             if (tracker.getSubTaskById(id) == null) {
@@ -82,6 +83,7 @@ public final class CsvMakeRepository implements IssueRepository {
                             }
                         }
                     }
+
                 }
             }
 
