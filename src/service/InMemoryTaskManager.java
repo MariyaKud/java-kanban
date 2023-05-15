@@ -49,15 +49,15 @@ public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Task> tasks = new HashMap<>();      //Задачи
     protected final Map<Integer, Epic> epics = new HashMap<>();      //Эпики
     protected final Map<Integer, SubTask> subTasks = new HashMap<>();//Подзадачи
-    protected final HistoryManager historyManager;                   //История просмотров
+    transient final HistoryManager historyManager;                   //История просмотров
 
     //Задачи и подзадачи отсортированные по startTime
-    protected final TreeSet<Issue> issuesByPriority = new TreeSet<>(Comparator.comparing(Issue::getStartTime)
+    transient final TreeSet<Issue> issuesByPriority = new TreeSet<>(Comparator.comparing(Issue::getStartTime)
             .thenComparing(Issue::getId));
 
     //Интервала сетки в минутах.
     //Ограничение: час должен быть кратен ITEM_GRID.
-    private static final long ITEM_GRID = 15;
+    protected static final long ITEM_GRID = 15;
 
     //Временная сетка для контроля пересечений
     protected final Map<ItemGrid, Integer> grid = new HashMap<>();
@@ -659,6 +659,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Issue> getPrioritizedTasks() {
         return new ArrayList<>(issuesByPriority);
+    }
+
+    //TODO удалить пока для теста
+    public void getGrid() {
+        System.out.println(grid);
     }
 
     /**

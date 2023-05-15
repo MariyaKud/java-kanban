@@ -34,7 +34,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         final File file = new File(dirHome,nameFileCSV);
         final FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(Managers.getDefaultHistory(), file);
 
-        Managers.simpleTestForTaskManager(fileBackedManager);
+        Managers.getSimpleTestForTaskManager(fileBackedManager);
 
         System.out.println("\nСверим данные менеджера, с сохраненными данными в csv файле:");
         FileBackedTasksManager loadFromFileTracker = loadFromFile(file);

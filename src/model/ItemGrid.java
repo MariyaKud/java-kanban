@@ -1,5 +1,7 @@
 package model;
 
+import service.Managers;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -54,6 +56,11 @@ public final class ItemGrid {
         return getMinutesOfDay() == item.getMinutesOfDay() &&
                 getDayOfYear() == item.getDayOfYear() &&
                 getYear() == item.getYear();
+    }
+
+    @Override
+    public String toString() {
+        return Managers.getGson().toJson(this);
     }
 }
 

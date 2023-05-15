@@ -160,7 +160,7 @@ public class SerializerIssue {
      * @param history - список просмотренных задач, экземпляры классов {@code Task},{@code SubTask},{@code Epic}
      * @return строковое представление списка - идентификаторы задач, разделенные запятой
      */
-    static String historyToString(List<Issue> history) {
+    public static String historyToString(List<Issue> history) {
         //id задач в порядке просмотра
         StringBuilder result = new StringBuilder();
         history.forEach(h -> result.append(h.getId()).append(","));

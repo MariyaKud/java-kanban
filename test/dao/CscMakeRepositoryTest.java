@@ -123,7 +123,7 @@ class CscMakeRepositoryTest {
     @DisplayName("Сохранить/загрузить задачу.")
     @Test
     void shouldSaveTaskTest() {
-        Task task = Managers.addSimpleTaskForTest(fileBackedTasksManager,10 , Instant.now());
+        Task task = Managers.getSimpleTaskForTest(fileBackedTasksManager,10 , Instant.now());
 
         FileBackedTasksManager loadTasksManager = new FileBackedTasksManager(new InMemoryHistoryManager(),file);
         issueRepository.load(loadTasksManager, file);
@@ -138,7 +138,7 @@ class CscMakeRepositoryTest {
     @DisplayName("Сохранить/загрузить эпик без детей.")
     @Test
     void shouldSaveEpicWithoutChildrenTest() {
-        Epic epic = Managers.addSimpleEpicForTest(fileBackedTasksManager);
+        Epic epic = Managers.getSimpleEpicForTest(fileBackedTasksManager);
 
         FileBackedTasksManager loadTasksManager = new FileBackedTasksManager(new InMemoryHistoryManager(),file);
         issueRepository.load(loadTasksManager, file);
@@ -155,8 +155,8 @@ class CscMakeRepositoryTest {
     @DisplayName("Сохранить/загрузить эпик с ребенком.")
     @Test
     void shouldSaveEpicWithTwoChildrenTest() {
-        Epic epic = Managers.addSimpleEpicForTest(fileBackedTasksManager);
-        SubTask subTask = Managers.addSimpleSubTaskForTest(fileBackedTasksManager, epic.getId(),
+        Epic epic = Managers.getSimpleEpicForTest(fileBackedTasksManager);
+        SubTask subTask = Managers.getSimpleSubTaskForTest(fileBackedTasksManager, epic.getId(),
                                               IssueStatus.NEW, 10, Instant.now());
 
         FileBackedTasksManager loadTasksManager = new FileBackedTasksManager(new InMemoryHistoryManager(),file);
@@ -176,7 +176,7 @@ class CscMakeRepositoryTest {
     @DisplayName("Сохранить/Загрузить эпик и он же в истории.")
     @Test
     void shouldSaveEpicWithHistoryTest() {
-        final Epic epic = Managers.addSimpleEpicForTest(fileBackedTasksManager);
+        final Epic epic = Managers.getSimpleEpicForTest(fileBackedTasksManager);
         //Сохраняем в историю
         fileBackedTasksManager.getEpicById(epic.getId());
 
@@ -196,7 +196,7 @@ class CscMakeRepositoryTest {
     @Test
     void shouldLoadTest() {
         //Подготовить файл
-        Managers.simpleTestForTaskManager(fileBackedTasksManager);
+        Managers.getSimpleTestForTaskManager(fileBackedTasksManager);
         FileBackedTasksManager loadTasksManager = new FileBackedTasksManager(new InMemoryHistoryManager(),file);
         issueRepository.load(loadTasksManager, file);
 
@@ -216,7 +216,7 @@ class CscMakeRepositoryTest {
     @Test
     void shouldDeleteAll() {
         //Подготовить файл
-        Managers.simpleTestForTaskManager(fileBackedTasksManager);
+        Managers.getSimpleTestForTaskManager(fileBackedTasksManager);
 
         //задачи
         fileBackedTasksManager.deleteAllTasks();

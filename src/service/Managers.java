@@ -1,15 +1,37 @@
 package service;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import dao.CsvMakeRepository;
 import dao.IssueRepository;
 import model.Epic;
 import model.IssueStatus;
+import model.ItemGrid;
 import model.SubTask;
 import model.Task;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Objects;
+
+import com.google.gson.JsonObject;
 
 
 /**
@@ -21,9 +43,12 @@ import java.time.format.DateTimeFormatter;
  */
 public class Managers {
 
+    public final static String URL_KV_SERVER = "http://localhost:8078";
+    public final static String URL_TM_SERVER = "http://localhost:8080";
+    private static final String CLASS_META_KEY = "CLASS_META_KEY";
     private static final IssueRepository issueRepository = new CsvMakeRepository();
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").
-                                                       withZone(ZoneId.systemDefault());
+            withZone(ZoneId.systemDefault());
 
     /**
      * Приватный конструктор для закрытия возможности создать объект.
@@ -35,7 +60,8 @@ public class Managers {
 
     /**
      * Получить дефолтный объект-менеджера
-     * @return  объект-менеджер
+     *
+     * @return объект-менеджер
      */
     public static TaskManager getDefault() {
         return new InMemoryTaskManager(getDefaultHistory());
@@ -43,7 +69,8 @@ public class Managers {
 
     /**
      * Получить дефолтный объект-история просмотров
-     * @return  объект-история просмотров
+     *
+     * @return объект-история просмотров
      */
     public static HistoryManager getDefaultHistory() {
         return new InMemoryHistoryManager();
@@ -51,7 +78,8 @@ public class Managers {
 
     /**
      * Получить дефолтный объект-обмена менеджера с файлом csv
-     * @return  объект-экземпляр поддерживающий контрактом {@code IssueRepository} для записи и чтения данных в файл csv
+     *
+     * @return объект-экземпляр поддерживающий контрактом {@code IssueRepository} для записи и чтения данных в файл csv
      */
     public static IssueRepository getDefaultIssueRepository() {
         return issueRepository;
@@ -59,6 +87,7 @@ public class Managers {
 
     /**
      * Получить дефолтный формат дат, для менеджера задач
+     *
      * @return формат хранения и представления дат
      */
     public static DateTimeFormatter getFormatter() {
@@ -67,13 +96,14 @@ public class Managers {
 
     /**
      * Выполняет набор базовых операций интерфейса, с выводом информации о результате на консоль
+     *
      * @param taskManager наследник контракта {@code TaskManager}
      */
-    public static void simpleTestForTaskManager(TaskManager taskManager) {
+    public static void getSimpleTestForTaskManager(TaskManager taskManager) {
 
         System.out.println("ЗАПУЩЕН АВТО ТЕСТ менеджера: " + taskManager.getClass());
 
-        Task newTask1 = new Task("Test", "Description", 10);
+        Task newTask1 = new Task("Test", "Description", 10, Instant.now());
         if (taskManager.addTask(newTask1) != null) {
             System.out.println("✅" + "Добавлена задача: " + newTask1);
         } else {
@@ -102,7 +132,7 @@ public class Managers {
             System.out.println("❌" + "Добавление эпика не состоялось");
         }
 
-        SubTask newSubTask1 = new SubTask(0, "SubTask1", "Description",15, newEpic.getId());
+        SubTask newSubTask1 = new SubTask(0, "SubTask1", "Description", 15, newEpic.getId());
         if (taskManager.addSubTask(newSubTask1) != null) {
             System.out.println("✅" + "Добавлена подзадача: " + newSubTask1);
         }
@@ -139,36 +169,104 @@ public class Managers {
 
     /**
      * Добавить новую задачу в менеджер со статусом NEW
+     *
      * @param taskManager менеджер задач, в него будем добавлять задачу
      * @return добавленная задача, экземпляр класса {@link Task}
      */
-    public static Task addSimpleTaskForTest(TaskManager taskManager, int duration, Instant start) {
+    public static Task getSimpleTaskForTest(TaskManager taskManager, int duration, Instant start) {
 
         final Task task = new Task("Test", "Description", duration, start);
-        return  taskManager.addTask(task);
+        return taskManager.addTask(task);
     }
 
     /**
      * Добавить новый эпик без детей в менеджере задач
+     *
      * @param taskManager менеджер задач, в него будем добавлять эпик
      * @return добавленный эпик, экземпляр класса {@link Epic}
      */
-    public static Epic addSimpleEpicForTest(TaskManager taskManager) {
+    public static Epic getSimpleEpicForTest(TaskManager taskManager) {
         final Epic epic = new Epic("Epic", "Description");
         return taskManager.addEpic(epic);
     }
 
     /**
      * Добавить новую подзадачу в менеджер со статусом NEW
+     *
      * @param taskManager менеджер задач, в него будем добавлять подзадачу
-     * @param epicID родительский ID
+     * @param epicID      родительский ID
      * @param issueStatus статус добавляемой подзадачи {@link IssueStatus}
      * @return добавленная подзадача, экземпляр класса {@link SubTask}
      */
-    public static SubTask addSimpleSubTaskForTest(TaskManager taskManager, int epicID, IssueStatus issueStatus,
+    public static SubTask getSimpleSubTaskForTest(TaskManager taskManager, int epicID, IssueStatus issueStatus,
                                                   int duration, Instant start) {
         final SubTask subTask = new SubTask("SubTask", "Description",
-                                              epicID, duration, start, issueStatus);
+                epicID, duration, start, issueStatus);
         return taskManager.addSubTask(subTask);
+    }
+
+    public static Gson getGson() {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.setPrettyPrinting();
+        gsonBuilder.registerTypeAdapter(Instant.class, new InstantTypeConverter());
+        gsonBuilder.registerTypeAdapter(ItemGrid.class, new LocalDateAdapter());
+        return gsonBuilder.create();
+    }
+
+    private static class InstantTypeConverter
+            implements JsonSerializer<Instant>, JsonDeserializer<Instant> {
+
+        @Override
+        public JsonElement serialize(Instant src, Type srcType, JsonSerializationContext context) {
+            if (src == Instant.MAX) {
+                return new JsonPrimitive(0);
+            } else {
+                return new JsonPrimitive(src.toEpochMilli());
+            }
+        }
+
+        @Override
+        public Instant deserialize(JsonElement json, Type type, JsonDeserializationContext context)
+                throws JsonParseException {
+            if ("0".equals(json.getAsString())) {
+                return Instant.MAX;
+            } else {
+                return Instant.ofEpochMilli(json.getAsLong());
+            }
+        }
+    }
+
+    private static class LocalDateAdapter extends TypeAdapter<ItemGrid> {
+        @Override
+        public void write(JsonWriter jsonWriter, ItemGrid itemGrid) throws IOException {
+            jsonWriter.value(itemGrid.getYear()+"-"+itemGrid.getDayOfYear()+"-"+itemGrid.getMinutesOfDay());
+        }
+
+        @Override
+        public ItemGrid read(JsonReader jsonReader) throws IOException {
+
+            int year = 0;
+            int dayOfYear = 0;
+            int minutes = 0;
+
+            String str = removeFirstAndLast(jsonReader.nextString());
+            String[] parts = str.split("-");
+
+            try {
+                year = Integer.parseInt(parts[0]);
+                dayOfYear = Integer.parseInt(parts[1]);
+                minutes = Integer.parseInt(parts[2]);
+            } catch (NumberFormatException ignored) {
+            }
+
+            return new ItemGrid(year,dayOfYear,minutes);
+        }
+    }
+
+    private static String removeFirstAndLast(String str) {
+        StringBuffer sb = new StringBuffer(str);
+        sb.delete(str.length() - 1, str.length());
+        sb.delete(0, 1);
+        return sb.toString();
     }
 }

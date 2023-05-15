@@ -1,6 +1,7 @@
 package model;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Универсальный класс задач, родитель любой сущности, управляемой менеджером.
@@ -85,7 +86,11 @@ public abstract class Issue {
     }
 
     public void setStartTime(Instant startTime) {
-        this.startTime = startTime;
+        if (startTime == Instant.MAX) {
+            this.startTime = startTime;
+        } else {
+            this.startTime = startTime.truncatedTo(ChronoUnit.MINUTES);
+        }
     }
 
     @Override
@@ -107,7 +112,7 @@ public abstract class Issue {
         return getId() == task.getId() &&
                 getStatus() == task.getStatus() &&
                 getDuration() == task.getDuration() &&
-                getStartTime().equals(task.getStartTime()) &&
+                getStartTime().equals(getStartTime()) &&
                 getTitle().equals(task.getTitle()) &&
                 getDescription().equals(task.getDescription());
     }
