@@ -2,9 +2,11 @@ package service;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import dao.CsvMakeRepository;
+
+import dao.KVServer;
 import dao.SerializerIssue;
 import dao.KVTaskClient;
+
 import model.Epic;
 import model.SubTask;
 import model.Task;
@@ -16,8 +18,6 @@ import java.util.List;
 public class HttpTaskManager extends FileBackedTasksManager {
 
     private final String url;
-
-    private static String json;
 
     private static KVTaskClient client = null;
 
@@ -33,9 +33,9 @@ public class HttpTaskManager extends FileBackedTasksManager {
 
     public static void main(String[] args) {
 
-        final CsvMakeRepository.KVServer kvServer;
+        final KVServer kvServer;
         try {
-            kvServer = new CsvMakeRepository.KVServer();
+            kvServer = new KVServer();
             kvServer.start();
         } catch (IOException e) {
             System.out.println("Возникли проблемы с доступом к северу");
@@ -75,7 +75,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
 
         System.out.println("Выполняется загрузка данных с сервера ..");
 
-        json = httpTasksManager.client.load("tasks");
+        String json = httpTasksManager.client.load("tasks");
         final List<Task> loadTasks = gson.fromJson(json, new TypeToken<ArrayList<Task>>() {
         }.getType());
         for (Task loadTask : loadTasks) {

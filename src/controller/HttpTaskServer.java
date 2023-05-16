@@ -131,7 +131,7 @@ public class HttpTaskServer {
     private void taskIdADDHandler(HttpExchange httpExchange, String param) throws IOException {
         int id = parsePathId(param);
         if (id != -1) {
-            //TODO берем тело задачи и добавляем или апдейтим если нашли
+            //TODO берем тело задачи
         } else {
             taskErrorHandler(httpExchange,
                     "Для метода POST получен не корректный параметр " + param);

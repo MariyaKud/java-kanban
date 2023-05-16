@@ -14,7 +14,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
 /**
- * Постман: https://www.getpostman.com/collections/a83b61d9e1c81c10575c
+ * Postman: https://www.getpostman.com/collections/a83b61d9e1c81c10575c
  */
 public class KVServer {
     public static final int PORT = 8078;
@@ -40,7 +40,7 @@ public class KVServer {
         try {
             System.out.println("\n/load");
             if (!hasAuth(h)) {
-                System.out.println("Запрос неавторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
+                System.out.println("Запрос не авторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
                 h.sendResponseHeaders(403, 0);
                 return;
             }
@@ -77,7 +77,7 @@ public class KVServer {
         try {
             System.out.println("\n/save");
             if (!hasAuth(h)) {
-                System.out.println("Запрос неавторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
+                System.out.println("Запрос не авторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
                 h.sendResponseHeaders(403, 0);
                 return;
             }

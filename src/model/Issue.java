@@ -112,7 +112,7 @@ public abstract class Issue {
         return getId() == task.getId() &&
                 getStatus() == task.getStatus() &&
                 getDuration() == task.getDuration() &&
-                getStartTime().equals(getStartTime()) &&
+                getStartTime().equals(task.getStartTime()) &&
                 getTitle().equals(task.getTitle()) &&
                 getDescription().equals(task.getDescription());
     }

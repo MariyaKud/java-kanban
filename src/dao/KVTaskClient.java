@@ -35,7 +35,7 @@ public class KVTaskClient {
     }
 
     public static void main(String[] args) throws IOException {
-        final CsvMakeRepository.KVServer kvServer = new CsvMakeRepository.KVServer();
+        final KVServer kvServer = new KVServer();
         kvServer.start();
 
         final KVTaskClient kvTaskClient = initKVTaskClient(Managers.URL_KV_SERVER);
@@ -94,8 +94,8 @@ public class KVTaskClient {
                 .POST(body)
                 .build();
         try {
-            final HttpResponse<String> response = HttpClient.newHttpClient()
-                    .send(request, HttpResponse.BodyHandlers.ofString());
+            final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
             if (response.statusCode() == 200) {
                 System.out.println("Данные по ключу " + key + " сохранены на сервере.");
             } else {
@@ -115,11 +115,9 @@ public class KVTaskClient {
                 .GET()
                 .build();
         try {
-            final HttpResponse<String> response = HttpClient.newHttpClient()
-                    .send(request, HttpResponse.BodyHandlers.ofString());
+            final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
                 JsonElement jsonElement = JsonParser.parseString(response.body());
-                System.out.println(jsonElement);
                 return gson.toJson(jsonElement);
 
             } else {
@@ -143,11 +141,9 @@ public class KVTaskClient {
                 .GET()
                 .build();
         try {
-            final HttpResponse<String> response = HttpClient.newHttpClient()
-                    .send(request, HttpResponse.BodyHandlers.ofString());
+            final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
                 token = JsonParser.parseString(response.body()).getAsString();
-
             } else {
                 System.out.println("Что-то пошло не так, при получении токена. Сервер вернул код состояния: "
                         + response.statusCode());
