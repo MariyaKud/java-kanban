@@ -2,14 +2,13 @@ package service;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import dao.CsvMakeRepository;
 import dao.SerializerIssue;
-import kv.KVServer;
-import kv.KVTaskClient;
+import dao.KVTaskClient;
 import model.Epic;
 import model.SubTask;
 import model.Task;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +33,9 @@ public class HttpTaskManager extends FileBackedTasksManager {
 
     public static void main(String[] args) {
 
-        final KVServer kvServer;
+        final CsvMakeRepository.KVServer kvServer;
         try {
-            kvServer = new KVServer();
+            kvServer = new CsvMakeRepository.KVServer();
             kvServer.start();
         } catch (IOException e) {
             System.out.println("Возникли проблемы с доступом к северу");

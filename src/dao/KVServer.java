@@ -1,4 +1,4 @@
-package kv;
+package dao;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -151,8 +151,5 @@ public class KVServer {
         h.getResponseHeaders().add("Content-Type", "application/json");
         h.sendResponseHeaders(200, resp.length);
         h.getResponseBody().write(resp);
-    }
-
-    public static class HttpTaskServer {
     }
 }

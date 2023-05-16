@@ -1,10 +1,9 @@
-package kv;
+package dao;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import dao.SerializerIssue;
 import model.Epic;
 import model.SubTask;
 import model.Task;
@@ -36,7 +35,7 @@ public class KVTaskClient {
     }
 
     public static void main(String[] args) throws IOException {
-        final KVServer kvServer = new KVServer();
+        final CsvMakeRepository.KVServer kvServer = new CsvMakeRepository.KVServer();
         kvServer.start();
 
         final KVTaskClient kvTaskClient = initKVTaskClient(Managers.URL_KV_SERVER);
