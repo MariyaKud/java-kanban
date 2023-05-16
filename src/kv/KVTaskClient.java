@@ -83,11 +83,11 @@ public class KVTaskClient {
         kvServer.stop();
     }
 
-    static KVTaskClient initKVTaskClient(String url) {
+    public static KVTaskClient initKVTaskClient(String url) {
         return new KVTaskClient(url, register(url));
     }
 
-    void put(String key, String json) {
+    public void put(String key, String json) {
         final URI url = URI.create(urlKVServer+"/save/" + key + "?API_TOKEN="+apiToken);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
         final HttpRequest request = HttpRequest.newBuilder()
@@ -109,7 +109,7 @@ public class KVTaskClient {
         }
     }
 
-    String load(String key) {
+    public String load(String key) {
         final URI url = URI.create(urlKVServer+"/load/" + key + "?API_TOKEN="+apiToken);
         final HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)

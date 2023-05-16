@@ -201,12 +201,19 @@ public class InMemoryTaskManager implements TaskManager {
      * @return Новый эпик типа {@link Epic}. Вернет Null, если на вход передать Null
      */
     protected Epic addEpicWithId(Epic epic) {
-        List<SubTask> children = epic.getChildren();
-        if (children.size() == 0) {
+        if (epic != null) {
+            List<SubTask> children = epic.getChildren();
+            if (children.size() != 0) {
+                //новый эпик не содержит детей
+                for (SubTask subTask : getChildrenOfEpicById(epic.getId())) {
+                    children.remove(subTask.getId());
+                }
+            }
+
             epics.put(epic.getId(), epic);
             synchronizeIdIssueAndManager(epic);
-            //новый эпик не содержит детей
             return epic;
+
         } else {
             return null;
         }

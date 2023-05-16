@@ -176,7 +176,7 @@ public class SerializerIssue {
      * @param value строка истории просмотров, идентификаторы задач, разделенные запятой
      * @return список идентификаторов просмотренных задач
      */
-    static List<Integer> stringToHistory(String value) {
+    public static List<Integer> stringToHistory(String value) {
         List<Integer> history = new ArrayList<>();
         String[] split = value.trim().split(",");
         int id;

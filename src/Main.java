@@ -1,4 +1,5 @@
 import service.FileBackedTasksManager;
+import service.HttpTaskManager;
 import service.Managers;
 import service.TaskManager;
 
@@ -14,6 +15,10 @@ public class Main {
 
         //Авто тест FileBackedTasksManager
         FileBackedTasksManager.main(args);
+        System.out.println("-----------------------------------------");
+
+        //Авто тест HttpTaskManager
+        HttpTaskManager.main(args);
         System.out.println("-----------------------------------------");
     }
 }

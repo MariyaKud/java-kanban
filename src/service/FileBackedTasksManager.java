@@ -47,6 +47,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 ((loadFromFileTracker.epics.equals(fileBackedManager.epics)) ? "✅" : "❌"));
         System.out.println("Результат сравнения истории просмотров менеджера и истории восстановленной из csv файла: " +
                 (loadFromFileTracker.getHistory().equals(fileBackedManager.getHistory()) ? "✅" : "❌"));
+        System.out.println("Результат сравнения отсортированных задач менеджера и восстановленной из csv файла: " +
+                (loadFromFileTracker.getPrioritizedTasks().equals(fileBackedManager.getPrioritizedTasks())
+                        ? "✅" : "❌"));
 
         System.out.println("\nАВТО ТЕСТ FileBackedTasksManager завершен");
     }
