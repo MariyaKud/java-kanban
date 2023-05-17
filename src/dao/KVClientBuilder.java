@@ -1,6 +1,6 @@
 package dao;
 
-public static class KVClientBuilder {
+public class KVClientBuilder {
     int port;
 
     public KVClientBuilder() {
