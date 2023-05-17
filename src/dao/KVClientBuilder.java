@@ -1,8 +1,6 @@
-package repository;
+package dao;
 
-import service.Managers;
-
-public class KVClientBuilder {
+public static class KVClientBuilder {
     int port;
 
     public KVClientBuilder() {

@@ -3,10 +3,10 @@ package service;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import repository.KVClientBuilder;
-import repository.KVServer;
-import repository.SerializerIssue;
-import repository.KVClient;
+import dao.KVClientBuilder;
+import dao.KVServer;
+import dao.SerializerIssue;
+import dao.KVClient;
 
 import model.Epic;
 import model.SubTask;

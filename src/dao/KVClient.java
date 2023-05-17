@@ -1,4 +1,4 @@
-package repository;
+package dao;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

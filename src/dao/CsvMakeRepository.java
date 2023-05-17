@@ -1,5 +1,7 @@
-package repository;
+package dao;
 
+import dao.IssueRepository;
+import dao.SerializerIssue;
 import exception.ManagerSaveException;
 import model.Epic;
 import model.Issue;

@@ -1,4 +1,4 @@
-package repository;
+package dao;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
