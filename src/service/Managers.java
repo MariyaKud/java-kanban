@@ -6,17 +6,15 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import dao.CsvMakeRepository;
-import dao.IssueRepository;
+import repository.CsvMakeRepository;
+import repository.IssueRepository;
 import model.Epic;
 import model.IssueStatus;
 import model.ItemGrid;
@@ -28,10 +26,6 @@ import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Objects;
-
-import com.google.gson.JsonObject;
 
 
 /**
@@ -43,9 +37,9 @@ import com.google.gson.JsonObject;
  */
 public class Managers {
 
-    public final static String URL_KV_SERVER = "http://localhost:8078";
-    public final static String URL_TM_SERVER = "http://localhost:8080";
-    private static final String CLASS_META_KEY = "CLASS_META_KEY";
+    public final static String PATH_SERVER = "http://localhost:";
+    public final static int PORT_KV_SERVER = 8078;
+    public final static int PORT_HTTP_SERVER = 8080;
     private static final IssueRepository issueRepository = new CsvMakeRepository();
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").
             withZone(ZoneId.systemDefault());
@@ -64,7 +58,7 @@ public class Managers {
      * @return объект-менеджер
      */
     public static TaskManager getDefault() {
-        return new InMemoryTaskManager(getDefaultHistory());
+        return new HttpTaskManager(getDefaultHistory(), PORT_HTTP_SERVER);
     }
 
     /**

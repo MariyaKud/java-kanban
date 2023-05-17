@@ -25,14 +25,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class HttpTaskServer {
 
-    public static final int PORT = 8080;
     private static final Gson gson = Managers.getGson();
     private final HttpServer server;
     private final TaskManager taskManager;
 
     public HttpTaskServer() throws IOException {
         taskManager = new InMemoryTaskManager(Managers.getDefaultHistory());
-        server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
+        server = HttpServer.create(new InetSocketAddress("localhost", Managers.PORT_HTTP_SERVER), 0);
         server.createContext("/tasks", this::tasksHandle);
     }
 
@@ -43,13 +42,13 @@ public class HttpTaskServer {
     }
 
     public void start() {
-        System.out.println("Запускаем сервер на порту " + PORT);
-        System.out.println("Открой в браузере http://localhost:" + PORT + "/");
+        System.out.println("Запускаем сервер на порту " + Managers.PORT_HTTP_SERVER);
+        System.out.println("Открой в браузере http://localhost:" + Managers.PORT_HTTP_SERVER + "/");
         server.start();
     }
 
     public void stop() {
-        System.out.println("Остановлен сервер на порту " + PORT);
+        System.out.println("Остановлен сервер на порту " + Managers.PORT_HTTP_SERVER);
         server.stop(0);
     }
 

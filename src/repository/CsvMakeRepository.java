@@ -1,4 +1,4 @@
-package dao;
+package repository;
 
 import exception.ManagerSaveException;
 import model.Epic;
@@ -6,6 +6,8 @@ import model.Issue;
 import model.SubTask;
 import model.Task;
 
+import repository.IssueRepository;
+import repository.SerializerIssue;
 import service.FileBackedTasksManager;
 import service.TaskManager;
 

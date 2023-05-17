@@ -1,6 +1,6 @@
 package service;
 
-import dao.IssueRepository;
+import repository.IssueRepository;
 
 import exception.NotValidate;
 import exception.ParentNotFound;

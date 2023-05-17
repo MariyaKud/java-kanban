@@ -3,9 +3,10 @@ package service;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import dao.KVServer;
-import dao.SerializerIssue;
-import dao.KVTaskClient;
+import repository.KVClientBuilder;
+import repository.KVServer;
+import repository.SerializerIssue;
+import repository.KVClient;
 
 import model.Epic;
 import model.SubTask;
@@ -17,18 +18,15 @@ import java.util.List;
 
 public class HttpTaskManager extends FileBackedTasksManager {
 
-    private final String url;
-
-    private static KVTaskClient client = null;
-
-    private static TaskManager taskManager = Managers.getDefault();
+    private final KVClient client;
 
     private static final Gson gson = Managers.getGson();
 
-    public HttpTaskManager(HistoryManager historyManager, String url) {
+    public HttpTaskManager(HistoryManager historyManager, int port) {
         super(historyManager, null);
-        this.url = url;
-        this.client = KVTaskClient.initKVTaskClient(url);
+        this.client = new KVClientBuilder()
+                           .port(port)
+                           .create();
     }
 
     public static void main(String[] args) {
@@ -43,12 +41,12 @@ public class HttpTaskManager extends FileBackedTasksManager {
         }
 
         final HttpTaskManager httpTasksManager = new HttpTaskManager(Managers.getDefaultHistory(),
-                                                                     Managers.URL_KV_SERVER);
+                                                                       Managers.PORT_KV_SERVER);
 
         Managers.getSimpleTestForTaskManager(httpTasksManager);
 
         System.out.println("\n Загружаем данные с сервера HTTP..");
-        FileBackedTasksManager loadFromHTTPServer = loadFromHTTPServer(Managers.URL_KV_SERVER);
+        FileBackedTasksManager loadFromHTTPServer = loadFromHTTPServer(Managers.PORT_KV_SERVER);
 
         System.out.println("\nСверим данные менеджера, с восстановленными данными с сервера HTTP:");
 
@@ -69,37 +67,26 @@ public class HttpTaskManager extends FileBackedTasksManager {
         kvServer.stop();
     }
 
-    static HttpTaskManager loadFromHTTPServer(String url) {
+    static HttpTaskManager loadFromHTTPServer(int port) {
 
-        HttpTaskManager httpTasksManager = new HttpTaskManager(Managers.getDefaultHistory(), url);
+        HttpTaskManager httpTasksManager = new HttpTaskManager(Managers.getDefaultHistory(), port);
 
         System.out.println("Выполняется загрузка данных с сервера ..");
-
+        //TASKS
         String json = httpTasksManager.client.load("tasks");
-        final List<Task> loadTasks = gson.fromJson(json, new TypeToken<ArrayList<Task>>() {
-        }.getType());
-        for (Task loadTask : loadTasks) {
-            httpTasksManager.addTaskWithId(loadTask);
-        }
-
+        final List<Task> loadTasks = gson.fromJson(json, new TypeToken<ArrayList<Task>>() {}.getType());
+        loadTasks.forEach(httpTasksManager::addTaskWithId);
+        //EPIC
         json = httpTasksManager.client.load("epics");
-        final List<Epic> loadEpics = gson.fromJson(json, new TypeToken<ArrayList<Epic>>() {
-        }.getType());
-        for (Epic loadTask : loadEpics) {
-            httpTasksManager.addEpicWithId(loadTask);
-        }
-
+        final List<Epic> loadEpics = gson.fromJson(json, new TypeToken<ArrayList<Epic>>() {}.getType());
+        loadEpics.forEach(httpTasksManager::addEpicWithId);
+        //SUBTASKS
         json = httpTasksManager.client.load("subTasks");
-        final List<SubTask> loadSubTasks = gson.fromJson(json, new TypeToken<ArrayList<SubTask>>() {
-        }.getType());
-        for (SubTask loadTask : loadSubTasks) {
-            httpTasksManager.addSubTaskWithId(loadTask);
-        }
-
+        final List<SubTask> loadSubTasks = gson.fromJson(json, new TypeToken<ArrayList<SubTask>>() {}.getType());
+        loadSubTasks.forEach(httpTasksManager::addSubTaskWithId);
+        //HISTORY
         json = httpTasksManager.client.load("history");
-        List<Integer> historyID = SerializerIssue.stringToHistory(gson.fromJson(json, String.class));
-
-        for (Integer id : historyID) {
+        for (Integer id : SerializerIssue.stringToHistory(gson.fromJson(json, String.class))) {
             if (httpTasksManager.getTaskById(id) == null) {
                 if (httpTasksManager.getSubTaskById(id) == null) {
                     httpTasksManager.getEpicById(id);
@@ -115,8 +102,6 @@ public class HttpTaskManager extends FileBackedTasksManager {
         client.put("tasks", gson.toJson(getAllTasks()));
         client.put("epics", gson.toJson(getAllEpics()));
         client.put("subTasks", gson.toJson(getAllSubTasks()));
-
-        final String history = SerializerIssue.historyToString(getHistory());
-        client.put("history", gson.toJson(history));
+        client.put("history", gson.toJson(SerializerIssue.historyToString(getHistory())));
     }
 }

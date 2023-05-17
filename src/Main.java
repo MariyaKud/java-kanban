@@ -1,5 +1,6 @@
 import service.FileBackedTasksManager;
 import service.HttpTaskManager;
+import service.InMemoryTaskManager;
 import service.Managers;
 import service.TaskManager;
 
@@ -8,7 +9,7 @@ public class Main {
 
         System.out.println("-----------------------------------------");
         //Авто тест InMemoryTaskManager
-        TaskManager taskManager = Managers.getDefault();
+        TaskManager taskManager = new InMemoryTaskManager(Managers.getDefaultHistory());
         Managers.getSimpleTestForTaskManager(taskManager);
         System.out.println("\nАВТО ТЕСТ InMemoryTaskManager завершен");
         System.out.println("-----------------------------------------");
