@@ -1,8 +1,18 @@
 package controller;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+
+import exception.NotValidate;
+import exception.ParentNotFound;
+
+import model.Epic;
+import model.SubTask;
+import model.Task;
+
 import service.InMemoryTaskManager;
 import service.Managers;
 import service.TaskManager;
@@ -23,7 +33,7 @@ public class HttpTaskServer {
     public HttpTaskServer() throws IOException {
         taskManager = new InMemoryTaskManager(Managers.getDefaultHistory());
         server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
-        server.createContext("/tasks", this::tasks);
+        server.createContext("/tasks", this::tasksHandle);
     }
 
     public static void main(String[] args) throws IOException {
@@ -43,7 +53,7 @@ public class HttpTaskServer {
         server.stop(0);
     }
 
-    private void tasks(HttpExchange httpExchange) throws IOException {
+    private void tasksHandle(HttpExchange httpExchange) throws IOException {
         final String path = httpExchange.getRequestURI().getPath();
         final String method = httpExchange.getRequestMethod();
         final String param = httpExchange.getRequestURI().getQuery();
@@ -54,104 +64,313 @@ public class HttpTaskServer {
                     if (Pattern.matches("^/tasks$", path)) {
                         //Отсортированный список
                         tasksHandler(httpExchange);
-                    } else if (Pattern.matches("^/tasks/history$", path)) {
-                        //История задач
-                        historyHandler(httpExchange);
                     } else if (Pattern.matches("^/tasks/task$", path)) {
                         //Список всех задач
                         taskHandler(httpExchange);
+                    } else if (Pattern.matches("^/tasks/subTask$", path)) {
+                        //Список всех подзадач
+                        subTaskHandler(httpExchange);
+                    } else if (Pattern.matches("^/tasks/epic$", path)) {
+                        //Список всех эпиков
+                        epicHandler(httpExchange);
                     } else if (Pattern.matches("^/tasks/task/$", path)) {
                         // Поиск задачи по id
-                        taskIdHandler(httpExchange,param);
+                        taskIdHandler(httpExchange, param);
+                    } else if (Pattern.matches("^/tasks/subTask/$", path)) {
+                        // Поиск задачи по id
+                        subTaskIdHandler(httpExchange, param);
+                    } else if (Pattern.matches("^/tasks/epic/$", path)) {
+                        // Поиск задачи по id
+                        epicIdHandler(httpExchange, param);
+                    } else if (Pattern.matches("^/tasks/subTask/epic/$", path)) {
+                        //Получить детей эпика
+                        childrenEpicByIdHandler(httpExchange, param);
+                    } else if (Pattern.matches("^/tasks/history$", path)) {
+                        //История задач
+                        historyHandler(httpExchange);
                     } else {
-                        taskErrorHandler(httpExchange, "Не корректная строка запроса = " + path);
+                        taskErrorHandler(httpExchange, 400, "Не корректны запрос - " + path);
                     }
                     break;
 
             case "POST":
                 if (Pattern.matches("^/tasks/task/$", path)) {
-                    taskIdADDHandler(httpExchange, param);
+                    taskADDUpdateHandler(httpExchange);
+                } else if (Pattern.matches("^/tasks/subTask/$", path)) {
+                    subTaskADDUpdateHandler(httpExchange);
+                } else if (Pattern.matches("^/tasks/epic/$", path)) {
+                    epicADDUpdateHandler(httpExchange);
                 } else {
-                    taskErrorHandler(httpExchange, "Не корректная строка запроса = " + path);
+                    taskErrorHandler(httpExchange, 400, "Не корректны запрос - " + path);
                 }
                 break;
 
             case "DELETE":
                 if (Pattern.matches("^/tasks/task$", path)) {
                     taskDeleteHandler(httpExchange);
+                } else if (Pattern.matches("^/tasks/subTask$", path)) {
+                    subTaskDeleteHandler(httpExchange);
+                } else if (Pattern.matches("^/tasks/epic$", path)) {
+                    epicDeleteHandler(httpExchange);
                 } else if (Pattern.matches("^/tasks/task/$", path)) {
                     taskIdDeleteHandler(httpExchange, param);
+                } else if (Pattern.matches("^/tasks/subTask/$", path)) {
+                    subTaskIdDeleteHandler(httpExchange, param);
+                } else if (Pattern.matches("^/tasks/epic/$", path)) {
+                    epicIdDeleteHandler(httpExchange, param);
                 } else {
-                    taskErrorHandler(httpExchange, "Не корректная строка запроса = " + path);
+                    taskErrorHandler(httpExchange, 400, "Не корректны запрос - " + path);
                 }
                 break;
 
             default:
-                taskErrorHandler(httpExchange, "Ждем GET или POST или DELETE, а получили " + method);
-
+                taskErrorHandler(httpExchange, 405,"Ждем GET или POST или DELETE, а получили " + method);
             }
+
         } finally {
             httpExchange.close();
         }
     }
 
-    private void taskErrorHandler(HttpExchange httpExchange, String textError) throws IOException {
-        System.out.println(textError);
-        sendText(httpExchange, 405, "");
+    private void tasksHandler(HttpExchange httpExchange) throws IOException {
+        sendText(httpExchange, 200, gson.toJson(taskManager.getPrioritizedTasks()));
     }
 
     private void taskHandler(HttpExchange httpExchange) throws IOException {
-        sendText(httpExchange, 201, gson.toJson(taskManager.getAllTasks()));
+        sendText(httpExchange, 200, gson.toJson(taskManager.getAllTasks()));
     }
 
-    private void tasksHandler(HttpExchange httpExchange) throws IOException {
-        sendText(httpExchange, 201, gson.toJson(taskManager.getPrioritizedTasks()));
+    private void subTaskHandler(HttpExchange httpExchange) throws IOException {
+        sendText(httpExchange, 200, gson.toJson(taskManager.getAllSubTasks()));
+    }
+
+    private void epicHandler(HttpExchange httpExchange) throws IOException {
+        sendText(httpExchange, 200, gson.toJson(taskManager.getAllEpics()));
     }
 
     private void taskIdHandler(HttpExchange httpExchange, String param) throws IOException {
         int id = parsePathId(param);
         if (id != -1) {
-            System.out.println("Получена задача id = " + id);
-            sendText(httpExchange, 201, gson.toJson(taskManager.getTaskById(id)));
+            final Task task = taskManager.getTaskById(id);
+            if (task != null) {
+                sendText(httpExchange, 200, gson.toJson(task));
+            } else {
+                taskErrorHandler(httpExchange, 404, "Задача с id =" + id + " не найдена.");
+            }
         } else {
-            taskErrorHandler(httpExchange, "Получен не корректный параметр " + param);
+            taskErrorHandler(httpExchange, 404,
+                    "Для метода GET получен не корректный id задачи = " + param);
+        }
+    }
+
+    private void subTaskIdHandler(HttpExchange httpExchange, String param) throws IOException {
+        int id = parsePathId(param);
+        if (id != -1) {
+            final SubTask task = taskManager.getSubTaskById(id);
+            if (task != null) {
+                sendText(httpExchange, 200, gson.toJson(task));
+            } else {
+                taskErrorHandler(httpExchange, 404, "Подзадача с id =" + id + " не найдена.");
+            }
+        } else {
+            taskErrorHandler(httpExchange, 404,
+                    "Для метода GET получен не корректный id подзадачи = " + param);
+        }
+    }
+
+    private void epicIdHandler(HttpExchange httpExchange, String param) throws IOException {
+        int id = parsePathId(param);
+        if (id != -1) {
+            final Epic task = taskManager.getEpicById(id);
+            if (task != null) {
+                sendText(httpExchange, 200, gson.toJson(task));
+            } else {
+                taskErrorHandler(httpExchange, 404, "Эпик с id =" + id + " не найдена.");
+            }
+        } else {
+            taskErrorHandler(httpExchange, 404,
+                    "Для метода GET получен не корректный id задачи = " + param);
+        }
+    }
+
+    private void taskADDUpdateHandler(HttpExchange httpExchange) throws IOException {
+        try {
+            String body = readText(httpExchange);
+            Task task = gson.fromJson(body, Task.class);
+            if (task != null) {
+                if (taskManager.getTaskById(task.getId()) == null) {
+                    //Добавляем
+                    task = taskManager.addTask(task);
+                } else {
+                    //Обновление
+                    task = taskManager.updateTask(task);
+                }
+                if (task != null) {
+                    sendText(httpExchange, 201, gson.toJson(task));
+                } else {
+                    sendText(httpExchange, 400, "");
+                }
+            } else {
+                //ресурс не найден
+                taskErrorHandler(httpExchange,404, "Передан null");
+            }
+        } catch (JsonSyntaxException e) {
+            taskErrorHandler(httpExchange,422, "Не получилось преобразовать в задачу.");
+        } catch (NotValidate e) {
+            taskErrorHandler(httpExchange,422, "Указанный период задачи занят.");
+        } catch (Exception e) {
+            taskErrorHandler(httpExchange,422, e.getMessage());
+        }
+    }
+
+    private void subTaskADDUpdateHandler(HttpExchange httpExchange) throws IOException {
+        try {
+            String body = readText(httpExchange);
+            SubTask task = gson.fromJson(body, SubTask.class);
+            if (task != null) {
+                if (taskManager.getTaskById(task.getId()) == null) {
+                    //Добавляем
+                    task = taskManager.addSubTask(task);
+                } else {
+                    //Обновление
+                    task = taskManager.updateSubTask(task);
+                }
+                if (task != null) {
+                    sendText(httpExchange, 201, gson.toJson(task));
+                } else {
+                    sendText(httpExchange, 400, "");
+                }
+            } else {
+                //ресурс не найден
+                taskErrorHandler(httpExchange,404, "Передан null");
+            }
+        } catch (JsonSyntaxException e) {
+            taskErrorHandler(httpExchange,422, "Не получилось преобразовать в задачу.");
+        } catch (NotValidate e) {
+            taskErrorHandler(httpExchange,422, "Указанный период подзадачи занят.");
+        } catch (ParentNotFound e) {
+            taskErrorHandler(httpExchange,422, "Не найден родитель подзадачи.");
+        } catch (Exception e) {
+            taskErrorHandler(httpExchange,422, e.getMessage());
+        }
+    }
+
+    private void epicADDUpdateHandler(HttpExchange httpExchange) throws IOException {
+        try {
+            String body = readText(httpExchange);
+            Epic epic = gson.fromJson(body, Epic.class);
+            if (epic != null) {
+                if (taskManager.getTaskById(epic.getId()) == null) {
+                    //Добавляем
+                    epic = taskManager.addEpic(epic);
+                } else {
+                    //Обновление
+                    epic = taskManager.updateEpic(epic);
+                }
+                if (epic != null) {
+                    sendText(httpExchange, 201, gson.toJson(epic));
+                } else {
+                    sendText(httpExchange, 400, "");
+                }
+            } else {
+                //ресурс не найден
+                taskErrorHandler(httpExchange,404, "Передан null");
+            }
+        } catch (JsonSyntaxException e) {
+            taskErrorHandler(httpExchange,422, "Не получилось преобразовать JSON в эпик.");
+        } catch (Exception e) {
+            taskErrorHandler(httpExchange,422, e.getMessage());
         }
     }
 
     private void taskIdDeleteHandler(HttpExchange httpExchange, String param) throws IOException {
         int id = parsePathId(param);
         if (id != -1) {
-            sendText(httpExchange, 201, gson.toJson(taskManager.deleteTaskById(id)));
+            final Task task = taskManager.deleteTaskById(id);
+            if (task != null) {
+                sendText(httpExchange, 200, gson.toJson(task));
+            } else {
+                taskErrorHandler(httpExchange, 404, "Задача с id =" + id + " не найдена.");
+            }
         } else {
-            taskErrorHandler(httpExchange,
+            taskErrorHandler(httpExchange, 404,
+                    "Для метода DELETE получен не корректный id задачи = " + param);
+        }
+    }
+
+    private void subTaskIdDeleteHandler(HttpExchange httpExchange, String param) throws IOException {
+        int id = parsePathId(param);
+        if (id != -1) {
+            final SubTask task = taskManager.deleteSubTaskById(id);
+            if (task != null) {
+                sendText(httpExchange, 200, gson.toJson(task));
+            }  else {
+                taskErrorHandler(httpExchange, 404, "Подзадача с id =" + id + " не найдена.");
+            }
+        } else {
+            taskErrorHandler(httpExchange, 404,
+                    "Для метода DELETE получен не корректный id подзадачи = " + param);
+        }
+    }
+
+    private void epicIdDeleteHandler(HttpExchange httpExchange, String param) throws IOException {
+        int id = parsePathId(param);
+        if (id != -1) {
+            final Epic task = taskManager.deleteEpicById(id);
+            if (task != null) {
+                sendText(httpExchange, 200, gson.toJson(task));
+            } else {
+                taskErrorHandler(httpExchange, 404, "Эпик с id =" + id + " не найдена.");
+            }
+        } else {
+            taskErrorHandler(httpExchange, 404,
                     "Для метода DELETE получен не корректный параметр " + param);
         }
     }
 
-    private void taskIdADDHandler(HttpExchange httpExchange, String param) throws IOException {
+    private void childrenEpicByIdHandler(HttpExchange httpExchange, String param) throws IOException {
         int id = parsePathId(param);
         if (id != -1) {
-            //TODO берем тело задачи
+            final Epic epic = taskManager.getEpicById(id);
+            if (epic != null) {
+                sendText(httpExchange, 200, gson.toJson(taskManager.getChildrenOfEpicById(id)));
+            } else {
+                taskErrorHandler(httpExchange, 404, "Эпик с id =" + id + " не найден.");
+            }
         } else {
-            taskErrorHandler(httpExchange,
-                    "Для метода POST получен не корректный параметр " + param);
+            taskErrorHandler(httpExchange, 404,
+                    "Не корректный id эпика = " + param);
         }
     }
 
     private void taskDeleteHandler(HttpExchange httpExchange) throws IOException {
         taskManager.deleteAllTasks();
-        sendText(httpExchange, 200, "");
+        sendText(httpExchange, 204, "");
+    }
+
+    private void subTaskDeleteHandler(HttpExchange httpExchange) throws IOException {
+        taskManager.deleteAllSubTasks();
+        sendText(httpExchange, 204, "");
+    }
+
+    private void epicDeleteHandler(HttpExchange httpExchange) throws IOException {
+        taskManager.deleteAllEpics();
+        sendText(httpExchange, 204, "");
     }
 
     private void historyHandler(HttpExchange httpExchange) throws IOException {
-        sendText(httpExchange, 201, gson.toJson(taskManager.getHistory()));
+        sendText(httpExchange, 200, gson.toJson(taskManager.getHistory()));
     }
 
     private int parsePathId(String param) {
-        String pathId = param.replaceFirst("id=", "");
         try {
-            return Integer.parseInt(pathId);
-        } catch (NumberFormatException e) {
+            String pathId = param.replaceFirst("id=", "");
+            try {
+                return Integer.parseInt(pathId);
+            } catch (NumberFormatException e) {
+                return -1;
+            }
+        } catch (Exception e) {
             return -1;
         }
     }
@@ -161,5 +380,16 @@ public class HttpTaskServer {
         h.getResponseHeaders().add("Content-Type", "application/json");
         h.sendResponseHeaders(code, resp.length);
         h.getResponseBody().write(resp);
+    }
+
+    private void taskErrorHandler(HttpExchange h, int code, String textError) throws IOException {
+        byte[] resp = gson.toJson(textError).getBytes(UTF_8);
+        h.getResponseHeaders().add("Content-Type", "application/json");
+        h.sendResponseHeaders(code, resp.length);
+        h.getResponseBody().write(resp);
+    }
+
+    protected String readText(HttpExchange h) throws IOException {
+        return new String(h.getRequestBody().readAllBytes(), UTF_8);
     }
 }
