@@ -1,7 +1,7 @@
 package dao;
 
 public class KVClientBuilder {
-    int port;
+    int port;//порт 8078
 
     public KVClientBuilder() {
     }
