@@ -45,7 +45,7 @@ public class KVClient {
 
         //Создаем контекст менеджера задач для теста
         final TaskManager taskManager = new InMemoryTaskManager(Managers.getDefaultHistory());
-        Managers.getSimpleTestForTaskManager(taskManager);
+        //Managers.getSimpleTestForTaskManager(taskManager);
 
 
         //Проверка чтения/записи задач

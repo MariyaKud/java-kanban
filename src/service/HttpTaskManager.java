@@ -40,22 +40,21 @@ public class HttpTaskManager extends FileBackedTasksManager {
             return;
         }
 
-        final HttpTaskManager httpTasksManager = new HttpTaskManager(Managers.getDefaultHistory(),
-                                                                       Managers.PORT_KV_SERVER);
+        final TaskManager httpTasksManager = Managers.getDefault();
 
         Managers.getSimpleTestForTaskManager(httpTasksManager);
 
         System.out.println("\n Загружаем данные с сервера HTTP..");
-        FileBackedTasksManager loadFromHTTPServer = loadFromHTTPServer(Managers.PORT_KV_SERVER);
+        TaskManager loadFromHTTPServer = loadFromHTTPServer(Managers.PORT_KV_SERVER);
 
         System.out.println("\nСверим данные менеджера, с восстановленными данными с сервера HTTP:");
 
         System.out.println("Результат сравнения задач менеджера и задач загруженных с сервера HTTP: " +
-                ((loadFromHTTPServer.tasks.equals(httpTasksManager.tasks)) ? "✅" : "❌"));
+                ((loadFromHTTPServer.getAllTasks().equals(httpTasksManager.getAllTasks())) ? "✅" : "❌"));
         System.out.println("Результат сравнения подзадач менеджера и подзадач загруженных с сервера HTTP: " +
-                ((loadFromHTTPServer.subTasks.equals(httpTasksManager.subTasks)) ? "✅" : "❌"));
+                ((loadFromHTTPServer.getAllSubTasks().equals(httpTasksManager.getAllSubTasks())) ? "✅" : "❌"));
         System.out.println("Результат сравнения эпиков менеджера и эпиков загруженных с сервера HTTP: " +
-                ((loadFromHTTPServer.epics.equals(httpTasksManager.epics)) ? "✅" : "❌"));
+                ((loadFromHTTPServer.getAllEpics().equals(httpTasksManager.getAllEpics())) ? "✅" : "❌"));
         System.out.println("Результат сравнения истории просмотров менеджера и истории восстановленной с сервера HTTP: "
                 + (loadFromHTTPServer.getHistory().equals(httpTasksManager.getHistory()) ? "✅" : "❌"));
         System.out.println("Результат сравнения отсортированного списка задач менеджера и восстановленного: " +

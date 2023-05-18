@@ -66,7 +66,7 @@ public class HttpTaskServer {
                     } else if (Pattern.matches("^/tasks/task$", path)) {
                         //Список всех задач
                         taskHandler(httpExchange);
-                    } else if (Pattern.matches("^/tasks/subTask$", path)) {
+                    } else if (Pattern.matches("^/tasks/subtask$", path)) {
                         //Список всех подзадач
                         subTaskHandler(httpExchange);
                     } else if (Pattern.matches("^/tasks/epic$", path)) {
@@ -75,13 +75,13 @@ public class HttpTaskServer {
                     } else if (Pattern.matches("^/tasks/task/$", path)) {
                         // Поиск задачи по id
                         taskIdHandler(httpExchange, param);
-                    } else if (Pattern.matches("^/tasks/subTask/$", path)) {
+                    } else if (Pattern.matches("^/tasks/subtask/$", path)) {
                         // Поиск задачи по id
                         subTaskIdHandler(httpExchange, param);
                     } else if (Pattern.matches("^/tasks/epic/$", path)) {
                         // Поиск задачи по id
                         epicIdHandler(httpExchange, param);
-                    } else if (Pattern.matches("^/tasks/subTask/epic/$", path)) {
+                    } else if (Pattern.matches("^/tasks/subtask/epic/$", path)) {
                         //Получить детей эпика
                         childrenEpicByIdHandler(httpExchange, param);
                     } else if (Pattern.matches("^/tasks/history$", path)) {
@@ -95,7 +95,7 @@ public class HttpTaskServer {
             case "POST":
                 if (Pattern.matches("^/tasks/task/$", path)) {
                     taskADDUpdateHandler(httpExchange);
-                } else if (Pattern.matches("^/tasks/subTask/$", path)) {
+                } else if (Pattern.matches("^/tasks/subtask/$", path)) {
                     subTaskADDUpdateHandler(httpExchange);
                 } else if (Pattern.matches("^/tasks/epic/$", path)) {
                     epicADDUpdateHandler(httpExchange);
@@ -107,13 +107,13 @@ public class HttpTaskServer {
             case "DELETE":
                 if (Pattern.matches("^/tasks/task$", path)) {
                     taskDeleteHandler(httpExchange);
-                } else if (Pattern.matches("^/tasks/subTask$", path)) {
+                } else if (Pattern.matches("^/tasks/subtask$", path)) {
                     subTaskDeleteHandler(httpExchange);
                 } else if (Pattern.matches("^/tasks/epic$", path)) {
                     epicDeleteHandler(httpExchange);
                 } else if (Pattern.matches("^/tasks/task/$", path)) {
                     taskIdDeleteHandler(httpExchange, param);
-                } else if (Pattern.matches("^/tasks/subTask/$", path)) {
+                } else if (Pattern.matches("^/tasks/subtask/$", path)) {
                     subTaskIdDeleteHandler(httpExchange, param);
                 } else if (Pattern.matches("^/tasks/epic/$", path)) {
                     epicIdDeleteHandler(httpExchange, param);

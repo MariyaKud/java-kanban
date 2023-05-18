@@ -58,7 +58,7 @@ public class Managers {
      * @return объект-менеджер
      */
     public static TaskManager getDefault() {
-        return new HttpTaskManager(getDefaultHistory(), PORT_HTTP_SERVER);
+        return new HttpTaskManager(getDefaultHistory(), PORT_KV_SERVER);
     }
 
     /**
@@ -203,7 +203,7 @@ public class Managers {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.setPrettyPrinting();
         gsonBuilder.registerTypeAdapter(Instant.class, new InstantTypeConverter());
-        gsonBuilder.registerTypeAdapter(ItemGrid.class, new LocalDateAdapter());
+        //gsonBuilder.registerTypeAdapter(ItemGrid.class, new LocalDateAdapter());
         return gsonBuilder.create();
     }
 
