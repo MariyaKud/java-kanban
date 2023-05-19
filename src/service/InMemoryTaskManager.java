@@ -3,6 +3,7 @@ package service;
 import exception.EmptyData;
 import exception.NotValidate;
 import exception.ParentNotFound;
+
 import model.Epic;
 import model.Issue;
 import model.IssueStatus;
@@ -666,11 +667,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Issue> getPrioritizedTasks() {
         return new ArrayList<>(issuesByPriority);
-    }
-
-    //TODO удалить пока для теста
-    public void getGrid() {
-        System.out.println(grid);
     }
 
     /**

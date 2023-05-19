@@ -4,15 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import dao.KVClientBuilder;
-import dao.KVServer;
-import dao.SerializerIssue;
 import dao.KVClient;
+import dao.SerializerIssue;
 
 import model.Epic;
 import model.SubTask;
 import model.Task;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,44 +27,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
                            .create();
     }
 
-    public static void main(String[] args) {
-
-        final KVServer kvServer;
-        try {
-            kvServer = new KVServer();
-            kvServer.start();
-        } catch (IOException e) {
-            System.out.println("Возникли проблемы с доступом к северу");
-            return;
-        }
-
-        final TaskManager httpTasksManager = Managers.getDefault();
-
-        Managers.getSimpleTestForTaskManager(httpTasksManager);
-
-        System.out.println("\n Загружаем данные с сервера HTTP..");
-        TaskManager loadFromHTTPServer = loadFromHTTPServer(Managers.PORT_KV_SERVER);
-
-        System.out.println("\nСверим данные менеджера, с восстановленными данными с сервера HTTP:");
-
-        System.out.println("Результат сравнения задач менеджера и задач загруженных с сервера HTTP: " +
-                ((loadFromHTTPServer.getAllTasks().equals(httpTasksManager.getAllTasks())) ? "✅" : "❌"));
-        System.out.println("Результат сравнения подзадач менеджера и подзадач загруженных с сервера HTTP: " +
-                ((loadFromHTTPServer.getAllSubTasks().equals(httpTasksManager.getAllSubTasks())) ? "✅" : "❌"));
-        System.out.println("Результат сравнения эпиков менеджера и эпиков загруженных с сервера HTTP: " +
-                ((loadFromHTTPServer.getAllEpics().equals(httpTasksManager.getAllEpics())) ? "✅" : "❌"));
-        System.out.println("Результат сравнения истории просмотров менеджера и истории восстановленной с сервера HTTP: "
-                + (loadFromHTTPServer.getHistory().equals(httpTasksManager.getHistory()) ? "✅" : "❌"));
-        System.out.println("Результат сравнения отсортированного списка задач менеджера и восстановленного: " +
-                (loadFromHTTPServer.getPrioritizedTasks().equals(httpTasksManager.getPrioritizedTasks())
-                        ? "✅" : "❌"));
-
-        System.out.println("\nАВТО ТЕСТ HttpTaskManager завершен");
-
-        kvServer.stop();
-    }
-
-    static HttpTaskManager loadFromHTTPServer(int port) {
+    public static HttpTaskManager loadFromHTTPServer(int port) {
 
         HttpTaskManager httpTasksManager = new HttpTaskManager(Managers.getDefaultHistory(), port);
 
