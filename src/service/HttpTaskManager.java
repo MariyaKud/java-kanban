@@ -27,23 +27,27 @@ public class HttpTaskManager extends FileBackedTasksManager {
                            .create();
     }
 
-    public static HttpTaskManager loadFromHTTPServer(int port) {
+    public static HttpTaskManager loadFromHTTPServer() {
 
-        HttpTaskManager httpTasksManager = new HttpTaskManager(Managers.getDefaultHistory(), port);
+        HttpTaskManager httpTasksManager = (HttpTaskManager) Managers.getDefault();
 
         System.out.println("Выполняется загрузка данных с сервера ..");
+
         //TASKS
         String json = httpTasksManager.client.load("tasks");
         final List<Task> loadTasks = gson.fromJson(json, new TypeToken<ArrayList<Task>>() {}.getType());
         loadTasks.forEach(httpTasksManager::addTaskWithId);
+
         //EPIC
         json = httpTasksManager.client.load("epics");
         final List<Epic> loadEpics = gson.fromJson(json, new TypeToken<ArrayList<Epic>>() {}.getType());
         loadEpics.forEach(httpTasksManager::addEpicWithId);
+
         //SUBTASKS
         json = httpTasksManager.client.load("subTasks");
         final List<SubTask> loadSubTasks = gson.fromJson(json, new TypeToken<ArrayList<SubTask>>() {}.getType());
         loadSubTasks.forEach(httpTasksManager::addSubTaskWithId);
+
         //HISTORY
         json = httpTasksManager.client.load("history");
         for (Integer id : SerializerIssue.stringToHistory(gson.fromJson(json, String.class))) {

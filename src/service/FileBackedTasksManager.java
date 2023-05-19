@@ -26,6 +26,35 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         this.file = file;
     }
 
+    public static void main(String[] args) {
+
+        //Создаем экземпляр менеджера
+        final String dirHome     = "data";
+        final String nameFileCSV = "taskManager.csv";
+
+        final File file = new File(dirHome,nameFileCSV);
+        final FileBackedTasksManager fileBackedManager = new FileBackedTasksManager(Managers.getDefaultHistory(), file);
+
+        Managers.getSimpleTestForTaskManager(fileBackedManager);
+
+        System.out.println("\nСверим данные менеджера, с сохраненными данными в csv файле:");
+        FileBackedTasksManager loadFromFileTracker = loadFromFile(file);
+
+        System.out.println("Результат сравнения задач менеджера и задач загруженных из csv файла: " +
+                ((loadFromFileTracker.tasks.equals(fileBackedManager.tasks)) ? "✅" : "❌"));
+        System.out.println("Результат сравнения подзадач менеджера и подзадач загруженных из csv файла: " +
+                ((loadFromFileTracker.subTasks.equals(fileBackedManager.subTasks)) ? "✅" : "❌"));
+        System.out.println("Результат сравнения эпиков менеджера и эпиков загруженных из csv файла: " +
+                ((loadFromFileTracker.epics.equals(fileBackedManager.epics)) ? "✅" : "❌"));
+        System.out.println("Результат сравнения истории просмотров менеджера и истории восстановленной из csv файла: " +
+                (loadFromFileTracker.getHistory().equals(fileBackedManager.getHistory()) ? "✅" : "❌"));
+        System.out.println("Результат сравнения отсортированных задач менеджера и восстановленной из csv файла: " +
+                (loadFromFileTracker.getPrioritizedTasks().equals(fileBackedManager.getPrioritizedTasks())
+                        ? "✅" : "❌"));
+
+        System.out.println("\nАВТО ТЕСТ FileBackedTasksManager завершен");
+    }
+
     /**
      * Восстанавливает данные менеджера из файла при запуске программы
      * @param file csv-файл для хранения данных менеджера задач

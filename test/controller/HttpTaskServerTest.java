@@ -73,7 +73,7 @@ class HttpTaskServerTest {
     @DisplayName("Должны получить статус 200 и отсортированные по дате задачи. Задача с пустой датой в конце.")
     @Test
     void shouldReturn() {
-        Task task = addTask();
+        addTask();
         SubTask subTask = addSubTask();
         final HttpResponse<String> response = testGet("/tasks");
         if (response != null && subTask != null) {
@@ -339,7 +339,7 @@ class HttpTaskServerTest {
     @DisplayName("Должны получить статус ошибки 400 обращение не корректному пути запроса метода GET.")
     @Test
     void  shouldReturn400IfPathForGetWrong() {
-        final HttpResponse<String> response = testGet("/tasks/thwth");
+        final HttpResponse<String> response = testGet("/tasks/method");
         if (response != null) {
             assertEquals(400, response.statusCode(), "Ожидали код 400.");
         }

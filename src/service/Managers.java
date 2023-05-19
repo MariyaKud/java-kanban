@@ -2,7 +2,6 @@ package service;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -10,23 +9,20 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+
 import dao.CsvMakeRepository;
 import dao.IssueRepository;
+
 import model.Epic;
 import model.IssueStatus;
-import model.ItemGrid;
 import model.SubTask;
 import model.Task;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
+
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-
 
 /**
  * Утилитарный класс <b>{@code Managers}</b> ответственный за получение дефолтных значений
@@ -203,7 +199,6 @@ public class Managers {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.setPrettyPrinting();
         gsonBuilder.registerTypeAdapter(Instant.class, new InstantTypeConverter());
-        //gsonBuilder.registerTypeAdapter(ItemGrid.class, new LocalDateAdapter());
         return gsonBuilder.create();
     }
 
@@ -228,39 +223,5 @@ public class Managers {
                 return Instant.ofEpochMilli(json.getAsLong());
             }
         }
-    }
-
-    private static class LocalDateAdapter extends TypeAdapter<ItemGrid> {
-        @Override
-        public void write(JsonWriter jsonWriter, ItemGrid itemGrid) throws IOException {
-            jsonWriter.value(itemGrid.getYear()+"-"+itemGrid.getDayOfYear()+"-"+itemGrid.getMinutesOfDay());
-        }
-
-        @Override
-        public ItemGrid read(JsonReader jsonReader) throws IOException {
-
-            int year = 0;
-            int dayOfYear = 0;
-            int minutes = 0;
-
-            String str = removeFirstAndLast(jsonReader.nextString());
-            String[] parts = str.split("-");
-
-            try {
-                year = Integer.parseInt(parts[0]);
-                dayOfYear = Integer.parseInt(parts[1]);
-                minutes = Integer.parseInt(parts[2]);
-            } catch (NumberFormatException ignored) {
-            }
-
-            return new ItemGrid(year,dayOfYear,minutes);
-        }
-    }
-
-    private static String removeFirstAndLast(String str) {
-        StringBuffer sb = new StringBuffer(str);
-        sb.delete(str.length() - 1, str.length());
-        sb.delete(0, 1);
-        return sb.toString();
     }
 }
