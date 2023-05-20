@@ -24,7 +24,8 @@ public class Main {
         Managers.getSimpleTestForTaskManager(taskManager);
 
         System.out.println("\n Загружаем данные с сервера HTTP..");
-        TaskManager loadFromHTTPServer = HttpTaskManager.loadFromHTTPServer();
+        TaskManager loadFromHTTPServer = new HttpTaskManager(Managers.getDefaultHistory(),
+                                                              Managers.PORT_KV_SERVER, true);
 
         System.out.println("\nСверим данные менеджера, с восстановленными данными с сервера HTTP:");
 

@@ -13,7 +13,7 @@ import java.io.File;
 
 /**
  * Менеджер задач управления сущностями: {@code Task}, {@code SubTask}, {@code Epic} наследники класса {@code Issue}
- * Хранит свои задачи в файле на диске, наследник класса {@code InMemoryTasksManager}
+ * Хранит свои данные в файле на диске, наследник класса {@code InMemoryTasksManager}
  * Поддерживает контракт {@code TasksManager}
  */
 public class FileBackedTasksManager extends InMemoryTaskManager {

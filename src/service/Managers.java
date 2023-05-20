@@ -54,7 +54,7 @@ public class Managers {
      * @return объект-менеджер
      */
     public static TaskManager getDefault() {
-        return new HttpTaskManager(getDefaultHistory(), PORT_KV_SERVER);
+        return new HttpTaskManager(PORT_KV_SERVER);
     }
 
     /**

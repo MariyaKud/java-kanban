@@ -2,16 +2,14 @@ package service;
 
 import dao.KVServer;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
-
-import static service.HttpTaskManager.loadFromHTTPServer;
 
 @DisplayName("Тест работы менеджера с сервером..")
 class HttpTaskManagerTest {
@@ -30,7 +28,7 @@ class HttpTaskManagerTest {
             Managers.getSimpleTestForTaskManager(httpTasksManager);
 
             try {
-                TaskManager loadTasksManager = loadFromHTTPServer();
+                TaskManager loadTasksManager = new HttpTaskManager(Managers.getDefaultHistory(), Managers.PORT_KV_SERVER, true);
 
                 assertEquals(httpTasksManager.getAllTasks(), loadTasksManager.getAllTasks(),
                         "Задачи загрузились не корректны.");

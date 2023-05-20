@@ -59,8 +59,10 @@ public class InMemoryHistoryManager implements HistoryManager {
      */
     @Override
     public void remove(int id) {
-        if (historyQueue.removeNode(historyStorage.get(id)) != null) {
-            historyStorage.remove(id);
+        if (historyQueue.size() > 0) {
+            if (historyQueue.removeNode(historyStorage.get(id)) != null) {
+                historyStorage.remove(id);
+            }
         }
     }
 
