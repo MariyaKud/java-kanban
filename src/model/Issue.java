@@ -16,14 +16,14 @@ import java.time.temporal.ChronoUnit;
 
 public abstract class Issue {
 
-    private int id;                   // Идентификатор
+    private Integer id;               // Идентификатор
     private String title;             // Название
     private String description;       // Описание
     private int duration;             //Продолжительность в минутах
     private Instant startTime;        //Время запуска
     private IssueStatus status;       // Статус
 
-    public Issue(int id, String title, String description, int duration) {
+    public Issue(Integer id, String title, String description, int duration) {
         this.id          = id;
         this.title       = title;
         this.description = description;
@@ -32,7 +32,7 @@ public abstract class Issue {
         this.status      = IssueStatus.NEW;
     }
 
-    public Issue(int id, String title, String description, int duration, Instant startTime) {
+    public Issue(Integer id, String title, String description, int duration, Instant startTime) {
         this(id, title, description, duration);
         this.setStartTime(startTime);
     }
@@ -41,7 +41,7 @@ public abstract class Issue {
         return IssueType.TASK;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 

@@ -10,22 +10,22 @@ import java.time.Instant;
 public class Task extends Issue {
 
     //Максимальный набор полей
-    public Task(int id, String title, String description, int duration, Instant startTime,
+    public Task(Integer id, String title, String description, int duration, Instant startTime,
                 IssueStatus status) {
         super(id, title, description, duration, startTime);
         this.setStatus(status);
     }
 
-    public Task(int id, String title, String description, int duration, Instant startTime) {
+    public Task(Integer id, String title, String description, int duration, Instant startTime) {
         super(id, title, description, duration, startTime);
+    }
+
+    public Task(Integer id, String title, String description, int duration) {
+        super(id, title, description, duration);
     }
 
     public Task(String title, String description, int duration, Instant startTime) {
         this(0, title, description, duration, startTime);
-    }
-
-    public Task(int id, String title, String description, int duration) {
-        super(id, title, description, duration);
     }
 
     //Минимальный набор полей

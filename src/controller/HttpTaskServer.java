@@ -30,13 +30,17 @@ public class HttpTaskServer {
     private final TaskManager taskManager;
 
     public HttpTaskServer() throws IOException {
-        taskManager = new InMemoryTaskManager(Managers.getDefaultHistory());
+        this(Managers.getDefault());
+    }
+
+    public HttpTaskServer(TaskManager taskManager) throws IOException {
+        this.taskManager = taskManager;
         server = HttpServer.create(new InetSocketAddress("localhost", Managers.PORT_HTTP_SERVER), 0);
         server.createContext("/tasks", this::tasksHandle);
     }
 
     public static void main(String[] args) throws IOException {
-        HttpTaskServer httpTaskServer = new HttpTaskServer();
+        HttpTaskServer httpTaskServer = new HttpTaskServer(new InMemoryTaskManager(Managers.getDefaultHistory()));
         Managers.getSimpleTestForTaskManager(httpTaskServer.taskManager);
         httpTaskServer.start();
     }
@@ -88,7 +92,7 @@ public class HttpTaskServer {
                         //История задач
                         historyHandler(httpExchange);
                     } else {
-                        taskErrorHandler(httpExchange, 400, "Не корректны запрос - " + path);
+                        taskErrorHandler(httpExchange, 404, "");
                     }
                     break;
 
@@ -100,7 +104,7 @@ public class HttpTaskServer {
                 } else if (Pattern.matches("^/tasks/epic/$", path)) {
                     epicADDUpdateHandler(httpExchange);
                 } else {
-                    taskErrorHandler(httpExchange, 400, "Не корректны запрос - " + path);
+                    taskErrorHandler(httpExchange, 404, "");
                 }
                 break;
 
@@ -118,7 +122,7 @@ public class HttpTaskServer {
                 } else if (Pattern.matches("^/tasks/epic/$", path)) {
                     epicIdDeleteHandler(httpExchange, param);
                 } else {
-                    taskErrorHandler(httpExchange, 400, "Не корректны запрос - " + path);
+                    taskErrorHandler(httpExchange, 404, "");
                 }
                 break;
 
@@ -195,19 +199,29 @@ public class HttpTaskServer {
     private void taskADDUpdateHandler(HttpExchange httpExchange) throws IOException {
         try {
             String body = readText(httpExchange);
-            Task task = gson.fromJson(body, Task.class);
+            if (body.isEmpty()) {
+                sendText(httpExchange, 400, "Тело запроса пустое.");
+                return;
+            }
+            final Task task = gson.fromJson(body, Task.class);
             if (task != null) {
-                if (taskManager.getTaskById(task.getId()) == null) {
+                if (task.getId() == null) {
                     //Добавляем
-                    task = taskManager.addTask(task);
+                    final Task newTask = taskManager.addTask(task);
+                    if (newTask != null) {
+                        sendText(httpExchange, 201, gson.toJson(newTask));
+                    } else {
+                        taskErrorHandler(httpExchange,400, "Задача не создана.");
+                    }
                 } else {
                     //Обновление
-                    task = taskManager.updateTask(task);
-                }
-                if (task != null) {
-                    sendText(httpExchange, 201, gson.toJson(task));
-                } else {
-                    sendText(httpExchange, 400, "");
+                    final Task newTask = taskManager.updateTask(task);
+                    if (newTask != null) {
+                        sendText(httpExchange, 201, gson.toJson(task));
+                    } else {
+                        taskErrorHandler(httpExchange,400, "Для обновления не найдена задача с id = " +
+                                                                           task.getId());
+                    }
                 }
             } else {
                 //ресурс не найден
@@ -225,19 +239,29 @@ public class HttpTaskServer {
     private void subTaskADDUpdateHandler(HttpExchange httpExchange) throws IOException {
         try {
             String body = readText(httpExchange);
-            SubTask task = gson.fromJson(body, SubTask.class);
+            if (body.isEmpty()) {
+                sendText(httpExchange, 400, "Тело запроса пустое.");
+                return;
+            }
+            final SubTask task = gson.fromJson(body, SubTask.class);
             if (task != null) {
-                if (taskManager.getTaskById(task.getId()) == null) {
+                if (task.getId() == null) {
                     //Добавляем
-                    task = taskManager.addSubTask(task);
+                    final SubTask newTask = taskManager.addSubTask(task);
+                    if (newTask != null) {
+                        sendText(httpExchange, 201, gson.toJson(newTask));
+                    } else {
+                        taskErrorHandler(httpExchange,400, "Подзадача не создана.");
+                    }
                 } else {
                     //Обновление
-                    task = taskManager.updateSubTask(task);
-                }
-                if (task != null) {
-                    sendText(httpExchange, 201, gson.toJson(task));
-                } else {
-                    sendText(httpExchange, 400, "");
+                    final SubTask newTask = taskManager.updateSubTask(task);
+                    if (newTask != null) {
+                        sendText(httpExchange, 201, gson.toJson(task));
+                    } else {
+                        taskErrorHandler(httpExchange,400, "Для обновления не найдена подзадача с id = " +
+                                task.getId());
+                    }
                 }
             } else {
                 //ресурс не найден
@@ -257,19 +281,29 @@ public class HttpTaskServer {
     private void epicADDUpdateHandler(HttpExchange httpExchange) throws IOException {
         try {
             String body = readText(httpExchange);
-            Epic epic = gson.fromJson(body, Epic.class);
+            if (body.isEmpty()) {
+                sendText(httpExchange, 400, "Тело запроса пустое.");
+                return;
+            }
+            final Epic epic = gson.fromJson(body, Epic.class);
             if (epic != null) {
-                if (taskManager.getTaskById(epic.getId()) == null) {
+                if (epic.getId() == null) {
                     //Добавляем
-                    epic = taskManager.addEpic(epic);
+                    final Epic newTask = taskManager.addEpic(epic);
+                    if (newTask != null) {
+                        sendText(httpExchange, 201, gson.toJson(newTask));
+                    } else {
+                        taskErrorHandler(httpExchange,400, "Эпик не создан.");
+                    }
                 } else {
                     //Обновление
-                    epic = taskManager.updateEpic(epic);
-                }
-                if (epic != null) {
-                    sendText(httpExchange, 201, gson.toJson(epic));
-                } else {
-                    sendText(httpExchange, 400, "");
+                    final Epic newTask = taskManager.updateEpic(epic);
+                    if (newTask != null) {
+                        sendText(httpExchange, 201, gson.toJson(newTask));
+                    } else {
+                        taskErrorHandler(httpExchange,400, "Для обновления не найден эпик с id = " +
+                                epic.getId());
+                    }
                 }
             } else {
                 //ресурс не найден
@@ -344,17 +378,17 @@ public class HttpTaskServer {
 
     private void taskDeleteHandler(HttpExchange httpExchange) throws IOException {
         taskManager.deleteAllTasks();
-        sendText(httpExchange, 204, "");
+        sendText(httpExchange, 204, gson.toJson(""));
     }
 
     private void subTaskDeleteHandler(HttpExchange httpExchange) throws IOException {
         taskManager.deleteAllSubTasks();
-        sendText(httpExchange, 204, "");
+        sendText(httpExchange, 204, gson.toJson(""));
     }
 
     private void epicDeleteHandler(HttpExchange httpExchange) throws IOException {
         taskManager.deleteAllEpics();
-        sendText(httpExchange, 204, "");
+        sendText(httpExchange, 204,  gson.toJson(""));
     }
 
     private void historyHandler(HttpExchange httpExchange) throws IOException {

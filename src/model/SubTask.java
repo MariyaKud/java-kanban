@@ -15,23 +15,23 @@ public class SubTask extends Issue {
      */
     private final int parentID;
 
-    public SubTask(int id, String title, String description, int duration, Instant startTime,
+    public SubTask(Integer id, String title, String description, int duration, Instant startTime,
                    int parentID, IssueStatus status) {
         super(id, title, description, duration, startTime);
         this.parentID = parentID;
         this.setStatus(status);
     }
 
-    public SubTask(int id, String title, String description, int parentID, int duration, Instant startTime) {
+    public SubTask(Integer id, String title, String description, int parentID, int duration, Instant startTime) {
         this(id, title, description, duration, startTime, parentID, IssueStatus.NEW);
+    }
+
+    public SubTask(Integer id, String title, String description, int duration, int parentID) {
+        this(id, title, description, duration, Instant.MAX, parentID, IssueStatus.NEW);
     }
 
     public SubTask(String title, String description, int parentID, int duration, Instant start, IssueStatus status){
         this(0, title, description, duration, start, parentID, status);
-    }
-
-    public SubTask(int id, String title, String description, int duration, int parentID) {
-        this(id, title, description, duration, Instant.MAX, parentID, IssueStatus.NEW);
     }
 
     public SubTask (SubTask other) {

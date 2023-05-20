@@ -19,14 +19,14 @@ public class Epic extends Issue {
     //Расчетное поле, время окончания самой поздней из задач
     private Instant endTime;
 
-    public Epic(int id, String title, String description) {
+    public Epic(Integer id, String title, String description) {
         super(id, title, description, 0);
         //Время старта/завершения текущая дата
         this.setStartTime(Instant.MAX);
         this.setEndTime(Instant.MAX);
     }
 
-    public Epic( String title, String description) {
+    public Epic(String title, String description) {
         this(0, title, description);
     }
 
