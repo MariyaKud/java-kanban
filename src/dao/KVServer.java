@@ -3,15 +3,15 @@ package dao;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
-import java.io.OutputStream;
+
 import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+
 import service.Managers;
 
 /**
@@ -21,7 +21,6 @@ public class KVServer {
     private final String apiToken;
     private final HttpServer server;
     private final Map<String, String> data = new HashMap<>();
-    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     public KVServer() throws IOException {
         apiToken = generateApiToken();
