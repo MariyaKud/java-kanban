@@ -29,7 +29,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
     private final KVClient client;
     private static final Gson gson = Managers.getGson();
 
-    public HttpTaskManager(HistoryManager historyManager, int port, boolean shouldLoad) {
+    public HttpTaskManager(HistoryManager historyManager, int port, boolean shouldLoad) throws ManagerSaveException {
         super(historyManager, null);
 
         this.client = new KVClientBuilder()
@@ -48,8 +48,9 @@ public class HttpTaskManager extends FileBackedTasksManager {
     /**
      * Загружает данные менеджера с сервера HTTP, используя в качестве посредника экземпляр класса {@link KVClient}
      * Загружаемые данные: задачи, подзадачи, эпики, история просмотров
+     * @throws ManagerSaveException -  при проблеме с восстановлением данных
      */
-    private void loadFromHTTPServer() {
+    private void loadFromHTTPServer() throws ManagerSaveException {
 
         System.out.println("Выполняется загрузка данных с сервера ..");
 
