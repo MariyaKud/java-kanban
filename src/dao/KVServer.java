@@ -52,14 +52,8 @@ public class KVServer {
                     return;
                 }
                 if (data.containsKey(key)) {
-                    String responseString = data.get(key);
                     System.out.println("Значение для ключа " + key + " получено!");
-
-                    byte[] bytes = responseString.getBytes(DEFAULT_CHARSET);
-                    h.sendResponseHeaders(200, bytes.length);
-                    try (OutputStream os = h.getResponseBody()) {
-                        os.write(bytes);
-                    }
+                    sendText(h, data.get(key));
                 } else {
                     h.sendResponseHeaders(200, 0);
                     System.out.println("Данных по ключу " + key + " нет!");
