@@ -68,7 +68,7 @@ public class HttpTaskServer {
     /**
      * Интерфейс менеджера задач
      * @param httpExchange обработчик запросов, приходящих на сервер
-     * @throws IOException
+     * @throws IOException исключение ввода/вывода
      */
     private void tasksHandle(HttpExchange httpExchange) throws IOException {
         final String path = httpExchange.getRequestURI().getPath();
@@ -432,7 +432,7 @@ public class HttpTaskServer {
      * @param h обработчик запросов
      * @param code код ответа
      * @param text тело ответа
-     * @throws IOException
+     * @throws IOException исключение ввода/вывода
      */
     protected void sendText(HttpExchange h, int code, String text) throws IOException {
         byte[] resp = text.getBytes(UTF_8);
@@ -446,7 +446,7 @@ public class HttpTaskServer {
      * @param h обработчик запросов
      * @param code код ответа
      * @param textError текст ответа
-     * @throws IOException
+     * @throws IOException исключение ввода/вывода
      */
     private void taskErrorHandler(HttpExchange h, int code, String textError) throws IOException {
         byte[] resp = gson.toJson(textError).getBytes(UTF_8);
@@ -458,8 +458,8 @@ public class HttpTaskServer {
     /**
      * Читаем тело запроса
      * @param h - обработчик запроса
-     * @return строка данных из талеа запроса
-     * @throws IOException
+     * @return строка данных из тела запроса
+     * @throws IOException исключение ввода/вывода
      */
     protected String readText(HttpExchange h) throws IOException {
         return new String(h.getRequestBody().readAllBytes(), UTF_8);
