@@ -5,6 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
+import exception.ManagerSaveException;
+import exception.StatusResponseMistake;
 import model.Epic;
 import model.SubTask;
 import model.Task;
@@ -22,18 +24,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KVClient {
-
     private final String url;
-    private String apiToken;
-
+    private final String apiToken;
     private static final HttpClient client = HttpClient.newHttpClient();
-    private static final Gson gson = Managers.getGson();
 
-    public KVClient(int port) {
+    public KVClient(int port) throws ManagerSaveException, StatusResponseMistake  {
         this.url = "http://localhost:" + port;
+        this.apiToken = register();
     }
 
     public static void main(String[] args) throws IOException {
+        //Локальный экспресс тест класса
+        final Gson gson = Managers.getGson();
+
         //Запускаем сервер
         final KVServer kvServer = new KVServer();
         kvServer.start();
@@ -51,7 +54,7 @@ public class KVClient {
         //Проверка чтения/записи задач
         String json = gson.toJson(taskManager.getAllTasks());
         kvTaskClient.put("tasks",json);
-        String jsonString =  kvTaskClient.load("tasks");
+        String jsonString =  gson.toJson(kvTaskClient.load("tasks"));
         final List<Task> loadTasks = gson.fromJson(jsonString, new TypeToken<ArrayList<Task>>() {
         }.getType());
 
@@ -61,7 +64,7 @@ public class KVClient {
         //Проверка чтения/записи подзадач
         json = gson.toJson(taskManager.getAllSubTasks());
         kvTaskClient.put("subTasks",json);
-        jsonString =  kvTaskClient.load("subTasks");
+        jsonString = gson.toJson(kvTaskClient.load("subTasks"));
         final List<SubTask> loadSubTasks = gson.fromJson(jsonString, new TypeToken<ArrayList<SubTask>>() {
         }.getType());
 
@@ -71,7 +74,7 @@ public class KVClient {
         //Проверка чтения/записи эпиков
         json = gson.toJson(taskManager.getAllEpics());
         kvTaskClient.put("epics",json);
-        jsonString =  kvTaskClient.load("epics");
+        jsonString = gson.toJson(kvTaskClient.load("epics"));
         final List<Epic> loadEpics = gson.fromJson(jsonString, new TypeToken<ArrayList<Epic>>() {
         }.getType());
 
@@ -82,7 +85,7 @@ public class KVClient {
         final String history = SerializerIssue.historyToString(taskManager.getHistory());
         json = gson.toJson(history);
         kvTaskClient.put("history",json);
-        jsonString =  kvTaskClient.load("history");
+        jsonString =  gson.toJson(kvTaskClient.load("history"));
 
         System.out.println("Результат сравнения истории менеджера и загруженный список с сервера: " +
                 ((history.equals(gson.fromJson(jsonString, String.class))) ? "✅" : "❌"));
@@ -91,55 +94,7 @@ public class KVClient {
         kvServer.stop();
     }
 
-    public void put(String key, String json) {
-
-        final URI uri = URI.create(url + "/save/" + key + "?API_TOKEN=" + apiToken);
-        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        final HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri)
-                .POST(body)
-                .build();
-        try {
-            final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                System.out.println("Данные по ключу " + key + " сохранены на сервере.");
-            } else {
-                System.out.println("Что-то пошло не так, при получении токена. Сервер вернул код состояния: "
-                        + response.statusCode());
-            }
-        } catch (NullPointerException | IOException | InterruptedException e) {
-            System.out.println("Во время выполнения запроса возникла ошибка.\n" +
-                    "Проверьте, пожалуйста, адрес и повторите попытку.");
-        }
-    }
-
-    public String load(String key) {
-
-        final URI uri = URI.create(url + "/load/" + key + "?API_TOKEN=" + apiToken);
-        final HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri)
-                .GET()
-                .build();
-        try {
-            final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() == 200) {
-                JsonElement jsonElement = JsonParser.parseString(response.body());
-                return gson.toJson(jsonElement);
-
-            } else {
-                System.out.println("Что-то пошло не так, при получении токена. Сервер вернул код состояния: "
-                        + response.statusCode());
-            }
-        } catch (NullPointerException | IOException | InterruptedException e) {
-            System.out.println("Во время выполнения запроса возникла ошибка.\n" +
-                                 "Проверьте, пожалуйста, адрес и повторите попытку.");
-        }
-
-        return "";
-    }
-
-    public void register() {
+    private String register() throws ManagerSaveException, StatusResponseMistake {
 
         final URI uri = URI.create(url + "/register");
         final HttpRequest request = HttpRequest.newBuilder()
@@ -149,14 +104,58 @@ public class KVClient {
         try {
             final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
-                apiToken = JsonParser.parseString(response.body()).getAsString();
+                return JsonParser.parseString(response.body()).getAsString();
             } else {
-                System.out.println("Что-то пошло не так, при получении токена. Сервер вернул код состояния: "
-                        + response.statusCode());
+                throw new StatusResponseMistake("Что-то пошло не так, при получении токена. Сервер вернул " +
+                                                 "код состояния: " + response.statusCode());
             }
-        } catch (NullPointerException | IOException | InterruptedException e) {
-            System.out.println("Во время выполнения запроса возникла ошибка.\n" +
+        } catch (IOException | InterruptedException e) {
+            throw new ManagerSaveException("Во время выполнения запроса возникла ошибка.\n" +
                     "Проверьте, пожалуйста, адрес и повторите попытку.");
+        }
+    }
+
+    public void put(String key, String json)  throws ManagerSaveException, StatusResponseMistake {
+        final URI uri = URI.create(url + "/save/" + key + "?API_TOKEN=" + apiToken);
+        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
+        final HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .POST(body)
+                .build();
+        try {
+            final HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+
+            if (response.statusCode() == 200) {
+                System.out.println("Данные по ключу " + key + " сохранены на сервере.");
+            } else {
+                throw new StatusResponseMistake("Что-то пошло не так, при получении токена. Сервер вернул " +
+                                                "код состояния: " + response.statusCode());
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new ManagerSaveException("Во время выполнения запроса возникла ошибка.\n" +
+                                             "Проверьте, пожалуйста, адрес и повторите попытку.");
+        }
+    }
+
+    public JsonElement load(String key) throws ManagerSaveException, StatusResponseMistake {
+
+        final URI uri = URI.create(url + "/load/" + key + "?API_TOKEN=" + apiToken);
+        final HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .GET()
+                .build();
+        try {
+            final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                return JsonParser.parseString(response.body());
+
+            } else {
+                throw new StatusResponseMistake("Что-то пошло не так, при получении токена. Сервер вернул код " +
+                                                 "состояния: " + response.statusCode());
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new ManagerSaveException("Во время выполнения запроса возникла ошибка.\n" +
+                                 "Проверьте, пожалуйста, адрес и повторите попытку.");
         }
     }
 }

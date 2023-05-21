@@ -12,8 +12,6 @@ public class KVClientBuilder {
     }
 
     public KVClient create() {
-        KVClient kvClient = new KVClient(port);
-        kvClient.register();
-        return kvClient;
+        return new KVClient(port);
     }
 }
