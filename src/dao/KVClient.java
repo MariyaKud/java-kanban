@@ -23,6 +23,9 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * HTTP-клиент для работы с хранилищем данных на сервере HTTP
+ */
 public class KVClient {
     private final String url;
     private final String apiToken;
@@ -94,6 +97,13 @@ public class KVClient {
         kvServer.stop();
     }
 
+    /**
+     * Регистрация клиента на сервере через получения токена
+     * @return строку токена
+     * @throws ManagerSaveException при попытке регистрации получили исключение
+     * @throws StatusResponseMistake получаем, если при отправке запроса на регистрацию
+     * в ответе получили код, отличный от 200
+     */
     private String register() throws ManagerSaveException, StatusResponseMistake {
 
         final URI uri = URI.create(url + "/register");
@@ -115,6 +125,14 @@ public class KVClient {
         }
     }
 
+    /**
+     * Сохраняет состояние менеджера задач через запрос PUT
+     * @param key - ключ к хранилищу данных на сервере: {@code tasks},{@code subtasks},{@code epics},{@code history}
+     * @param json - данные для сохранения по ключу
+     * @throws ManagerSaveException при попытке отправить запрос получили исключение
+     * @throws StatusResponseMistake получаем, если при отправке запроса на сервер
+     * в ответе получили код, отличный от 200
+     */
     public void put(String key, String json)  throws ManagerSaveException, StatusResponseMistake {
         final URI uri = URI.create(url + "/save/" + key + "?API_TOKEN=" + apiToken);
         final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
@@ -137,6 +155,14 @@ public class KVClient {
         }
     }
 
+    /**
+     * Возвращает состояние менеджера задач по запросу
+     * @param key - ключ запроса: {@code tasks},{@code subtasks},{@code epics},{@code history}
+     * @return - данные с сервера по ключу
+     * @throws ManagerSaveException при попытке отправить запрос получили исключение
+     * @throws StatusResponseMistake получаем, если при отправке запроса на сервер
+     * в ответе получили код, отличный от 200
+     */
     public JsonElement load(String key) throws ManagerSaveException, StatusResponseMistake {
 
         final URI uri = URI.create(url + "/load/" + key + "?API_TOKEN=" + apiToken);

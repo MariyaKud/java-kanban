@@ -1,5 +1,8 @@
 package dao;
 
+/**
+ Builder для клиента, читающего данные с сервера HTTP экземпляра класса {@code KVClient}
+ */
 public class KVClientBuilder {
     private int port;//порт 8078
 

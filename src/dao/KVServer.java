@@ -15,6 +15,7 @@ import com.sun.net.httpserver.HttpServer;
 import service.Managers;
 
 /**
+ * Сервер HTTP для хранения данных менеджера задач
  * Postman: https://www.getpostman.com/collections/a83b61d9e1c81c10575c
  */
 public class KVServer {

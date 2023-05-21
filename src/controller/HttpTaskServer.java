@@ -23,6 +23,9 @@ import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+/**
+ * API менеджера задач
+ */
 public class HttpTaskServer {
 
     private static final Gson gson = Managers.getGson();
@@ -45,17 +48,28 @@ public class HttpTaskServer {
         httpTaskServer.start();
     }
 
+    /**
+     * Запуск сервера
+     */
     public void start() {
         System.out.println("Запускаем сервер на порту " + Managers.PORT_HTTP_SERVER);
         System.out.println("Открой в браузере http://localhost:" + Managers.PORT_HTTP_SERVER + "/");
         server.start();
     }
 
+    /**
+     * Остановка сервера
+     */
     public void stop() {
         System.out.println("Остановлен сервер на порту " + Managers.PORT_HTTP_SERVER);
         server.stop(0);
     }
 
+    /**
+     * Интерфейс менеджера задач
+     * @param httpExchange обработчик запросов, приходящих на сервер
+     * @throws IOException
+     */
     private void tasksHandle(HttpExchange httpExchange) throws IOException {
         final String path = httpExchange.getRequestURI().getPath();
         final String method = httpExchange.getRequestMethod();
@@ -395,6 +409,11 @@ public class HttpTaskServer {
         sendText(httpExchange, 200, gson.toJson(taskManager.getHistory()));
     }
 
+    /**
+     * Извлечь id задачи из переданных параметров запроса
+     * @param param - параметр, переданный в запросе
+     * @return идентификатор
+     */
     private int parsePathId(String param) {
         try {
             String pathId = param.replaceFirst("id=", "");
@@ -408,6 +427,13 @@ public class HttpTaskServer {
         }
     }
 
+    /**
+     * Отправить ответ
+     * @param h обработчик запросов
+     * @param code код ответа
+     * @param text тело ответа
+     * @throws IOException
+     */
     protected void sendText(HttpExchange h, int code, String text) throws IOException {
         byte[] resp = text.getBytes(UTF_8);
         h.getResponseHeaders().add("Content-Type", "application/json");
@@ -415,6 +441,13 @@ public class HttpTaskServer {
         h.getResponseBody().write(resp);
     }
 
+    /**
+     * Отправить ответ об ошибке
+     * @param h обработчик запросов
+     * @param code код ответа
+     * @param textError текст ответа
+     * @throws IOException
+     */
     private void taskErrorHandler(HttpExchange h, int code, String textError) throws IOException {
         byte[] resp = gson.toJson(textError).getBytes(UTF_8);
         h.getResponseHeaders().add("Content-Type", "application/json");
@@ -422,6 +455,12 @@ public class HttpTaskServer {
         h.getResponseBody().write(resp);
     }
 
+    /**
+     * Читаем тело запроса
+     * @param h - обработчик запроса
+     * @return строка данных из талеа запроса
+     * @throws IOException
+     */
     protected String readText(HttpExchange h) throws IOException {
         return new String(h.getRequestBody().readAllBytes(), UTF_8);
     }
