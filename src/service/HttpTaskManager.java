@@ -28,6 +28,10 @@ import java.util.stream.Collectors;
 public class HttpTaskManager extends FileBackedTasksManager {
     private final KVClient client;
     private static final Gson gson = Managers.getGson();
+    private static final String TASK_KEY = "tasks";
+    private static final String SUBTASK_KEY = "subtasks";
+    private static final String EPIC_KEY = "epics";
+    private static final String HISTORY_KEY = "history";
 
     public HttpTaskManager(HistoryManager historyManager, int port, boolean shouldLoad) throws ManagerSaveException {
         super(historyManager, null);
@@ -48,7 +52,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
     /**
      * Загружает данные менеджера с сервера HTTP, используя в качестве посредника экземпляр класса {@link KVClient}
      * Загружаемые данные: задачи, подзадачи, эпики, история просмотров
-     * @throws ManagerSaveException -  при проблеме с восстановлением данных
+     * @throws ManagerSaveException при проблеме с восстановлением данных
      */
     private void loadFromHTTPServer() throws ManagerSaveException {
 
@@ -56,44 +60,52 @@ public class HttpTaskManager extends FileBackedTasksManager {
 
         //TASKS
         try {
-            final List<Task> loadTasks = gson.fromJson(client.load("tasks"), new TypeToken<ArrayList<Task>>() {
+            final List<Task> loadTasks = gson.fromJson(client.load(TASK_KEY), new TypeToken<ArrayList<Task>>() {
             }.getType());
             loadTasks.forEach(this::addTaskWithId);
 
-        } catch (JsonSyntaxException | NullPointerException e) {
+        } catch (JsonSyntaxException e) {
             throw new ManagerSaveException("Не получилось восстановить задачи с сервера HTTP");
         }
 
         //EPIC
         try {
-            final List<Epic> loadEpics = gson.fromJson(client.load("epics"), new TypeToken<ArrayList<Epic>>() {
+            final List<Epic> loadEpics = gson.fromJson(client.load(EPIC_KEY), new TypeToken<ArrayList<Epic>>() {
             }.getType());
             loadEpics.forEach(this::addEpicWithId);
 
-        } catch (JsonSyntaxException | NullPointerException e) {
+        } catch (JsonSyntaxException e) {
             throw new ManagerSaveException("Не получилось восстановить эпики с сервера HTTP");
         }
 
         //SUBTASKS
         try {
-            final List<SubTask> loadSubTasks = gson.fromJson(client.load("subTasks"),
+            final List<SubTask> loadSubTasks = gson.fromJson(client.load(SUBTASK_KEY),
                                                 new TypeToken<ArrayList<SubTask>>() {}.getType());
 
             loadSubTasks.forEach(this::addSubTaskWithId);
 
-        } catch (JsonSyntaxException | NullPointerException e) {
+        } catch (JsonSyntaxException e) {
             throw new ManagerSaveException("Не получилось восстановить подзадачи с сервера HTTP");
         }
 
         //HISTORY
         try {
-            List<Integer> history = gson.fromJson(client.load("history"), new TypeToken<List<Integer>>() {
+            List<Integer> history = gson.fromJson(client.load(HISTORY_KEY), new TypeToken<List<Integer>>() {
             }.getType());
             history.forEach(this::addToHistoryById);
 
-        } catch (JsonSyntaxException | NullPointerException e) {
+        } catch (JsonSyntaxException e) {
             throw new ManagerSaveException("Не получилось восстановить историю просмотров с сервера HTTP");
         }
+    }
+
+    @Override
+    void save() {
+        client.put(TASK_KEY, gson.toJson(getAllTasks()));
+        client.put(EPIC_KEY, gson.toJson(getAllEpics()));
+        client.put(SUBTASK_KEY, gson.toJson(getAllSubTasks()));
+        client.put(HISTORY_KEY, gson.toJson(getHistory().stream().map(Issue::getId).collect(Collectors.toList())));
     }
 
     /**
@@ -113,13 +125,5 @@ public class HttpTaskManager extends FileBackedTasksManager {
         if (issue != null) {
             historyManager.add(issue);
         }
-    }
-
-    @Override
-    void save() {
-        client.put("tasks", gson.toJson(getAllTasks()));
-        client.put("epics", gson.toJson(getAllEpics()));
-        client.put("subTasks", gson.toJson(getAllSubTasks()));
-        client.put("history", gson.toJson(getHistory().stream().map(Issue::getId).collect(Collectors.toList())));
     }
 }

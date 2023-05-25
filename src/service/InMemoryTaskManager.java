@@ -202,12 +202,17 @@ public class InMemoryTaskManager implements TaskManager {
      * @return Новый эпик типа {@link Epic}. Вернет Null, если на вход передать Null
      */
     protected Epic addEpicWithId(Epic epic) {
+        int id;
         if (epic != null) {
             List<SubTask> children = epic.getChildren();
             if (children.size() != 0) {
                 //новый эпик не содержит детей
                 for (SubTask subTask : getChildrenOfEpicById(epic.getId())) {
-                    children.remove(subTask.getId());
+                    try {
+                        id = subTask.getId();
+                        children.remove(id);
+                    } catch (NullPointerException ignored) {
+                    }
                 }
             }
 
@@ -748,7 +753,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (issue != null) {
             if (issue.getType() != IssueType.EPIC) {
                 for (ItemGrid item : cutIssueForItem(issue)) {
-                    if (grid.containsKey(item) && grid.get(item) != issue.getId()) {
+                    if (grid.containsKey(item) && !grid.get(item).equals(issue.getId())) {
                         //Пересечение
                         return false;
                     }

@@ -55,7 +55,7 @@ public class KVServer {
                     System.out.println("Значение для ключа " + key + " получено!");
                     sendText(h, data.get(key));
                 } else {
-                    h.sendResponseHeaders(200, 0);
+                    h.sendResponseHeaders(400, 0);
                     System.out.println("Данных по ключу " + key + " нет!");
                 }
             } else {
